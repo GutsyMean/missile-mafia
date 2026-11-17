@@ -12,11 +12,12 @@ import {
 } from "@/app/admin/actions";
 import { signOut } from "@/app/login/actions";
 import type { AdminCrafter, AdminData, SyncRunView } from "@/lib/admin/load";
-import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
+import type { AdminCatalog, AdminDirectory, AdminSettings } from "@/lib/admin/types";
 import { matchGuildonExport, parseGuildonExport, type GuildonErrorReason } from "@/lib/guildon";
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { CraftersPanel } from "./CraftersPanel";
+import { ProfileForm } from "./ProfileForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
@@ -34,10 +35,30 @@ function when(iso: string | null): string {
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
-export function AdminPanel({ data }: { data: AdminData }) {
+/** How a crafter's stored profile fills the form. */
+function profileOf(crafter: AdminCrafter) {
+  return {
+    characterName: crafter.characterName,
+    realm: crafter.realm ?? "",
+    faction: crafter.faction ?? "",
+    className: crafter.className ?? "",
+    level: crafter.level ? String(crafter.level) : "",
+    note: crafter.note ?? "",
+    skills: Object.fromEntries(Object.entries(crafter.skills).map(([id, skill]) => [id, String(skill)])),
+  };
+}
+
+interface Props {
+  data: AdminData;
+  /** True straight after signing up: opens on the recipe import, the second step. */
+  welcome?: boolean;
+}
+
+export function AdminPanel({ data, welcome = false }: Props) {
   // A site admin need not be a crafter; they then see only the admin tabs.
   const crafter = data.crafters[0] ?? null;
-  const [tab, setTab] = useState<Tab>(crafter ? "recipes" : "crafters");
+  const [tab, setTab] = useState<Tab>(crafter ? (welcome ? "import" : "recipes") : "crafters");
+  const [settings, setSettings] = useState<AdminSettings | null>(data.settings);
   const [ticked, setTicked] = useState(() => new Set(crafter?.recipeIds ?? []));
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
   const [directory, setDirectory] = useState<AdminDirectory | null>(data.directory);
@@ -142,6 +163,13 @@ export function AdminPanel({ data }: { data: AdminData }) {
       <div className={styles.status} role="status" data-kind={message?.kind}>
         {message?.text ?? (pending ? "Saving…" : "")}
       </div>
+      {welcome && crafter && tab === "import" && ticked.size === 0 ? (
+        <p className={styles.welcome}>
+          <strong>Welcome, {crafter.characterName}. Step 2 of 2: your recipes.</strong> Paste an export from the addon
+          below to add everything you have learned at once, or open <em>My recipes</em> and tick them by hand. Your
+          profile is already on the crafting list.
+        </p>
+      ) : null}
 
       <div className={styles.pane}>
         {tab === "recipes" && crafter ? (
@@ -168,10 +196,24 @@ export function AdminPanel({ data }: { data: AdminData }) {
           />
         ) : null}
         {tab === "profile" && crafter ? (
-          <ProfileForm crafter={crafter} catalog={catalog} onSaved={(text) => setMessage({ kind: "ok", text })} />
+          <ProfileForm
+            heading="How guild members find you"
+            initial={profileOf(crafter)}
+            professions={catalog.professions}
+            submitLabel="Save profile"
+            onSubmit={(input) => saveProfile(crafter.id, input)}
+            onSaved={() => setMessage({ kind: "ok", text: "Profile saved." })}
+          />
         ) : null}
         {tab === "crafters" && directory ? (
-          <CraftersPanel directory={directory} ownUserId={data.userId} onChange={setDirectory} />
+          <CraftersPanel
+            directory={directory}
+            settings={settings}
+            serverReady={data.syncConfigured}
+            ownUserId={data.userId}
+            onChange={setDirectory}
+            onSettingsChange={setSettings}
+          />
         ) : null}
         {tab === "data" ? <GameDataPanel runs={data.runs} configured={data.syncConfigured} /> : null}
       </div>
@@ -272,109 +314,6 @@ function GuildonImport({
         on your list.
       </p>
     </div>
-  );
-}
-
-function ProfileForm({
-  crafter,
-  catalog,
-  onSaved,
-}: {
-  crafter: AdminCrafter;
-  catalog: AdminCatalog;
-  onSaved: (message: string) => void;
-}) {
-  const [form, setForm] = useState({
-    characterName: crafter.characterName,
-    realm: crafter.realm ?? "",
-    faction: crafter.faction ?? "",
-    className: crafter.className ?? "",
-    level: crafter.level ? String(crafter.level) : "",
-    note: crafter.note ?? "",
-  });
-  const [skills, setSkills] = useState<Record<string, string>>(() =>
-    Object.fromEntries(Object.entries(crafter.skills).map(([id, skill]) => [id, String(skill)])),
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-  const set = (key: keyof typeof form) => (event: { target: { value: string } }) =>
-    setForm((current) => ({ ...current, [key]: event.target.value }));
-
-  return (
-    <form
-      className={styles.section}
-      onSubmit={(event) => {
-        event.preventDefault();
-        setError(null);
-        startTransition(async () => {
-          const result = await saveProfile(crafter.id, { ...form, skills });
-          if (result.ok) onSaved("Profile saved.");
-          else setError(result.error);
-        });
-      }}
-    >
-      <h2 className={styles.heading}>How guild members find you</h2>
-      <div className={styles.fields}>
-        <label className={styles.fieldLabel}>
-          Character name
-          <input className={wow.field} value={form.characterName} onChange={set("characterName")} required maxLength={40} />
-        </label>
-        <label className={styles.fieldLabel}>
-          Rule set or realm
-          <input className={wow.field} value={form.realm} onChange={set("realm")} maxLength={40} placeholder="Normal, PvP, RP…" />
-        </label>
-        <label className={styles.fieldLabel}>
-          Faction
-          <select className={wow.field} value={form.faction} onChange={set("faction")}>
-            <option value="">Not shown</option>
-            <option value="Alliance">Alliance</option>
-            <option value="Horde">Horde</option>
-          </select>
-        </label>
-        <label className={styles.fieldLabel}>
-          Class
-          <input className={wow.field} value={form.className} onChange={set("className")} maxLength={20} />
-        </label>
-        <label className={styles.fieldLabel}>
-          Level
-          <input className={wow.field} inputMode="numeric" value={form.level} onChange={set("level")} />
-        </label>
-      </div>
-
-      <h3 className={styles.subheading}>Profession skill</h3>
-      <div className={styles.fields}>
-        {catalog.professions.map((profession) => (
-          <label key={profession.id} className={styles.fieldLabel}>
-            {profession.name}
-            <input
-              className={wow.field}
-              inputMode="numeric"
-              placeholder="Not learned"
-              value={skills[String(profession.id)] ?? ""}
-              onChange={(event) => setSkills((current) => ({ ...current, [String(profession.id)]: event.target.value }))}
-            />
-          </label>
-        ))}
-      </div>
-
-      <label className={styles.fieldLabel}>
-        Note shown with your items
-        <textarea
-          className={styles.textarea}
-          rows={3}
-          maxLength={500}
-          value={form.note}
-          onChange={set("note")}
-          placeholder="Bring the materials and whisper me in game."
-        />
-      </label>
-      {error ? <p className={styles.error}>{error}</p> : null}
-      <div>
-        <button type="submit" className={wow.button} disabled={pending}>
-          {pending ? "Saving…" : "Save profile"}
-        </button>
-      </div>
-    </form>
   );
 }
 

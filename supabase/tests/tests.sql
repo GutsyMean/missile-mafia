@@ -337,3 +337,90 @@ select test.is(
   (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where r -> 'crafterIds' ? :'new_id'), 1,
   'while what they ticked is craftable');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Automatic approval of Discord members, and signing up
+-- ---------------------------------------------------------------------------
+\set joiner '44444444-4444-4444-4444-444444444444'
+\set stranger '55555555-5555-5555-5555-555555555555'
+insert into auth.users (id, raw_user_meta_data) values
+  (:'joiner', '{"full_name": "joiner"}'),
+  (:'stranger', '{"full_name": "stranger"}');
+
+set role anon;
+select test.login(null);
+select test.is((select auto_approve from public.site_settings), false, 'automatic approval is off until an admin turns it on');
+select test.throws($$select discord_guild_id from public.site_settings$$, '42501', 'visitors cannot read which Discord server is required');
+select test.throws($$update public.site_settings set auto_approve = true$$, '42501', 'visitors cannot change the settings');
+select test.throws($$insert into public.verified_members (user_id) values ('44444444-4444-4444-4444-444444444444')$$, '42501', 'visitors cannot mark anyone as verified');
+select test.throws($$select public.signup_crafter('Sneaky')$$, '42501', 'visitors cannot sign up');
+reset role;
+
+set role authenticated;
+select test.login(:'joiner');
+select test.throws($$insert into public.verified_members (user_id) values ('44444444-4444-4444-4444-444444444444')$$, '42501', 'a signed-in user cannot verify themselves');
+select test.throws($$update public.site_settings set auto_approve = true$$, '42501', 'a signed-in user cannot change the settings');
+select test.throws($$select public.signup_crafter('Joiner')$$, '42501', 'nobody can sign up while automatic approval is off');
+select test.throws($$select public.admin_save_settings(true, '123456789012345678', null)$$, '42501', 'a member cannot change the approval rule');
+select test.throws($$select public.admin_settings()$$, '42501', 'a member cannot read the approval rule');
+
+select test.login(:'owner');
+select test.throws($$select public.admin_save_settings(true, null, null)$$, '22023', 'automatic approval needs a Discord server');
+select test.throws($$select public.admin_save_settings(true, 'not-an-id', null)$$, '22023', 'the server must be given as a Discord id');
+select test.throws($$select public.admin_save_settings(true, '123456789012345678', 'admins')$$, '22023', 'the role must be given as a Discord id');
+select public.admin_save_settings(true, ' 123456789012345678 ', '');
+select test.is(public.admin_settings() ->> 'discordGuildId', '123456789012345678', 'an admin can set the Discord server');
+select test.is(public.admin_settings() -> 'discordRoleId', 'null'::jsonb, 'the role is optional');
+select test.is((public.admin_settings() ->> 'autoApprove')::boolean, true, 'and turn automatic approval on');
+reset role;
+
+-- The site's server records what Discord answered at sign-in.
+set role service_role;
+insert into public.verified_members (user_id, discord_name) values (:'joiner', 'Joiner');
+reset role;
+
+set role anon;
+select test.is((select auto_approve from public.site_settings), true, 'visitors can see that sign-up is open');
+reset role;
+
+set role authenticated;
+select test.login(:'stranger');
+select test.throws($$select public.signup_crafter('Stranger')$$, '42501', 'an account Discord did not confirm cannot sign up');
+select test.is((select count(*)::int from public.verified_members), 0, 'members cannot see who else is verified');
+
+select test.login(:'joiner');
+select test.is((select count(*)::int from public.verified_members), 1, 'a member can see their own verification');
+select test.throws($$select public.signup_crafter('  ')$$, '22023', 'signing up needs a character name');
+select public.signup_crafter(' Joiner ') as joiner_crafter \gset
+select test.is((select user_id from public.crafters where id = :'joiner_crafter'), :'joiner'::uuid, 'a verified member creates their own crafter');
+select test.is((select character_name from public.crafters where id = :'joiner_crafter'), 'Joiner', 'under the name they gave');
+select test.is((select is_listed from public.crafters where id = :'joiner_crafter'), true, 'and is listed straight away');
+select test.throws($$select public.signup_crafter('Second')$$, 'P0001', 'one profile per account');
+select test.is(
+  test.affected(format('update public.crafters set note = %L where id = %L', 'Whisper me', :'joiner_crafter')), 1,
+  'they can then fill in their profile');
+select test.is(
+  public.set_crafter_recipes(:'joiner_crafter', array[3333], '{}'::int[]) ->> 'added', '1',
+  'and add their recipes');
+select test.throws($$select public.admin_directory()$$, '42501', 'signing up does not make anyone an admin');
+
+select test.login(:'owner');
+select test.is(
+  (select (a ->> 'isVerifiedMember')::boolean from jsonb_array_elements(public.admin_directory() -> 'accounts') a where a ->> 'id' = :'joiner'), true,
+  'the admin list shows who Discord confirmed');
+select test.is(
+  (select (a ->> 'isVerifiedMember')::boolean from jsonb_array_elements(public.admin_directory() -> 'accounts') a where a ->> 'id' = :'stranger'), false,
+  'and who it did not');
+select public.admin_save_settings(false, '123456789012345678', null);
+reset role;
+
+set role service_role;
+insert into public.verified_members (user_id) values (:'stranger');
+reset role;
+set role authenticated;
+select test.login(:'stranger');
+select test.throws($$select public.signup_crafter('Stranger')$$, '42501', 'turning automatic approval off closes sign-up again');
+reset role;
+
+select test.is(has_table_privilege('authenticated', 'public.verified_members', 'insert'), false, 'only the server can record a verification');
+select test.is(has_function_privilege('anon', 'public.admin_save_settings(boolean, text, text)', 'execute'), false, 'visitors have no execute right on the settings');

@@ -53,11 +53,15 @@ Trainer unlock levels are decided by the game server and are not in the game tab
 
 ## Adding guild members as crafters
 
-1. The member opens the site, follows **Crafter sign-in** at the bottom and signs in with Discord.
-2. A site admin opens the admin page's **Crafters** tab. The member is listed under *Waiting for you*; **Add as crafter** makes them one.
-3. The member reloads the page and manages their own recipe list.
+Members open the site, follow **Crafter sign-in** at the bottom and sign in with Discord. What happens next depends on a setting on the admin page's **Crafters** tab.
 
-The same tab links or unlinks existing crafters, adds a crafter before the member has signed in, and hides a crafter from the public list. Changes take effect at once; nothing is redeployed. Signing in gives an account no rights until an admin links it.
+**Automatic approval on.** The admin enters the guild's Discord server ID (and, to limit it, a role ID). A member of that server who signs in is asked to set up a profile (character, class, level, professions and skill) and is then taken to the recipe import. They are listed at once; nobody has to approve them.
+
+The check is made by the site's server, which asks Discord with the token issued for that sign-in, so membership cannot be claimed by the visitor. It is repeated at every sign-in: someone who has left the server can no longer sign up, though a profile they already made stays until an admin hides it. It needs `SUPABASE_SECRET_KEY`, because only the server may record Discord's answer.
+
+**Automatic approval off** (the default), or the account is not in the server. The account waits under *Waiting for you* until an admin presses **Add as crafter**.
+
+The same tab links or unlinks existing crafters, adds a crafter before the member has signed in, and hides a crafter from the public list. Changes take effect at once; nothing is redeployed. Signing in alone gives an account no rights.
 
 ## Working on it
 

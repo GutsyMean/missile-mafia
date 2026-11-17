@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
-import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
+import type { AdminCatalog, AdminDirectory, AdminSettings } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -55,46 +55,101 @@ export interface ProfileInput {
   skills: Record<string, string>;
 }
 
-export async function saveProfile(crafterId: string, input: ProfileInput): Promise<ActionResult> {
-  const session = await signedIn();
-  if (!session) return fail("Sign in again to save.");
+type Session = NonNullable<Awaited<ReturnType<typeof signedIn>>>;
 
-  const characterName = input.characterName.trim();
+interface ParsedProfile {
+  row: {
+    character_name: string;
+    realm: string | null;
+    faction: string | null;
+    class: string | null;
+    level: number | null;
+    note: string | null;
+  };
+  skills: { professionId: number; skill: number }[];
+}
+
+/** Checks what was typed before anything is written. */
+function parseProfile(input: ProfileInput): ActionResult<ParsedProfile> {
+  const characterName = typeof input?.characterName === "string" ? input.characterName.trim() : "";
   if (characterName.length < 1 || characterName.length > 40) return fail("Enter your character's name (up to 40 characters).");
-  if (input.note.length > 500) return fail("Keep the note under 500 characters.");
-  const level = input.level.trim() === "" ? null : Number(input.level);
+  const note = String(input.note ?? "");
+  if (note.length > 500) return fail("Keep the note under 500 characters.");
+  const levelText = String(input.level ?? "").trim();
+  const level = levelText === "" ? null : Number(levelText);
   if (level !== null && (!Number.isInteger(level) || level < 1 || level > 80)) return fail("Level must be a whole number.");
   const faction = input.faction === "Alliance" || input.faction === "Horde" ? input.faction : null;
 
+  const skills: ParsedProfile["skills"] = [];
+  for (const [professionId, text] of Object.entries(input.skills ?? {})) {
+    if (String(text).trim() === "") continue;
+    const skill = Number(text);
+    if (!Number.isInteger(skill) || skill < 0 || skill > 450) return fail("Skill must be a whole number between 0 and 450.");
+    skills.push({ professionId: Number(professionId), skill });
+  }
+
+  return {
+    ok: true,
+    data: {
+      row: {
+        character_name: characterName,
+        realm: String(input.realm ?? "").trim().slice(0, 40) || null,
+        faction,
+        class: String(input.className ?? "").trim().slice(0, 20) || null,
+        level,
+        note: note.trim() || null,
+      },
+      skills,
+    },
+  };
+}
+
+async function writeProfile(session: Session, crafterId: string, profile: ParsedProfile): Promise<ActionResult> {
   const { error, count } = await session.supabase
     .from("crafters")
-    .update(
-      {
-        character_name: characterName,
-        realm: input.realm.trim() || null,
-        faction,
-        class: input.className.trim() || null,
-        level,
-        note: input.note.trim() || null,
-      },
-      { count: "exact" },
-    )
+    .update(profile.row, { count: "exact" })
     .eq("id", crafterId);
   if (error) return fail(error.message);
   if (count === 0) return fail("That crafter is not yours to edit.");
 
-  for (const [professionId, text] of Object.entries(input.skills)) {
-    if (text.trim() === "") continue;
-    const skill = Number(text);
-    if (!Number.isInteger(skill) || skill < 0 || skill > 450) return fail("Skill must be a whole number between 0 and 450.");
+  for (const { professionId, skill } of profile.skills) {
     const { error: skillError } = await session.supabase
       .from("crafter_professions")
-      .upsert({ crafter_id: crafterId, profession_id: Number(professionId), skill });
+      .upsert({ crafter_id: crafterId, profession_id: professionId, skill });
     if (skillError) return fail(skillError.message);
   }
 
   updateTag(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
+}
+
+export async function saveProfile(crafterId: string, input: ProfileInput): Promise<ActionResult> {
+  const session = await signedIn();
+  if (!session) return fail("Sign in again to save.");
+  const profile = parseProfile(input);
+  if (!profile.ok) return profile;
+  return writeProfile(session, crafterId, profile.data);
+}
+
+/**
+ * Sign-up: a member Discord confirmed creates their own crafter profile.
+ * The database refuses anyone it has no verification for.
+ */
+export async function signUpCrafter(input: ProfileInput): Promise<ActionResult> {
+  const session = await signedIn();
+  if (!session) return fail("Sign in again to continue.");
+  const profile = parseProfile(input);
+  if (!profile.ok) return profile;
+
+  const { data, error } = await session.supabase.rpc("signup_crafter", { p_character_name: profile.data.row.character_name });
+  if (error) {
+    return fail(
+      error.code === "42501"
+        ? "Discord has not confirmed this account as a guild member. Sign out, then sign in again once you have joined the server."
+        : error.message,
+    );
+  }
+  return writeProfile(session, data as string, profile.data);
 }
 
 /**
@@ -167,7 +222,7 @@ export async function correctUnlockLevel(recipeId: number, level: number | null)
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const NOT_ADMIN = "Only a site admin can manage crafters.";
 
-type AdminSession = NonNullable<Awaited<ReturnType<typeof signedInAdmin>>>;
+type AdminSession = Session;
 
 /** The list as it stands after a change, so the page can show it without a reload. */
 async function directoryAfterChange(session: AdminSession): Promise<ActionResult<AdminDirectory>> {
@@ -214,6 +269,26 @@ export async function setCrafterListed(crafterId: string, listed: boolean): Prom
   const { error } = await session.supabase.rpc("admin_set_crafter_listed", { p_crafter_id: crafterId, p_listed: listed === true });
   if (error) return fail(error.message);
   return directoryAfterChange(session);
+}
+
+/** Sets who is approved automatically: members of a Discord server, optionally with a role. */
+export async function saveApprovalSettings(
+  autoApprove: boolean,
+  guildId: string,
+  roleId: string,
+): Promise<ActionResult<AdminSettings>> {
+  const session = await signedInAdmin();
+  if (!session) return fail("Only a site admin can change this.");
+
+  const { error } = await session.supabase.rpc("admin_save_settings", {
+    p_auto_approve: autoApprove === true,
+    p_guild_id: String(guildId ?? ""),
+    p_role_id: String(roleId ?? ""),
+  });
+  if (error) return fail(error.message);
+  const { data, error: readError } = await session.supabase.rpc("admin_settings");
+  if (readError) return fail(readError.message);
+  return { ok: true, data: data as AdminSettings };
 }
 
 export interface SyncSummary {

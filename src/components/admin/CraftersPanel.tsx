@@ -2,17 +2,27 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { createCrafter, linkCrafter, setCrafterListed, type ActionResult } from "@/app/admin/actions";
+import {
+  createCrafter,
+  linkCrafter,
+  saveApprovalSettings,
+  setCrafterListed,
+  type ActionResult,
+} from "@/app/admin/actions";
 import { unlinkedCrafters, waitingAccounts } from "@/lib/admin/directory";
-import type { AdminDirectory } from "@/lib/admin/types";
+import type { AdminDirectory, AdminSettings } from "@/lib/admin/types";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./admin.module.css";
 
 interface Props {
   directory: AdminDirectory;
+  settings: AdminSettings | null;
+  /** False while the site's server has no secret key: it then cannot record Discord's answers. */
+  serverReady: boolean;
   /** The admin's own account, so changes to it can refresh their own tabs. */
   ownUserId: string;
   onChange: (directory: AdminDirectory) => void;
+  onSettingsChange: (settings: AdminSettings) => void;
 }
 
 /** A fixed format, so the server and the browser print the same text. */
@@ -20,7 +30,7 @@ const day = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 /** Site admins only: who has signed in, who is a crafter, and how the two are linked. */
-export function CraftersPanel({ directory, ownUserId, onChange }: Props) {
+export function CraftersPanel({ directory, settings, serverReady, ownUserId, onChange, onSettingsChange }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -65,6 +75,8 @@ export function CraftersPanel({ directory, ownUserId, onChange }: Props) {
         </p>
       ) : null}
 
+      {settings ? <ApprovalSettings settings={settings} serverReady={serverReady} onSaved={onSettingsChange} /> : null}
+
       <h3 className={styles.subheading}>Waiting for you</h3>
       {waiting.length === 0 ? (
         <p className={styles.muted}>Nobody is waiting. Members appear here once they have signed in.</p>
@@ -78,6 +90,7 @@ export function CraftersPanel({ directory, ownUserId, onChange }: Props) {
               <p>
                 <span className={styles.personName}>{account.name}</span>
                 {own ? " (you)" : ""} signed in on {day(account.createdAt)}
+                {account.isVerifiedMember ? <span className={styles.ok}> · confirmed by Discord as a member</span> : null}
               </p>
               <div className={styles.row}>
                 <label className={styles.inlineLabel}>
@@ -237,5 +250,103 @@ export function CraftersPanel({ directory, ownUserId, onChange }: Props) {
         </button>
       </form>
     </div>
+  );
+}
+
+/** Who becomes a crafter without waiting for an admin: members of a Discord server, optionally with a role. */
+function ApprovalSettings({
+  settings,
+  serverReady,
+  onSaved,
+}: {
+  settings: AdminSettings;
+  serverReady: boolean;
+  onSaved: (settings: AdminSettings) => void;
+}) {
+  const [autoApprove, setAutoApprove] = useState(settings.autoApprove);
+  const [guildId, setGuildId] = useState(settings.discordGuildId ?? "");
+  const [roleId, setRoleId] = useState(settings.discordRoleId ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <form
+      className={styles.character}
+      aria-label="Automatic approval"
+      onSubmit={(event) => {
+        event.preventDefault();
+        setError(null);
+        setSaved(false);
+        startTransition(async () => {
+          const result = await saveApprovalSettings(autoApprove, guildId, roleId);
+          if (!result.ok) {
+            setError(result.error);
+            return;
+          }
+          onSaved(result.data);
+          setSaved(true);
+        });
+      }}
+    >
+      <h3 className={styles.subheading}>Automatic approval</h3>
+      <p>
+        When this is on, anyone who signs in and is a member of your Discord server can set up their own crafter
+        profile, with no approval from you. The site asks Discord itself at every sign-in, so membership cannot be
+        faked. People who are not in the server still wait for you below.
+      </p>
+      <label className={wow.checkbox}>
+        <input type="checkbox" checked={autoApprove} onChange={(event) => setAutoApprove(event.target.checked)} />
+        Approve members of my Discord server automatically
+      </label>
+      <div className={styles.row}>
+        <label className={styles.inlineLabel}>
+          Server ID
+          <input
+            className={wow.field}
+            inputMode="numeric"
+            placeholder="Required"
+            value={guildId}
+            onChange={(event) => setGuildId(event.target.value)}
+          />
+        </label>
+        <label className={styles.inlineLabel}>
+          Role ID
+          <input
+            className={wow.field}
+            inputMode="numeric"
+            placeholder="Optional: only this role"
+            value={roleId}
+            onChange={(event) => setRoleId(event.target.value)}
+          />
+        </label>
+        <button type="submit" className={wow.button} disabled={pending}>
+          {pending ? "Saving…" : "Save"}
+        </button>
+      </div>
+      <p className={styles.muted}>
+        To copy the IDs, turn on Developer Mode in Discord (User Settings, Advanced). Then right-click your server
+        and choose Copy Server ID. For a role, open Server Settings, Roles, right-click the role and choose Copy
+        Role ID.
+      </p>
+      {!serverReady ? (
+        <p className={styles.error}>
+          This cannot work yet: the site&apos;s server is missing its Supabase secret key, which it needs to record
+          Discord&apos;s answers.
+        </p>
+      ) : null}
+      {error ? <p className={styles.error}>{error}</p> : null}
+      {saved ? (
+        <p className={styles.ok} role="status">
+          Saved. {autoApprove ? "Members are checked the next time they sign in." : "Approval is manual again."}
+        </p>
+      ) : null}
+      {settings.autoApprove ? (
+        <p className={styles.muted}>
+          {settings.verifiedMembers} {settings.verifiedMembers === 1 ? "account has" : "accounts have"} been confirmed
+          by Discord so far. If you signed in before this was turned on, sign out and in again to be checked yourself.
+        </p>
+      ) : null}
+    </form>
   );
 }

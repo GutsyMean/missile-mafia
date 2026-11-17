@@ -12,9 +12,14 @@ export async function signInWithDiscord() {
     requestHeaders.get("origin") ??
     `${requestHeaders.get("x-forwarded-proto") ?? "https"}://${requestHeaders.get("host")}`;
 
+  // The extra permission lets the site ask Discord about one thing: membership of the guild's server.
+  const { data: settings } = await supabase.from("site_settings").select("auto_approve").maybeSingle();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "discord",
-    options: { redirectTo: `${origin}/auth/callback` },
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+      ...(settings?.auto_approve ? { scopes: "guilds.members.read" } : {}),
+    },
   });
   if (error || !data.url) redirect("/login?error=discord");
   redirect(data.url);

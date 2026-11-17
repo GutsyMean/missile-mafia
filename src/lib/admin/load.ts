@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseSecretKey } from "@/lib/supabase/env";
 import { createServerSupabase } from "@/lib/supabase/server";
-import type { AdminCatalog, AdminDirectory } from "./types";
+import type { AdminCatalog, AdminDirectory, AdminSettings } from "./types";
 
 export interface AdminCrafter {
   id: string;
@@ -39,6 +39,10 @@ export interface AdminData {
   crafters: AdminCrafter[];
   /** Who has signed in and every crafter. Null unless the account is a site admin. */
   directory: AdminDirectory | null;
+  /** The automatic-approval rule. Null unless the account is a site admin. */
+  settings: AdminSettings | null;
+  /** Whether members can sign up by themselves, and whether Discord confirmed this account. */
+  signup: { open: boolean; verified: boolean };
   catalog: AdminCatalog;
   runs: SyncRunView[];
   /** False until the server has the secret key the sync writes with. */
@@ -54,20 +58,26 @@ export async function loadAdminData(): Promise<AdminData | null> {
   const claims = auth?.claims;
   if (!claims?.sub) return null;
 
-  const [crafterRows, adminRow, catalog, runRows] = await Promise.all([
+  const [crafterRows, adminRow, catalog, runRows, signupRow, verifiedRow] = await Promise.all([
     supabase.from("crafters").select("*").eq("user_id", claims.sub).order("character_name"),
     supabase.from("app_admins").select("user_id").maybeSingle(),
     supabase.rpc("admin_catalog"),
     supabase.from("sync_runs").select("*").order("id", { ascending: false }).limit(8),
+    supabase.from("site_settings").select("auto_approve").maybeSingle(),
+    // Row level security shows a user only their own row here.
+    supabase.from("verified_members").select("user_id").maybeSingle(),
   ]);
   if (crafterRows.error) throw new Error(crafterRows.error.message);
   if (catalog.error) throw new Error(catalog.error.message);
 
   let directory: AdminDirectory | null = null;
+  let settings: AdminSettings | null = null;
   if (adminRow.data) {
-    const result = await supabase.rpc("admin_directory");
-    if (result.error) throw new Error(result.error.message);
-    directory = result.data as AdminDirectory;
+    const [people, rule] = await Promise.all([supabase.rpc("admin_directory"), supabase.rpc("admin_settings")]);
+    if (people.error) throw new Error(people.error.message);
+    if (rule.error) throw new Error(rule.error.message);
+    directory = people.data as AdminDirectory;
+    settings = rule.data as AdminSettings;
   }
 
   const crafters: AdminCrafter[] = [];
@@ -116,6 +126,8 @@ export async function loadAdminData(): Promise<AdminData | null> {
     isAdmin: Boolean(adminRow.data),
     crafters,
     directory,
+    settings,
+    signup: { open: Boolean(signupRow.data?.auto_approve), verified: Boolean(verifiedRow.data) },
     catalog: catalog.data as AdminCatalog,
     runs: (runRows.data ?? []).map((run) => ({
       id: run.id,

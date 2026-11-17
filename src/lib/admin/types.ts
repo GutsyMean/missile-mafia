@@ -54,6 +54,16 @@ export interface DirectoryAccount {
   createdAt: string;
   lastSignInAt: string | null;
   isAdmin: boolean;
+  /** Discord confirmed this account as a guild member at its last sign-in. */
+  isVerifiedMember?: boolean;
+}
+
+/** The automatic-approval rule, as `admin_settings()` returns it. Site admins only. */
+export interface AdminSettings {
+  autoApprove: boolean;
+  discordGuildId: string | null;
+  discordRoleId: string | null;
+  verifiedMembers: number;
 }
 
 export interface DirectoryCrafter {
