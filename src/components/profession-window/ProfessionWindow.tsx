@@ -65,6 +65,7 @@ export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
 
   const visible = useMemo(() => applyFilters(entries, filters), [entries, filters]);
   const groups = useMemo(() => groupEntries(visible, filters.sort), [visible, filters.sort]);
+  const notYet = useMemo(() => visible.filter((entry) => !entry.available).length, [visible]);
   const selected = useMemo(
     () => entries.find((entry) => entry.recipe.id === recipeId) ?? null,
     [entries, recipeId],
@@ -213,6 +214,7 @@ export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
             {visible.length === entries.length
               ? `${entries.length} recipes`
               : `${visible.length} of ${entries.length} recipes`}
+            {notYet > 0 ? ` · ${notYet} not available yet` : ""}
           </span>
           {isFiltered(filters) ? (
             <button type="button" className={styles.linkButton} onClick={() => setFilters({ ...DEFAULT_FILTERS, sort: filters.sort })}>

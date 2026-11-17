@@ -66,3 +66,23 @@ export function sampleDoc(): CraftablesDoc {
     items: Object.fromEntries(items.map((i) => [String(i.id), i])),
   };
 }
+
+/**
+ * The sample document plus recipes Damien has not learned: two trainer recipes
+ * above his skill, a vendor plan, and one whose unlock level nobody has confirmed.
+ */
+export function sampleDocWithPending(): CraftablesDoc {
+  const doc = sampleDoc();
+  const pending = (over: Partial<RecipeView> & { id: number; name: string }) =>
+    recipe({ crafterIds: [], pendingCrafterIds: ["c1"], category: "Mail Armor", categoryOrder: 103, ...over });
+  doc.items["3844"] = item({ id: 3844, name: "Green Iron Hauberk", quality: 2, classId: 4, subclassId: 3, inventoryType: 5, requiredLevel: 31, slotName: "Chest", typeName: "Mail" });
+  doc.items["3835"] = item({ id: 3835, name: "Green Iron Bracers", quality: 2, classId: 4, subclassId: 3, inventoryType: 9, requiredLevel: 28, slotName: "Wrist", typeName: "Mail" });
+  doc.recipes.find((r) => r.id === 3333)!.learnSkill = 110;
+  doc.recipes.push(
+    pending({ id: 3508, name: "Green Iron Hauberk", craftedItemId: 3844, learnSkill: 180, acquisition: "trainer", acquisitionText: "Trainer · 75s" }),
+    pending({ id: 3501, name: "Green Iron Bracers", craftedItemId: 3835, learnSkill: 165, acquisition: "trainer", acquisitionText: "Trainer · 50s" }),
+    pending({ id: 5001, name: "Azure Skyforged Chain", learnSkill: 50, acquisition: "vendor", acquisitionText: "Vendor · Vayn Moongaze (Zephras Isle)" }),
+    pending({ id: 5002, name: "Truesilver Gauntlets", learnSkill: null, acquisition: "trainer", acquisitionText: null, category: "Plate Armor", categoryOrder: 104 }),
+  );
+  return doc;
+}

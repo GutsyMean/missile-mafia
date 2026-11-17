@@ -133,6 +133,66 @@ async function threeSlice(name: string, left: string, center: string, right: str
   ], `slice 0 ${r.rect.width} 0 ${l.rect.width}`);
 }
 
+/** An .ico file holding PNG images, which every current browser reads. */
+function ico(images: { size: number; png: Buffer }[]): Buffer {
+  const header = Buffer.alloc(6 + 16 * images.length);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(images.length, 4);
+  let offset = header.length;
+  images.forEach(({ size, png }, index) => {
+    const entry = 6 + index * 16;
+    header.writeUInt8(size, entry);
+    header.writeUInt8(size, entry + 1);
+    header.writeUInt16LE(1, entry + 4);
+    header.writeUInt16LE(32, entry + 6);
+    header.writeUInt32LE(png.length, entry + 8);
+    header.writeUInt32LE(offset, entry + 12);
+    offset += png.length;
+  });
+  return Buffer.concat([header, ...images.map((image) => image.png)]);
+}
+
+/**
+ * The site's icon: a game icon in a bronze rim, like an action button.
+ * Written into src/app, where Next.js picks the files up by name.
+ */
+async function favicon(fileId: string) {
+  const source = await texture(fileId);
+  // Game icons carry a dark rim of their own; cut it off before adding ours.
+  const trim = Math.round(source.width / 16);
+  const art = await sharp(Buffer.from(source.rgba), { raw: { width: source.width, height: source.height, channels: 4 } })
+    .extract({ left: trim, top: trim, width: source.width - 2 * trim, height: source.height - 2 * trim })
+    .png()
+    .toBuffer();
+
+  const render = async (size: number, rounded: boolean) => {
+    const rim = Math.max(1, Math.round(size / 14));
+    const radius = rounded ? Math.round(size * 0.2) : 0;
+    const shape = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${radius}" fill="#fff"/></svg>`;
+    const border = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f1d58a"/><stop offset="0.5" stop-color="#b98a3a"/><stop offset="1" stop-color="#6a4517"/>
+      </linearGradient></defs>
+      <rect x="${rim / 2}" y="${rim / 2}" width="${size - rim}" height="${size - rim}" rx="${Math.max(0, radius - rim / 2)}" fill="none" stroke="url(#g)" stroke-width="${rim}"/>
+      <rect x="${rim + 0.5}" y="${rim + 0.5}" width="${size - 2 * rim - 1}" height="${size - 2 * rim - 1}" rx="${Math.max(0, radius - rim)}" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="1"/>
+    </svg>`;
+    return sharp(art)
+      .resize(size, size, { kernel: "lanczos3" })
+      .composite([
+        { input: Buffer.from(shape), blend: "dest-in" },
+        { input: Buffer.from(border) },
+      ])
+      .png()
+      .toBuffer();
+  };
+
+  const app = path.join(ROOT, "src/app");
+  writeFileSync(path.join(app, "favicon.ico"), ico(await Promise.all([16, 32, 48].map(async (size) => ({ size, png: await render(size, true) })))));
+  writeFileSync(path.join(app, "icon.png"), await render(192, true));
+  // Phones round the corners themselves and show transparency as black.
+  writeFileSync(path.join(app, "apple-icon.png"), await render(180, false));
+}
+
 async function main() {
   version = process.argv[2] ?? (await resolveLatestBuild());
   mkdirSync(OUT, { recursive: true });
@@ -206,6 +266,9 @@ async function main() {
     await single(out, atlas(`professions-slot-frame-${name}`));
   }
   for (const coin of ["gold", "silver", "copper"]) await single(`coin-${coin}`, atlas(`coin-${coin}-20x20`));
+
+  // The site's icon: the Blacksmithing icon, the same anvil as the window's portrait.
+  await favicon("136241");
 
   writeFileSync(path.join(OUT, "manifest.json"), JSON.stringify({ build: version, textures: manifest }, null, 2) + "\n");
   console.log(`Wrote ${Object.keys(manifest).length} textures to public/ui (build ${version})`);

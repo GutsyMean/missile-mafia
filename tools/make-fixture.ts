@@ -16,7 +16,11 @@ const BLACKSMITHING = 164;
 // A few plan-taught recipes, including Bind on Pickup ones, to exercise the soulbound marking.
 const EXTRA = new Set(["Veteran's Silvered Chain Helm", "Acolyte's Silvered Chain Helm", "Sterling Silver Shoulders"]);
 
-const recipes = dataset.recipes.filter(
+// Recipes Damien has not learned, shown greyed out: trainer recipes above his skill,
+// a vendor plan, and one whose unlock level the sources disagree on.
+const PENDING = new Set(["Green Iron Hauberk", "Golden Scale Bracers", "Steel Breastplate", "Azure Skyforged Chain", "Truesilver Gauntlets"]);
+
+const learned = dataset.recipes.filter(
   (r) =>
     r.professionId === BLACKSMITHING &&
     r.status === "ok" &&
@@ -25,6 +29,11 @@ const recipes = dataset.recipes.filter(
       r.unlock.learnSkill <= SKILL) ||
       EXTRA.has(r.name)),
 );
+const learnedIds = new Set(learned.map((r) => r.id));
+const pending = dataset.recipes.filter(
+  (r) => r.professionId === BLACKSMITHING && r.status === "ok" && PENDING.has(r.name) && !learnedIds.has(r.id),
+);
+const recipes = [...learned, ...pending];
 
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]));
 const items: Record<string, ItemView> = {};
@@ -41,6 +50,7 @@ for (const recipe of recipes) {
   for (const reagent of recipe.reagents) include(reagent.itemId);
 }
 
+const CRAFTER = "00000000-0000-4000-8000-000000000001";
 const profession = dataset.professions.find((p) => p.id === BLACKSMITHING)!;
 const doc: CraftablesDoc = {
   build: dataset.build,
@@ -48,7 +58,7 @@ const doc: CraftablesDoc = {
   professions: [{ id: profession.id, slug: profession.slug, name: profession.name, iconFileId: profession.iconFileId }],
   crafters: [
     {
-      id: "00000000-0000-4000-8000-000000000001",
+      id: CRAFTER,
       slug: "damien",
       characterName: "Damien",
       realm: null,
@@ -71,7 +81,14 @@ const doc: CraftablesDoc = {
       category: r.category,
       categoryOrder: r.categoryOrder,
       reagents: r.reagents.map((g) => [g.itemId, g.quantity] as [number, number]),
-      crafterIds: ["00000000-0000-4000-8000-000000000001"],
+      crafterIds: learnedIds.has(r.id) ? [CRAFTER] : [],
+      pendingCrafterIds: learnedIds.has(r.id) ? [] : [CRAFTER],
+      learnSkill: r.unlock.learnSkill,
+      skillYellow: r.skillYellow,
+      skillGreen: r.skillGreen,
+      skillGrey: r.skillGrey,
+      acquisition: r.unlock.acquisition,
+      acquisitionText: r.unlock.acquisitionText,
     }))
     .sort((a, b) => a.categoryOrder - b.categoryOrder || a.name.localeCompare(b.name) || a.id - b.id),
   items,
@@ -79,4 +96,4 @@ const doc: CraftablesDoc = {
 
 const out = path.join(ROOT, "e2e/fixtures/craftables.json");
 writeFileSync(out, JSON.stringify(doc, null, 1) + "\n");
-console.log(`Wrote ${out}: ${doc.recipes.length} recipes, ${Object.keys(items).length} items`);
+console.log(`Wrote ${out}: ${learned.length} learned and ${pending.length} not yet learned recipes, ${Object.keys(items).length} items`);

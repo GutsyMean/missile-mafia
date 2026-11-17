@@ -162,13 +162,38 @@ set role anon;
 select test.login(null);
 select public.guild_craftables() as doc \gset
 
-select test.is(jsonb_array_length(:'doc'::jsonb -> 'recipes'), 1, 'guild_craftables lists only what listed crafters can make');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(:'doc'::jsonb -> 'recipes') r where jsonb_array_length(r -> 'crafterIds') > 0), 1,
+  'guild_craftables marks as craftable only what listed crafters can make');
 select test.is(:'doc'::jsonb -> 'recipes' -> 0 ->> 'name', 'Silvered Bronze Gauntlets', 'the recipe is included');
 select test.is(:'doc'::jsonb -> 'recipes' -> 0 -> 'reagents', '[[2841, 8], [2842, 1], [3478, 2]]'::jsonb, 'with its reagents in order');
 select test.is(:'doc'::jsonb -> 'recipes' -> 0 -> 'crafterIds' ->> 0, :'crafter_owner', 'and who can craft it');
 select test.is(:'doc'::jsonb -> 'items' -> '3483' ->> 'tradeable', 'true', 'crafted items come with their data');
 select test.is(:'doc'::jsonb -> 'items' ? '2841', true, 'reagent items are included');
-select test.is(:'doc'::jsonb -> 'items' ? '250528', false, 'items of unlisted crafters are not');
+
+-- Every item shows the profession skill it needs.
+select test.is((:'doc'::jsonb -> 'recipes' -> 0 ->> 'learnSkill')::int, 110, 'each recipe comes with the skill needed to learn it');
+select test.is(
+  array[(:'doc'::jsonb -> 'recipes' -> 0 ->> 'skillYellow')::int, (:'doc'::jsonb -> 'recipes' -> 0 ->> 'skillGreen')::int, (:'doc'::jsonb -> 'recipes' -> 0 ->> 'skillGrey')::int],
+  array[140, 155, 170], 'and the skill-up thresholds');
+select test.is(:'doc'::jsonb -> 'recipes' -> 0 ->> 'acquisitionText', 'Trainer · 10s', 'and where it comes from');
+
+-- Recipes of a listed crafter's profession that they have not learned are listed as not yet available.
+select test.is(jsonb_array_length(:'doc'::jsonb -> 'recipes'), 3, 'recipes the crafter has yet to learn are listed too');
+select test.is(
+  (select r -> 'crafterIds' from jsonb_array_elements(:'doc'::jsonb -> 'recipes') r where (r ->> 'id')::int = 1252277), '[]'::jsonb,
+  'an unlisted crafter does not make a recipe available');
+select test.is(
+  (select r -> 'pendingCrafterIds' ->> 0 from jsonb_array_elements(:'doc'::jsonb -> 'recipes') r where (r ->> 'id')::int = 1252277), :'crafter_owner',
+  'it is offered as not yet learned by the listed crafter who has the profession');
+select test.is(
+  (select r -> 'pendingCrafterIds' from jsonb_array_elements(:'doc'::jsonb -> 'recipes') r where (r ->> 'id')::int = 3333), '[]'::jsonb,
+  'a learned recipe is not pending for its crafter');
+select test.is(
+  (select (r ->> 'learnSkill')::int from jsonb_array_elements(:'doc'::jsonb -> 'recipes') r where (r ->> 'id')::int = 9999), 20,
+  'an admin''s corrected level is the one shown');
+select test.is(:'doc'::jsonb -> 'items' ? '250528', true, 'items of not-yet-learned recipes come with their data');
+select test.is(jsonb_array_length(:'doc'::jsonb -> 'crafters'), 1, 'unlisted crafters stay out of the document');
 select test.is(:'doc'::jsonb -> 'crafters' -> 0 ->> 'characterName', 'Damien', 'crafter details are included');
 select test.is(:'doc'::jsonb -> 'crafters' -> 0 -> 'skills' ->> '164', '145', 'with their profession skill');
 select test.is(:'doc'::jsonb ->> 'build', '1.60.1.70938', 'and the game build of the last sync');
@@ -216,6 +241,12 @@ reset role;
 
 set role anon;
 select test.is(public.guild_craftables() ->> 'build', '1.60.1.70999', 'the public read reports the latest successful build');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where (r ->> 'id')::int = 1252277), 0,
+  'a recipe the game has dropped is not offered as something to learn');
+select test.is(
+  (select r -> 'pendingCrafterIds' ->> 0 from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where (r ->> 'id')::int = 7777), :'crafter_owner',
+  'a recipe a later sync adds shows up as not yet learned without anyone touching it');
 reset role;
 
 -- ---------------------------------------------------------------------------
@@ -295,3 +326,14 @@ reset role;
 select test.is(has_function_privilege('anon', 'public.admin_directory()', 'execute'), false, 'visitors have no execute right on the account list');
 select test.is(has_function_privilege('anon', 'private.admin_directory()', 'execute'), false, 'nor on the inner function');
 select test.is(has_function_privilege('authenticated', 'private.require_admin()', 'execute'), false, 'the admin check cannot be called on its own');
+
+-- A crafter with no profession recorded has nothing "yet to learn".
+set role anon;
+select test.login(null);
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where r -> 'pendingCrafterIds' ? :'new_id'), 0,
+  'a crafter with no profession skill is not waiting to learn anything');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where r -> 'crafterIds' ? :'new_id'), 1,
+  'while what they ticked is craftable');
+reset role;

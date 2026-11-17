@@ -1,3 +1,4 @@
+import { sourceLabel } from "@/lib/craftables/pending";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
@@ -5,9 +6,20 @@ import styles from "./window.module.css";
 
 /** What the selected recipe makes, what it needs, and who can make it. */
 export function DetailPane({ entry }: { entry: Entry }) {
-  const { item, recipe, reagents, crafters } = entry;
+  const { item, recipe, reagents, crafters, pending } = entry;
   const quality = item?.quality ?? 1;
   const soulbound = item ? !item.tradeable : false;
+  const profession = entry.professionName ?? "Skill";
+  const learnSkill = recipe.learnSkill ?? null;
+  // The skill at which crafting it stops being a sure skill-up, as the game colours it.
+  const steps: [string, number | null | undefined][] = [
+    ["orange", learnSkill],
+    ["yellow", recipe.skillYellow],
+    ["green", recipe.skillGreen],
+    ["grey", recipe.skillGrey],
+  ];
+  const shownSteps = steps.filter((step): step is [string, number] => typeof step[1] === "number" && step[1] > 0);
+  const waiting = pending.map((crafter) => crafter.characterName);
 
   return (
     <article className={styles.detail} data-testid="detail">
@@ -21,8 +33,33 @@ export function DetailPane({ entry }: { entry: Entry }) {
             {recipe.category}
             {recipe.craftedCount > 1 ? ` · makes ${recipe.craftedCount}` : ""}
           </p>
+          <p className={styles.detailSkill}>
+            {learnSkill !== null ? `Requires ${profession} (${learnSkill})` : `${profession} skill needed: not confirmed`}
+            {shownSteps.length > 1 ? (
+              <span
+                className={styles.skillSteps}
+                aria-label={`Skill-ups: ${shownSteps.map(([colour, value]) => `${colour} from ${value}`).join(", ")}`}
+              >
+                {shownSteps.map(([colour, value]) => (
+                  <span key={colour} data-step={colour} aria-hidden="true">
+                    {value}
+                  </span>
+                ))}
+              </span>
+            ) : null}
+          </p>
         </div>
       </header>
+
+      {!entry.available ? (
+        <p className={styles.pendingBanner} role="note">
+          <strong>Not available yet.</strong>{" "}
+          {waiting.length > 0
+            ? `${waiting.join(", ")} ${waiting.length === 1 ? "has" : "have"} not learned this recipe.`
+            : "Nobody in the guild has learned this recipe."}
+          {learnSkill !== null ? ` It needs ${profession} ${learnSkill}.` : ""} Source: {sourceLabel(recipe)}.
+        </p>
+      ) : null}
 
       {soulbound ? (
         <p className={styles.soulboundBanner} role="note">
@@ -57,18 +94,20 @@ export function DetailPane({ entry }: { entry: Entry }) {
         </ul>
       </section>
 
-      <section aria-label="Crafters">
-        <h3 className={styles.sectionTitle}>Crafted by</h3>
-        <ul className={styles.crafters}>
-          {crafters.map((crafter) => (
-            <li key={crafter.id}>
-              <span className={styles.crafterName}>{crafter.characterName}</span>
-              <span className={styles.crafterHow}> — whisper in game</span>
-              {crafter.note ? <p className={styles.crafterNote}>{crafter.note}</p> : null}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {crafters.length > 0 ? (
+        <section aria-label="Crafters">
+          <h3 className={styles.sectionTitle}>Crafted by</h3>
+          <ul className={styles.crafters}>
+            {crafters.map((crafter) => (
+              <li key={crafter.id}>
+                <span className={styles.crafterName}>{crafter.characterName}</span>
+                <span className={styles.crafterHow}> — whisper in game</span>
+                {crafter.note ? <p className={styles.crafterNote}>{crafter.note}</p> : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {item ? (
         <p className={styles.external}>

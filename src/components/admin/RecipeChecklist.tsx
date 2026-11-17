@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { planBulkSelect, type BulkSelectPlan } from "@/lib/admin/bulk-select";
 import type { AdminCatalog, CatalogRecipe } from "@/lib/admin/types";
+import { sourceLabel } from "@/lib/craftables/pending";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./admin.module.css";
@@ -18,13 +19,6 @@ interface Props {
   busy: boolean;
   onChange: (add: number[], remove: number[], source: "manual" | "bulk") => void;
   onCorrect: (recipeId: number, level: number | null) => void;
-}
-
-function sourceLabel(recipe: CatalogRecipe): string {
-  if (recipe.acquisitionText) return recipe.acquisitionText;
-  if (recipe.acquisition === "starter") return "Known from the start";
-  if (recipe.acquisition === "unknown") return "Source not known yet";
-  return recipe.acquisition.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 /** The unlock level as text. Unsettled levels say so instead of showing a guess. */

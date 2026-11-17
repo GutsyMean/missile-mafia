@@ -25,6 +25,7 @@ export function parseViewState(params: URLSearchParams): ViewState {
       minLevel: positiveInteger(params.get("min")),
       maxLevel: positiveInteger(params.get("max")),
       tradeableOnly: params.get("tradeable") === "1",
+      availableOnly: params.get("available") === "1",
       sort: sort && SORTS.includes(sort) ? sort : DEFAULT_FILTERS.sort,
     },
     recipeId: positiveInteger(params.get("recipe")),
@@ -40,6 +41,7 @@ export function serializeViewState({ filters, recipeId }: ViewState): string {
   if (filters.minLevel !== null) params.set("min", String(filters.minLevel));
   if (filters.maxLevel !== null) params.set("max", String(filters.maxLevel));
   if (filters.tradeableOnly) params.set("tradeable", "1");
+  if (filters.availableOnly) params.set("available", "1");
   if (filters.sort !== DEFAULT_FILTERS.sort) params.set("sort", filters.sort);
   if (recipeId !== null) params.set("recipe", String(recipeId));
   return params.toString();

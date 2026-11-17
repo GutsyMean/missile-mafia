@@ -20,7 +20,15 @@ function levelValue(text: string): number | null {
 export function FilterBar({ filters, options, onChange }: Props) {
   // On a phone the extra filters stay folded away until asked for.
   const [expanded, setExpanded] = useState(false);
-  const active = [filters.slot, filters.type, filters.stat, filters.minLevel, filters.maxLevel, filters.tradeableOnly].filter(Boolean).length;
+  const active = [
+    filters.slot,
+    filters.type,
+    filters.stat,
+    filters.minLevel,
+    filters.maxLevel,
+    filters.tradeableOnly,
+    filters.availableOnly,
+  ].filter(Boolean).length;
   const select = (label: string, key: "slot" | "type" | "stat", all: string, values: string[]) => (
     <select
       className={wow.field}
@@ -90,6 +98,14 @@ export function FilterBar({ filters, options, onChange }: Props) {
         <option value="name">By name</option>
         <option value="level">By level</option>
       </select>
+      <label className={wow.checkbox}>
+        <input
+          type="checkbox"
+          checked={filters.availableOnly}
+          onChange={(event) => onChange({ availableOnly: event.target.checked })}
+        />
+        Available now only
+      </label>
       <label className={wow.checkbox}>
         <input
           type="checkbox"

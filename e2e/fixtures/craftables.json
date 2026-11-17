@@ -59,7 +59,41 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 95,
+   "skillYellow": 125,
+   "skillGreen": 140,
+   "skillGrey": 155,
+   "acquisition": "drop vendor",
+   "acquisitionText": "Drop, Vendor · Stondry Darkhammer (Redridge Mountains) · Merchant's Favor 30 · Gor'mak (The Barrens) · Merchant's Favor 30"
+  },
+  {
+   "id": 1301448,
+   "professionId": 164,
+   "name": "Azure Skyforged Chain",
+   "iconFileId": 7737711,
+   "craftedItemId": 277019,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     6
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ],
+   "learnSkill": 50,
+   "skillYellow": 55,
+   "skillGreen": 57,
+   "skillGrey": 60,
+   "acquisition": "vendor",
+   "acquisitionText": "Vendor · Vayn Moongaze (Zephras Isle)"
   },
   {
    "id": 2661,
@@ -79,7 +113,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 30,
+   "skillYellow": 70,
+   "skillGreen": 90,
+   "skillGrey": 110,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 3319,
@@ -99,7 +140,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 20,
+   "skillYellow": 60,
+   "skillGreen": 80,
+   "skillGrey": 100,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50c"
   },
   {
    "id": 2662,
@@ -119,7 +167,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 15,
+   "skillYellow": 50,
+   "skillGreen": 70,
+   "skillGrey": 90,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50c"
   },
   {
    "id": 1252229,
@@ -151,7 +206,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 35,
+   "skillYellow": 40,
+   "skillGreen": 40,
+   "skillGrey": 40,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s 5c"
   },
   {
    "id": 1252231,
@@ -179,7 +241,45 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 35,
+   "skillYellow": 40,
+   "skillGreen": 40,
+   "skillGrey": 40,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s 5c"
+  },
+  {
+   "id": 7223,
+   "professionId": 164,
+   "name": "Golden Scale Bracers",
+   "iconFileId": 132609,
+   "craftedItemId": 6040,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3859,
+     5
+    ],
+    [
+     3486,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ],
+   "learnSkill": 160,
+   "skillYellow": 185,
+   "skillGreen": 197,
+   "skillGrey": 210,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 3501,
@@ -203,7 +303,57 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 140,
+   "skillYellow": 165,
+   "skillGreen": 177,
+   "skillGrey": 190,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
+  },
+  {
+   "id": 3508,
+   "professionId": 164,
+   "name": "Green Iron Hauberk",
+   "iconFileId": 132624,
+   "craftedItemId": 3844,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3575,
+     20
+    ],
+    [
+     3486,
+     4
+    ],
+    [
+     1529,
+     2
+    ],
+    [
+     1206,
+     2
+    ],
+    [
+     4255,
+     1
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ],
+   "learnSkill": 155,
+   "skillYellow": 180,
+   "skillGreen": 192,
+   "skillGrey": 205,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 75s"
   },
   {
    "id": 3502,
@@ -231,7 +381,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 145,
+   "skillYellow": 170,
+   "skillGreen": 182,
+   "skillGrey": 195,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 12s 50c"
   },
   {
    "id": 3506,
@@ -259,7 +416,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 130,
+   "skillYellow": 155,
+   "skillGreen": 167,
+   "skillGrey": 180,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50s"
   },
   {
    "id": 2672,
@@ -283,7 +447,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 95,
+   "skillYellow": 125,
+   "skillGreen": 140,
+   "skillGrey": 155,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 7817,
@@ -307,7 +478,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 70,
+   "skillYellow": 100,
+   "skillGreen": 115,
+   "skillGrey": 130,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2670,
@@ -327,7 +505,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 80,
+   "skillYellow": 120,
+   "skillGreen": 135,
+   "skillGrey": 150,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 2668,
@@ -347,7 +532,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 80,
+   "skillYellow": 120,
+   "skillGreen": 135,
+   "skillGrey": 150,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 3s"
   },
   {
    "id": 3328,
@@ -375,7 +567,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 85,
+   "skillYellow": 115,
+   "skillGreen": 130,
+   "skillGrey": 145,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 12260,
@@ -395,7 +594,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 1,
+   "skillYellow": 15,
+   "skillGreen": 35,
+   "skillGrey": 55,
+   "acquisition": "starter",
+   "acquisitionText": "Known from the start"
   },
   {
    "id": 2666,
@@ -415,7 +621,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 45,
+   "skillYellow": 85,
+   "skillGreen": 105,
+   "skillGrey": 125,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2664,
@@ -439,7 +652,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 65,
+   "skillYellow": 90,
+   "skillGreen": 102,
+   "skillGrey": 115,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 3323,
@@ -463,7 +683,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 35,
+   "skillYellow": 75,
+   "skillGreen": 95,
+   "skillGrey": 115,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 3324,
@@ -491,7 +718,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 35,
+   "skillYellow": 75,
+   "skillGreen": 95,
+   "skillGrey": 115,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2675,
@@ -527,7 +761,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 120,
+   "skillYellow": 150,
+   "skillGreen": 165,
+   "skillGrey": 180,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 3331,
@@ -555,7 +796,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 105,
+   "skillYellow": 135,
+   "skillGreen": 150,
+   "skillGrey": 165,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 3333,
@@ -583,7 +831,45 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 110,
+   "skillYellow": 140,
+   "skillGreen": 155,
+   "skillGrey": 170,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
+  },
+  {
+   "id": 9916,
+   "professionId": 164,
+   "name": "Steel Breastplate",
+   "iconFileId": 132740,
+   "craftedItemId": 7963,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3859,
+     16
+    ],
+    [
+     3486,
+     3
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ],
+   "learnSkill": 175,
+   "skillYellow": 200,
+   "skillGreen": 212,
+   "skillGrey": 225,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 25s"
   },
   {
    "id": 1252235,
@@ -611,7 +897,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 110,
+   "skillYellow": 140,
+   "skillGreen": 155,
+   "skillGrey": 170,
+   "acquisition": "drop",
+   "acquisitionText": "Drop · Redridge Mountains"
   },
   {
    "id": 1252230,
@@ -639,7 +932,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 35,
+   "skillYellow": 40,
+   "skillGreen": 40,
+   "skillGrey": 40,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s 5c"
   },
   {
    "id": 1252277,
@@ -675,7 +975,61 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 95,
+   "skillYellow": 125,
+   "skillGreen": 140,
+   "skillGrey": 155,
+   "acquisition": "drop vendor",
+   "acquisitionText": "Drop, Vendor · Stondry Darkhammer (Redridge Mountains) · Merchant's Favor 30 · Gor'mak (The Barrens) · Merchant's Favor 30"
+  },
+  {
+   "id": 9954,
+   "professionId": 164,
+   "name": "Truesilver Gauntlets",
+   "iconFileId": 132963,
+   "craftedItemId": 7938,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Plate Armor",
+   "categoryOrder": 104,
+   "reagents": [
+    [
+     3860,
+     10
+    ],
+    [
+     6037,
+     8
+    ],
+    [
+     7909,
+     3
+    ],
+    [
+     3864,
+     3
+    ],
+    [
+     5966,
+     1
+    ],
+    [
+     7966,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ],
+   "learnSkill": null,
+   "skillYellow": 220,
+   "skillGreen": 230,
+   "skillGrey": 240,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1g"
   },
   {
    "id": 2741,
@@ -703,7 +1057,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 90,
+   "skillYellow": 120,
+   "skillGreen": 135,
+   "skillGrey": 150,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2738,
@@ -731,7 +1092,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 20,
+   "skillYellow": 60,
+   "skillGreen": 80,
+   "skillGrey": 100,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50c"
   },
   {
    "id": 3294,
@@ -767,7 +1135,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 45,
+   "skillYellow": 85,
+   "skillGreen": 105,
+   "skillGrey": 125,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 9987,
@@ -795,7 +1170,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 110,
+   "skillYellow": 140,
+   "skillGreen": 155,
+   "skillGrey": 170,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 3293,
@@ -831,7 +1213,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 30,
+   "skillYellow": 70,
+   "skillGreen": 90,
+   "skillGrey": 110,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 2740,
@@ -859,7 +1248,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 85,
+   "skillYellow": 115,
+   "skillGreen": 130,
+   "skillGrey": 145,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2737,
@@ -887,7 +1283,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 15,
+   "skillYellow": 55,
+   "skillGreen": 75,
+   "skillGrey": 95,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50c"
   },
   {
    "id": 3296,
@@ -927,7 +1330,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 105,
+   "skillYellow": 135,
+   "skillGreen": 150,
+   "skillGrey": 165,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 9985,
@@ -955,7 +1365,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 100,
+   "skillYellow": 155,
+   "skillGreen": 170,
+   "skillGrey": 185,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 7408,
@@ -983,7 +1400,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 40,
+   "skillYellow": 80,
+   "skillGreen": 100,
+   "skillGrey": 120,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 3s"
   },
   {
    "id": 2742,
@@ -1011,7 +1435,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 95,
+   "skillYellow": 125,
+   "skillGreen": 140,
+   "skillGrey": 155,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s"
   },
   {
    "id": 2739,
@@ -1039,7 +1470,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 25,
+   "skillYellow": 65,
+   "skillGreen": 85,
+   "skillGrey": 105,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 50c"
   },
   {
    "id": 9986,
@@ -1067,7 +1505,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 105,
+   "skillYellow": 135,
+   "skillGreen": 150,
+   "skillGrey": 165,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 9983,
@@ -1099,7 +1544,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 25,
+   "skillYellow": 65,
+   "skillGreen": 85,
+   "skillGrey": 105,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 3292,
@@ -1131,7 +1583,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 70,
+   "skillYellow": 110,
+   "skillGreen": 130,
+   "skillGrey": 150,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
   },
   {
    "id": 3491,
@@ -1167,7 +1626,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 80,
+   "skillYellow": 110,
+   "skillGreen": 125,
+   "skillGrey": 140,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 6s"
   },
   {
    "id": 8880,
@@ -1199,7 +1665,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 25,
+   "skillYellow": 65,
+   "skillGreen": 85,
+   "skillGrey": 105,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 6517,
@@ -1231,7 +1704,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 85,
+   "skillYellow": 115,
+   "skillGreen": 130,
+   "skillGrey": 145,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 8s"
   },
   {
    "id": 2665,
@@ -1251,7 +1731,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 40,
+   "skillYellow": 40,
+   "skillGreen": 47,
+   "skillGrey": 55,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 3116,
@@ -1271,7 +1758,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 40,
+   "skillYellow": 40,
+   "skillGreen": 47,
+   "skillGrey": 55,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 19667,
@@ -1295,7 +1789,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 125,
+   "skillYellow": 125,
+   "skillGreen": 135,
+   "skillGrey": 145,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 2674,
@@ -1315,7 +1816,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 100,
+   "skillYellow": 100,
+   "skillGreen": 107,
+   "skillGrey": 115,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 3117,
@@ -1335,7 +1843,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 100,
+   "skillYellow": 100,
+   "skillGreen": 107,
+   "skillGrey": 115,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 2660,
@@ -1355,7 +1870,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 1,
+   "skillYellow": 15,
+   "skillGreen": 35,
+   "skillGrey": 55,
+   "acquisition": "starter",
+   "acquisitionText": "Known from the start"
   },
   {
    "id": 1230171,
@@ -1379,7 +1901,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 20,
+   "skillYellow": 20,
+   "skillGreen": 20,
+   "skillGrey": 20,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s 5c"
   },
   {
    "id": 19666,
@@ -1403,7 +1932,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 75,
+   "skillYellow": 75,
+   "skillGreen": 85,
+   "skillGrey": 95,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 3326,
@@ -1423,7 +1959,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 50,
+   "skillYellow": 50,
+   "skillGreen": 70,
+   "skillGrey": 90,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 1245287,
@@ -1443,7 +1986,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 1,
+   "skillYellow": 10,
+   "skillGreen": 12,
+   "skillGrey": 15,
+   "acquisition": "starter",
+   "acquisitionText": "Known from the start"
   },
   {
    "id": 14379,
@@ -1467,7 +2017,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 125,
+   "skillYellow": 130,
+   "skillGreen": 132,
+   "skillGrey": 135,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 3337,
@@ -1487,7 +2044,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 100,
+   "skillYellow": 100,
+   "skillGreen": 112,
+   "skillGrey": 125,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 10s"
   },
   {
    "id": 8768,
@@ -1507,7 +2071,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 125,
+   "skillYellow": 125,
+   "skillGreen": 127,
+   "skillGrey": 130,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 2s 50c"
   },
   {
    "id": 3320,
@@ -1527,7 +2098,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 25,
+   "skillYellow": 45,
+   "skillGreen": 65,
+   "skillGrey": 85,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   },
   {
    "id": 7818,
@@ -1551,7 +2129,14 @@
    ],
    "crafterIds": [
     "00000000-0000-4000-8000-000000000001"
-   ]
+   ],
+   "pendingCrafterIds": [],
+   "learnSkill": 75,
+   "skillYellow": 80,
+   "skillGreen": 82,
+   "skillGrey": 85,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 1s"
   }
  ],
  "items": {
@@ -1654,6 +2239,32 @@
    "tooltip": [
     {
      "text": "Shadowgem",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "1529": {
+   "id": 1529,
+   "name": "Jade",
+   "quality": 2,
+   "iconFileId": 134134,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 35,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 700,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Jade",
      "color": "quality"
     }
    ],
@@ -3961,6 +4572,68 @@
    ],
    "tooltipComplete": true
   },
+  "3844": {
+   "id": 3844,
+   "name": "Green Iron Hauberk",
+   "quality": 3,
+   "iconFileId": 132624,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 36,
+   "requiredLevel": 31,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 5658,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 238,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 11
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 7
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Green Iron Hauberk",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "238 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+7 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+11 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 31",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  },
   "3848": {
    "id": 3848,
    "name": "Big Bronze Knife",
@@ -4024,6 +4697,58 @@
    ],
    "tooltipComplete": true
   },
+  "3859": {
+   "id": 3859,
+   "name": "Steel Bar",
+   "quality": 1,
+   "iconFileId": 133234,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 35,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 60,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Steel Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3860": {
+   "id": 3860,
+   "name": "Mithril Bar",
+   "quality": 1,
+   "iconFileId": 133220,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 40,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 400,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Mithril Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
   "3864": {
    "id": 3864,
    "name": "Citrine",
@@ -4046,6 +4771,68 @@
     {
      "text": "Citrine",
      "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4255": {
+   "id": 4255,
+   "name": "Green Leather Armor",
+   "quality": 2,
+   "iconFileId": 132723,
+   "classId": 4,
+   "subclassId": 2,
+   "inventoryType": 5,
+   "itemLevel": 31,
+   "requiredLevel": 26,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2366,
+   "slotName": "Chest",
+   "typeName": "Leather",
+   "armor": 95,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 8
+    },
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 8
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Green Leather Armor",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Leather",
+     "color": "white"
+    },
+    {
+     "text": "95 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+8 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+8 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 26",
+     "color": "white"
     }
    ],
    "tooltipComplete": true
@@ -4169,6 +4956,156 @@
     },
     {
      "text": "Requires Level 18",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5966": {
+   "id": 5966,
+   "name": "Guardian Gloves",
+   "quality": 2,
+   "iconFileId": 132939,
+   "classId": 4,
+   "subclassId": 2,
+   "inventoryType": 10,
+   "itemLevel": 38,
+   "requiredLevel": 33,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1374,
+   "slotName": "Hands",
+   "typeName": "Leather",
+   "armor": 66,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 8
+    },
+    {
+     "stat": 45,
+     "name": "Spell Power",
+     "value": 8
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Guardian Gloves",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Hands",
+     "right": "Leather",
+     "color": "white"
+    },
+    {
+     "text": "66 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+8 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 33",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases spell power by 8.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6037": {
+   "id": 6037,
+   "name": "Truesilver Bar",
+   "quality": 2,
+   "iconFileId": 133222,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 50,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 1250,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Truesilver Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6040": {
+   "id": 6040,
+   "name": "Golden Scale Bracers",
+   "quality": 2,
+   "iconFileId": 132609,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 9,
+   "itemLevel": 37,
+   "requiredLevel": 32,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1315,
+   "slotName": "Wrist",
+   "typeName": "Mail",
+   "armor": 96,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Golden Scale Bracers",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Wrist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "96 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+6 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 32",
      "color": "white"
     }
    ],
@@ -4443,6 +5380,94 @@
     },
     {
      "text": "Requires Level 6",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7909": {
+   "id": 7909,
+   "name": "Aquamarine",
+   "quality": 2,
+   "iconFileId": 134088,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 45,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 1000,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Aquamarine",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7938": {
+   "id": 7938,
+   "name": "Truesilver Gauntlets",
+   "quality": 3,
+   "iconFileId": 132963,
+   "classId": 4,
+   "subclassId": 4,
+   "inventoryType": 10,
+   "itemLevel": 45,
+   "requiredLevel": 40,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 4028,
+   "slotName": "Hands",
+   "typeName": "Plate",
+   "armor": 300,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 16
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 7
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Truesilver Gauntlets",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Hands",
+     "right": "Plate",
+     "color": "white"
+    },
+    {
+     "text": "300 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+16 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+7 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 40",
      "color": "white"
     }
    ],
@@ -4723,6 +5748,94 @@
     {
      "text": "Requires Level 22",
      "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7963": {
+   "id": 7963,
+   "name": "Steel Breastplate",
+   "quality": 2,
+   "iconFileId": 132740,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 40,
+   "requiredLevel": 35,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 5615,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 231,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 12
+    },
+    {
+     "stat": 15,
+     "name": "Block",
+     "value": 10
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Steel Breastplate",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "231 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+12 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 35",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases your shield block by 10.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7966": {
+   "id": 7966,
+   "name": "Solid Grinding Stone",
+   "quality": 1,
+   "iconFileId": 135246,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 35,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Solid Grinding Stone",
+     "color": "quality"
     }
    ],
    "tooltipComplete": true
@@ -5355,6 +6468,59 @@
     {
      "text": "Equip: Increases spell power by 5.",
      "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "277019": {
+   "id": 277019,
+   "name": "Azure Skyforged Chain",
+   "quality": 2,
+   "iconFileId": 7737711,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 6,
+   "itemLevel": 10,
+   "requiredLevel": 5,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 0,
+   "slotName": "Waist",
+   "typeName": "Mail",
+   "armor": 61,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Azure Skyforged Chain",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Waist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "61 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 5",
+     "color": "white"
     }
    ],
    "tooltipComplete": true

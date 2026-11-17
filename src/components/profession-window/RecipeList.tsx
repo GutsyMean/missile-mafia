@@ -1,6 +1,7 @@
 "use client";
 
 import type { EntryGroup } from "@/lib/craftables/filter";
+import { skillLabel } from "@/lib/craftables/pending";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import styles from "./window.module.css";
@@ -42,6 +43,7 @@ export function RecipeList({ groups, selectedId, shownId, onSelect, onHover }: P
             {group.entries.map((entry) => {
               const quality = entry.item?.quality ?? 1;
               const soulbound = entry.item ? !entry.item.tradeable : false;
+              const skill = skillLabel(entry);
               return (
                 <li key={entry.recipe.id}>
                   <button
@@ -50,6 +52,7 @@ export function RecipeList({ groups, selectedId, shownId, onSelect, onHover }: P
                     aria-pressed={entry.recipe.id === selectedId}
                     data-shown={entry.recipe.id === shownId}
                     data-recipe={entry.recipe.id}
+                    data-available={entry.available}
                     onClick={() => onSelect(entry)}
                     onPointerEnter={(event) => {
                       if (event.pointerType === "mouse") onHover(entry, event.currentTarget);
@@ -65,9 +68,20 @@ export function RecipeList({ groups, selectedId, shownId, onSelect, onHover }: P
                       <span className={styles.rowName} data-quality={quality}>
                         {entry.item?.name ?? entry.recipe.name}
                       </span>
-                      <span className={styles.rowSub}>{describeEntry(entry)}</span>
+                      <span className={styles.rowSub}>
+                        {entry.available ? describeEntry(entry) : `Not available yet · ${describeEntry(entry)}`}
+                      </span>
                     </span>
-                    {soulbound ? <span className={styles.soulbound}>Soulbound</span> : null}
+                    <span className={styles.rowTags}>
+                      {skill ? (
+                        <span className={styles.rowSkill}>
+                          <span className={styles.wideOnly}>{skill}</span>
+                          {/* On a phone the profession's name would crowd out the item's own line. */}
+                          <span className={styles.narrowOnly}>Skill {entry.recipe.learnSkill}</span>
+                        </span>
+                      ) : null}
+                      {soulbound ? <span className={styles.soulbound}>Soulbound</span> : null}
+                    </span>
                   </button>
                 </li>
               );

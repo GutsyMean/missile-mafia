@@ -3,13 +3,20 @@ import type { CraftablesDoc, Entry, Filters, SortMode } from "./types";
 /** Joins every recipe with the item it makes, its reagents and who can craft it. */
 export function buildEntries(doc: CraftablesDoc): Entry[] {
   const crafters = new Map(doc.crafters.map((crafter) => [crafter.id, crafter]));
+  const professions = new Map(doc.professions.map((profession) => [profession.id, profession.name]));
   const itemOf = (id: number | null) => (id === null ? null : (doc.items[String(id)] ?? null));
-  return doc.recipes.map((recipe) => ({
-    recipe,
-    item: itemOf(recipe.craftedItemId),
-    reagents: recipe.reagents.map(([itemId, quantity]) => ({ item: itemOf(itemId), itemId, quantity })),
-    crafters: recipe.crafterIds.flatMap((id) => crafters.get(id) ?? []),
-  }));
+  return doc.recipes.map((recipe) => {
+    const makers = recipe.crafterIds.flatMap((id) => crafters.get(id) ?? []);
+    return {
+      recipe,
+      item: itemOf(recipe.craftedItemId),
+      reagents: recipe.reagents.map(([itemId, quantity]) => ({ item: itemOf(itemId), itemId, quantity })),
+      crafters: makers,
+      pending: (recipe.pendingCrafterIds ?? []).flatMap((id) => crafters.get(id) ?? []),
+      available: makers.length > 0,
+      professionName: professions.get(recipe.professionId) ?? null,
+    };
+  });
 }
 
 function searchText(entry: Entry): string {
@@ -32,16 +39,22 @@ function matches(entry: Entry, filters: Filters, words: string[]): boolean {
   if (filters.maxLevel !== null && (item?.requiredLevel ?? 0) > filters.maxLevel) return false;
   // A recipe that makes no item (an enchant) is applied for the customer, so it counts as tradeable.
   if (filters.tradeableOnly && item && !item.tradeable) return false;
+  if (filters.availableOnly && !entry.available) return false;
   return true;
 }
 
 const level = (entry: Entry) => entry.item?.requiredLevel ?? 0;
 const byName = (a: Entry, b: Entry) => a.recipe.name.localeCompare(b.recipe.name);
+/** Recipes with no confirmed skill sort after the ones that have one. */
+const skillNeeded = (entry: Entry) => entry.recipe.learnSkill ?? Number.MAX_SAFE_INTEGER;
 
 const COMPARATORS: Record<SortMode, (a: Entry, b: Entry) => number> = {
+  // Within a type: what can be made now first, then what is still to be learned, soonest first.
   category: (a, b) =>
     a.recipe.categoryOrder - b.recipe.categoryOrder ||
     a.recipe.category.localeCompare(b.recipe.category) ||
+    Number(b.available) - Number(a.available) ||
+    (a.available ? 0 : skillNeeded(a) - skillNeeded(b)) ||
     level(a) - level(b) ||
     byName(a, b),
   name: byName,

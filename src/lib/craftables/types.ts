@@ -42,7 +42,20 @@ export interface RecipeView {
   categoryOrder: number;
   /** [item id, quantity] in the game's order. */
   reagents: [number, number][];
+  /** Listed crafters who have learned this recipe. Empty when nobody can make it yet. */
   crafterIds: string[];
+  /** Listed crafters who have the profession but have not learned this recipe. */
+  pendingCrafterIds?: string[];
+  /** The profession skill needed to learn it. Null when no source has confirmed it. */
+  learnSkill?: number | null;
+  /** The skill at which crafting it gives fewer skill-ups (yellow, green) and none (grey). */
+  skillYellow?: number;
+  skillGreen?: number;
+  skillGrey?: number;
+  /** "trainer", "vendor", "drop", "quest", "starter", "unknown" or a combination. */
+  acquisition?: string;
+  /** Where it comes from, in full, e.g. "Trainer · 10s". */
+  acquisitionText?: string | null;
 }
 
 export interface ItemView {
@@ -72,7 +85,13 @@ export interface Entry {
   recipe: RecipeView;
   item: ItemView | null;
   reagents: { item: ItemView | null; itemId: number; quantity: number }[];
+  /** Who can craft it now. */
   crafters: CrafterView[];
+  /** Who has the profession but has not learned it yet. */
+  pending: CrafterView[];
+  /** False when no listed crafter has learned the recipe: shown greyed out. */
+  available: boolean;
+  professionName: string | null;
 }
 
 export type SortMode = "category" | "name" | "level";
@@ -85,6 +104,8 @@ export interface Filters {
   minLevel: number | null;
   maxLevel: number | null;
   tradeableOnly: boolean;
+  /** Hide recipes nobody has learned yet. */
+  availableOnly: boolean;
   sort: SortMode;
 }
 
@@ -96,5 +117,6 @@ export const DEFAULT_FILTERS: Filters = {
   minLevel: null,
   maxLevel: null,
   tradeableOnly: false,
+  availableOnly: false,
   sort: "category",
 };

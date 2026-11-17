@@ -7,9 +7,16 @@ const detail = (page: Page) => page.locator('[data-testid="detail"]:visible');
 test.describe("browsing", () => {
   test("lists everything the crafter can make, grouped by type", async ({ page }) => {
     await page.goto("/");
-    await expect(rows(page)).toHaveCount(58);
+    await expect(page.locator('[data-recipe][data-available="true"]')).toHaveCount(58);
     await expect(page.getByRole("heading", { name: /Mail Armor/ })).toBeVisible();
-    await expect(page.getByText("58 recipes")).toBeVisible();
+  });
+
+  test("shows the Blacksmithing skill each item needs", async ({ page }) => {
+    await page.goto("/");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toContainText("Blacksmithing 110");
+    await row(page, "Patterned Bronze Bracers").click();
+    await expect(detail(page).getByText("Requires Blacksmithing (95)")).toBeVisible();
+    await expect(detail(page).getByLabel("Skill-ups: orange from 95, yellow from 125, green from 140, grey from 155")).toBeVisible();
   });
 
   test("shows the in-game tooltip and the three reagents when an item is clicked", async ({ page }) => {
@@ -54,13 +61,67 @@ test.describe("browsing", () => {
   });
 });
 
+test.describe("recipes not learned yet", () => {
+  test("are listed greyed out and marked as not available", async ({ page }) => {
+    await page.goto("/");
+    await expect(rows(page)).toHaveCount(63);
+    await expect(page.getByText("63 recipes · 5 not available yet")).toBeVisible();
+
+    const hauberk = row(page, "Green Iron Hauberk");
+    await expect(hauberk).toHaveAttribute("data-available", "false");
+    await expect(hauberk).toContainText("Not available yet");
+    await expect(hauberk).toContainText("Blacksmithing 155");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toHaveAttribute("data-available", "true");
+  });
+
+  test("come after what can be made now, soonest first", async ({ page }) => {
+    await page.goto("/");
+    const mail = page.getByRole("region", { name: "Mail Armor" }).locator("[data-recipe]");
+    await expect(mail.nth(24)).toHaveAttribute("data-available", "true");
+    await expect(mail.nth(25)).toContainText("Azure Skyforged Chain");
+    await expect(mail.nth(26)).toContainText("Green Iron Hauberk");
+    await expect(mail.nth(27)).toContainText("Golden Scale Bracers");
+    await expect(mail.nth(28)).toContainText("Steel Breastplate");
+  });
+
+  test("say what they need and where they come from when opened", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Green Iron Hauberk").click();
+    const note = detail(page).getByRole("note");
+    await expect(note).toContainText("Not available yet.");
+    await expect(note).toContainText("Damien has not learned this recipe.");
+    await expect(note).toContainText("It needs Blacksmithing 155.");
+    await expect(note).toContainText("Source: Trainer · 75s.");
+    await expect(detail(page).getByRole("region", { name: "Reagents" })).toBeVisible();
+    await expect(detail(page).getByRole("region", { name: "Crafters" })).toHaveCount(0);
+  });
+
+  test("admit it when the skill needed is not confirmed", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Truesilver Gauntlets").click();
+    await expect(detail(page).getByText("Blacksmithing skill needed: not confirmed")).toBeVisible();
+  });
+
+  test("are hidden by Available now only, and the link remembers it", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("Available now only").check();
+    await expect(rows(page)).toHaveCount(58);
+    await expect(row(page, "Green Iron Hauberk")).toHaveCount(0);
+    await expect(page).toHaveURL(/available=1/);
+
+    await page.goto("/?available=1");
+    await expect(rows(page)).toHaveCount(58);
+    await expect(page.getByLabel("Available now only")).toBeChecked();
+  });
+});
+
 test.describe("search and filters", () => {
   test("searches item names", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("searchbox").fill("silver");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
-    await expect(page.getByText(/of 58 recipes/)).toBeVisible();
+    await expect(page.getByText(/of 63 recipes/)).toBeVisible();
   });
 
   test("finds recipes by a reagent they use", async ({ page }) => {
@@ -90,7 +151,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
-    await expect(rows(page)).toHaveCount(58);
+    await expect(rows(page)).toHaveCount(63);
   });
 });
 

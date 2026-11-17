@@ -271,6 +271,56 @@
   text-shadow: 1px 1px 0 #000;
 }
 
+.rowTags {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+/* The profession skill the recipe needs. */
+.rowSkill {
+  color: #c8c1b3;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.narrowOnly {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .wideOnly {
+    display: none;
+  }
+
+  .narrowOnly {
+    display: inline;
+  }
+}
+
+/* Recipes nobody has learned yet: listed, but clearly out of reach. */
+.row[data-available="false"] {
+  background: rgb(22 20 18 / 0.62);
+}
+
+.row[data-available="false"] > :first-child {
+  filter: grayscale(1) brightness(0.62);
+}
+
+.row[data-available="false"] .rowName {
+  color: #99948b;
+}
+
+.row[data-available="false"] .rowSub,
+.row[data-available="false"] .rowSkill {
+  color: #8d877d;
+}
+
+.row[data-available="false"] .soulbound {
+  color: #a8726c;
+}
+
 /* Quality colours, shared by names in the list and in the detail pane. */
 .rowName[data-quality="0"],
 .detailName[data-quality="0"],
@@ -335,6 +385,52 @@
   margin: 3px 0 0;
   color: #c8c1b3;
   font-size: 13px;
+}
+
+.detailSkill {
+  margin: 3px 0 0;
+  color: #e9e2d4;
+  font-size: 13px;
+}
+
+/* Skill-up colours, as the game and Wowhead show them. */
+.skillSteps {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: 10px;
+  font-size: 12px;
+}
+
+.skillSteps [data-step="orange"] {
+  color: #ff8040;
+}
+
+.skillSteps [data-step="yellow"] {
+  color: #ffff00;
+}
+
+.skillSteps [data-step="green"] {
+  color: #40bf40;
+}
+
+.skillSteps [data-step="grey"] {
+  color: #9d9d9d;
+}
+
+.pendingBanner {
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid #6f6a60;
+  border-radius: 3px;
+  background: rgb(70 66 60 / 0.38);
+  color: #d8d2c6;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pendingBanner strong {
+  color: #fff;
+  font-weight: 400;
 }
 
 .soulboundBanner {
