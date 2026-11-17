@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseSecretKey } from "@/lib/supabase/env";
 import { createServerSupabase } from "@/lib/supabase/server";
-import type { AdminCatalog } from "./types";
+import type { AdminCatalog, AdminDirectory } from "./types";
 
 export interface AdminCrafter {
   id: string;
@@ -30,10 +30,15 @@ export interface SyncRunView {
 }
 
 export interface AdminData {
+  /** The signed-in account. */
+  userId: string;
   /** How the signed-in account is shown, e.g. a Discord name. */
   accountName: string | null;
   isAdmin: boolean;
+  /** The crafters this account manages. Empty for an admin who does not craft. */
   crafters: AdminCrafter[];
+  /** Who has signed in and every crafter. Null unless the account is a site admin. */
+  directory: AdminDirectory | null;
   catalog: AdminCatalog;
   runs: SyncRunView[];
   /** False until the server has the secret key the sync writes with. */
@@ -57,6 +62,13 @@ export async function loadAdminData(): Promise<AdminData | null> {
   ]);
   if (crafterRows.error) throw new Error(crafterRows.error.message);
   if (catalog.error) throw new Error(catalog.error.message);
+
+  let directory: AdminDirectory | null = null;
+  if (adminRow.data) {
+    const result = await supabase.rpc("admin_directory");
+    if (result.error) throw new Error(result.error.message);
+    directory = result.data as AdminDirectory;
+  }
 
   const crafters: AdminCrafter[] = [];
   for (const row of crafterRows.data ?? []) {
@@ -99,9 +111,11 @@ export async function loadAdminData(): Promise<AdminData | null> {
     (metadata.full_name as string | undefined) ?? (metadata.name as string | undefined) ?? (claims.email as string | undefined) ?? null;
 
   return {
+    userId: claims.sub,
     accountName,
     isAdmin: Boolean(adminRow.data),
     crafters,
+    directory,
     catalog: catalog.data as AdminCatalog,
     runs: (runRows.data ?? []).map((run) => ({
       id: run.id,

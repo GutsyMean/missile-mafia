@@ -47,6 +47,15 @@ Trainer unlock levels are decided by the game server and are not in the game tab
    select 'my-character', 'My Character', id from auth.users order by created_at limit 1;
    insert into public.app_admins (user_id) select id from auth.users order by created_at limit 1;
    ```
+   This is the only time SQL is needed. From then on, crafters are managed on the site (see below).
+
+## Adding guild members as crafters
+
+1. The member opens the site, follows **Crafter sign-in** at the bottom and signs in with Discord.
+2. A site admin opens the admin page's **Crafters** tab. The member is listed under *Waiting for you*; **Add as crafter** makes them one.
+3. The member reloads the page and manages their own recipe list.
+
+The same tab links or unlinks existing crafters, adds a crafter before the member has signed in, and hides a crafter from the public list. Changes take effect at once; nothing is redeployed. Signing in gives an account no rights until an admin links it.
 
 ## Working on it
 

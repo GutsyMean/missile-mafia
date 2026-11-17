@@ -217,3 +217,81 @@ reset role;
 set role anon;
 select test.is(public.guild_craftables() ->> 'build', '1.60.1.70999', 'the public read reports the latest successful build');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Site admins decide who is a crafter
+-- ---------------------------------------------------------------------------
+\set member '33333333-3333-3333-3333-333333333333'
+insert into auth.users (id, email, raw_user_meta_data, last_sign_in_at) values
+  (:'member', 'member@example.com', '{"full_name": "newmember", "custom_claims": {"global_name": "New Member"}}', now());
+
+set role anon;
+select test.login(null);
+select test.throws($$select public.admin_directory()$$, '42501', 'a visitor cannot read the account list');
+select test.throws($$select public.admin_create_crafter('Sneaky', null)$$, '42501', 'a visitor cannot create a crafter');
+select test.throws($$select public.admin_link_crafter('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', null)$$, '42501', 'a visitor cannot unlink a crafter');
+
+reset role;
+set role authenticated;
+select test.login(:'member');
+select test.throws($$select public.admin_directory()$$, '42501', 'a signed-in member cannot read the account list');
+select test.throws($$select private.admin_directory()$$, '42501', 'nor by calling the inner function directly');
+select test.throws($$select public.admin_create_crafter('Me', '33333333-3333-3333-3333-333333333333')$$, '42501', 'a member cannot make themselves a crafter');
+select test.throws($$select public.admin_link_crafter('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '33333333-3333-3333-3333-333333333333')$$, '42501', 'a member cannot take over someone else''s crafter');
+select test.throws($$select public.admin_set_crafter_listed('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true)$$, '42501', 'a member cannot change who is listed');
+select test.is((select count(*)::int from public.crafters where user_id = (select auth.uid())), 0, 'signing in alone does not make anyone a crafter');
+
+select test.login(:'owner');
+select test.is(jsonb_array_length(public.admin_directory() -> 'accounts'), 3, 'an admin sees every account that has signed in');
+select test.is(
+  (select a ->> 'name' from jsonb_array_elements(public.admin_directory() -> 'accounts') a where a ->> 'id' = :'member'), 'New Member',
+  'accounts are shown by their Discord name');
+select test.is(
+  (select (a ->> 'isAdmin')::boolean from jsonb_array_elements(public.admin_directory() -> 'accounts') a where a ->> 'id' = :'owner'), true,
+  'the account list marks site admins');
+select test.is(public.admin_directory()::text like '%example.com%', false, 'the account list never includes email addresses');
+select test.is(jsonb_array_length(public.admin_directory() -> 'crafters'), 2, 'an admin sees unlisted crafters too');
+select test.is(
+  (select (c ->> 'recipeCount')::int from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'slug' = 'damien'),
+  (select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner'),
+  'each crafter comes with the size of their list');
+
+select public.admin_create_crafter('  New Member ', :'member') as new_id \gset
+select test.is((select user_id from public.crafters where id = :'new_id'), :'member'::uuid, 'an admin can make a signed-in member a crafter');
+select test.is((select character_name from public.crafters where id = :'new_id'), 'New Member', 'the name is trimmed');
+select test.is((select slug from public.crafters where id = :'new_id'), 'new-member', 'the new crafter gets an address from the name');
+select test.is((select is_listed from public.crafters where id = :'new_id'), true, 'a new crafter is listed');
+
+select public.admin_create_crafter('New Member', null) as alt_id \gset
+select test.is((select slug from public.crafters where id = :'alt_id'), 'new-member-2', 'a repeated name still gets its own address');
+select test.is((select user_id is null from public.crafters where id = :'alt_id'), true, 'a crafter can be added before the member signs in');
+
+select public.admin_link_crafter(:'alt_id', :'member');
+select test.is((select user_id from public.crafters where id = :'alt_id'), :'member'::uuid, 'an admin can link an account to an existing crafter');
+select public.admin_link_crafter(:'alt_id', null);
+select test.is((select user_id is null from public.crafters where id = :'alt_id'), true, 'an admin can unlink a crafter');
+select public.admin_set_crafter_listed(:'alt_id', false);
+select test.is(
+  (select (c ->> 'isListed')::boolean from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' = :'alt_id'), false,
+  'an admin can take a crafter off the public list');
+select test.is((select count(*)::int from public.crafters where id = :'alt_id'), 0, 'which hides them from ordinary reads');
+
+select test.throws($$select public.admin_create_crafter('   ', null)$$, '22023', 'a crafter needs a name');
+select test.throws($$select public.admin_link_crafter('99999999-9999-9999-9999-999999999999', null)$$, 'P0002', 'linking a crafter that does not exist is an error');
+select test.throws(
+  format('select public.admin_link_crafter(%L, %L)', :'alt_id', '99999999-9999-9999-9999-999999999999'), '23503',
+  'linking to an account that does not exist is an error');
+select test.throws($$update public.crafters set is_listed = false where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$$, '42501', 'crafters still cannot be changed around the admin functions');
+
+-- The member can now manage their own list, and nothing more.
+select test.login(:'member');
+select test.is(
+  public.set_crafter_recipes(:'new_id', array[3333], '{}'::int[]) ->> 'added', '1',
+  'a newly linked member can tick their own recipes');
+select test.throws($$select public.admin_directory()$$, '42501', 'being a crafter does not make someone an admin');
+select test.throws(format('select public.admin_set_crafter_listed(%L, true)', :'alt_id'), '42501', 'a crafter cannot list other crafters');
+
+reset role;
+select test.is(has_function_privilege('anon', 'public.admin_directory()', 'execute'), false, 'visitors have no execute right on the account list');
+select test.is(has_function_privilege('anon', 'private.admin_directory()', 'execute'), false, 'nor on the inner function');
+select test.is(has_function_privilege('authenticated', 'private.require_admin()', 'execute'), false, 'the admin check cannot be called on its own');

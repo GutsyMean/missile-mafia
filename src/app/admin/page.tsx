@@ -17,7 +17,7 @@ async function AdminContent() {
   const data = await loadAdminData();
   if (!data) redirect("/login");
 
-  if (data.crafters.length === 0) {
+  if (data.crafters.length === 0 && !data.isAdmin) {
     return (
       <Frame title="Not a crafter yet" className={styles.window}>
         <div className={styles.card}>
@@ -34,7 +34,8 @@ async function AdminContent() {
       </Frame>
     );
   }
-  return <AdminPanel data={data} />;
+  // Remount when the account's crafter changes, so the tabs start from the new list.
+  return <AdminPanel key={data.crafters[0]?.id ?? "no-crafter"} data={data} />;
 }
 
 export default function AdminPage() {

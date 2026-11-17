@@ -374,6 +374,44 @@
   background: rgb(0 0 0 / 0.35);
 }
 
+.character p {
+  margin: 0;
+}
+
+.personName {
+  color: #fff;
+  font-size: 15px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.inlineLabel {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.inlineLabel input {
+  width: 190px;
+}
+
+select.wideSelect {
+  max-width: 210px;
+}
+
+.linkButton:disabled {
+  color: var(--grey);
+  cursor: default;
+}
+
 .plain {
   margin: 0;
   padding: 0;

@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
-import type { AdminCatalog } from "@/lib/admin/types";
+import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -162,6 +162,58 @@ export async function correctUnlockLevel(recipeId: number, level: number | null)
   if (error) return fail(error.message);
   if (count === 0) return fail("That recipe could not be updated.");
   return { ok: true, data: undefined };
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NOT_ADMIN = "Only a site admin can manage crafters.";
+
+type AdminSession = NonNullable<Awaited<ReturnType<typeof signedInAdmin>>>;
+
+/** The list as it stands after a change, so the page can show it without a reload. */
+async function directoryAfterChange(session: AdminSession): Promise<ActionResult<AdminDirectory>> {
+  const { data, error } = await session.supabase.rpc("admin_directory");
+  if (error) return fail(error.message);
+  updateTag(CRAFTABLES_TAG);
+  return { ok: true, data: data as AdminDirectory };
+}
+
+/**
+ * Adds a crafter. With an account, that member can manage the crafter's list
+ * the next time they open the page. The database checks the caller is an admin.
+ */
+export async function createCrafter(characterName: string, userId: string | null): Promise<ActionResult<AdminDirectory>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  const name = typeof characterName === "string" ? characterName.trim() : "";
+  if (name.length < 1 || name.length > 40) return fail("Enter a character name (up to 40 characters).");
+  if (userId !== null && !UUID.test(String(userId))) return fail("That account is not known.");
+
+  const { error } = await session.supabase.rpc("admin_create_crafter", { p_character_name: name, p_user_id: userId });
+  if (error) return fail(error.message);
+  return directoryAfterChange(session);
+}
+
+/** Links a crafter to a signed-in account, or unlinks it when the account is null. */
+export async function linkCrafter(crafterId: string, userId: string | null): Promise<ActionResult<AdminDirectory>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  if (!UUID.test(String(crafterId))) return fail("That crafter is not known.");
+  if (userId !== null && !UUID.test(String(userId))) return fail("That account is not known.");
+
+  const { error } = await session.supabase.rpc("admin_link_crafter", { p_crafter_id: crafterId, p_user_id: userId });
+  if (error) return fail(error.message);
+  return directoryAfterChange(session);
+}
+
+/** Shows a crafter on the public crafting list, or takes them off it. */
+export async function setCrafterListed(crafterId: string, listed: boolean): Promise<ActionResult<AdminDirectory>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  if (!UUID.test(String(crafterId))) return fail("That crafter is not known.");
+
+  const { error } = await session.supabase.rpc("admin_set_crafter_listed", { p_crafter_id: crafterId, p_listed: listed === true });
+  if (error) return fail(error.message);
+  return directoryAfterChange(session);
 }
 
 export interface SyncSummary {

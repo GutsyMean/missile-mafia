@@ -11,15 +11,16 @@ import {
   type SyncSummary,
 } from "@/app/admin/actions";
 import { signOut } from "@/app/login/actions";
-import type { AdminData, SyncRunView } from "@/lib/admin/load";
-import type { AdminCatalog } from "@/lib/admin/types";
+import type { AdminCrafter, AdminData, SyncRunView } from "@/lib/admin/load";
+import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
 import { matchGuildonExport, parseGuildonExport, type GuildonErrorReason } from "@/lib/guildon";
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
+import { CraftersPanel } from "./CraftersPanel";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
-type Tab = "recipes" | "import" | "profile" | "data";
+type Tab = "recipes" | "import" | "profile" | "crafters" | "data";
 
 const IMPORT_ERRORS: Record<GuildonErrorReason, string> = {
   format: "is not an export line. Copy the whole text from /gnc export.",
@@ -34,14 +35,17 @@ function when(iso: string | null): string {
 }
 
 export function AdminPanel({ data }: { data: AdminData }) {
-  const crafter = data.crafters[0];
-  const [tab, setTab] = useState<Tab>("recipes");
-  const [ticked, setTicked] = useState(() => new Set(crafter.recipeIds));
+  // A site admin need not be a crafter; they then see only the admin tabs.
+  const crafter = data.crafters[0] ?? null;
+  const [tab, setTab] = useState<Tab>(crafter ? "recipes" : "crafters");
+  const [ticked, setTicked] = useState(() => new Set(crafter?.recipeIds ?? []));
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
+  const [directory, setDirectory] = useState<AdminDirectory | null>(data.directory);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
   const changeRecipes = (add: number[], remove: number[], source: "manual" | "bulk") => {
+    if (!crafter) return;
     const before = ticked;
     const next = new Set(ticked);
     for (const id of add) next.add(id);
@@ -82,17 +86,26 @@ export function AdminPanel({ data }: { data: AdminData }) {
   };
 
   const tabs: [Tab, string][] = [
-    ["recipes", "My recipes"],
-    ["import", "Import from addon"],
-    ["profile", "Profile"],
-    ...(data.isAdmin ? ([["data", "Game data"]] as [Tab, string][]) : []),
+    ...(crafter
+      ? ([
+          ["recipes", "My recipes"],
+          ["import", "Import from addon"],
+          ["profile", "Profile"],
+        ] as [Tab, string][])
+      : []),
+    ...(data.isAdmin
+      ? ([
+          ["crafters", "Crafters"],
+          ["data", "Game data"],
+        ] as [Tab, string][])
+      : []),
   ];
 
   return (
     <Frame
-      title={`${crafter.characterName}'s Recipes`}
+      title={crafter ? `${crafter.characterName}'s Recipes` : "Site admin"}
       portraitFileId={
-        (catalog.professions.find((p) => crafter.skills[String(p.id)] !== undefined) ?? catalog.professions[0])
+        (catalog.professions.find((p) => crafter?.skills[String(p.id)] !== undefined) ?? catalog.professions[0])
           ?.iconFileId
       }
       className={styles.window}
@@ -131,7 +144,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
       </div>
 
       <div className={styles.pane}>
-        {tab === "recipes" ? (
+        {tab === "recipes" && crafter ? (
           <RecipeChecklist
             catalog={catalog}
             ticked={ticked}
@@ -142,7 +155,7 @@ export function AdminPanel({ data }: { data: AdminData }) {
             onCorrect={correct}
           />
         ) : null}
-        {tab === "import" ? (
+        {tab === "import" && crafter ? (
           <GuildonImport
             catalog={catalog}
             crafterId={crafter.id}
@@ -154,7 +167,12 @@ export function AdminPanel({ data }: { data: AdminData }) {
             }}
           />
         ) : null}
-        {tab === "profile" ? <ProfileForm data={data} onSaved={(text) => setMessage({ kind: "ok", text })} /> : null}
+        {tab === "profile" && crafter ? (
+          <ProfileForm crafter={crafter} catalog={catalog} onSaved={(text) => setMessage({ kind: "ok", text })} />
+        ) : null}
+        {tab === "crafters" && directory ? (
+          <CraftersPanel directory={directory} ownUserId={data.userId} onChange={setDirectory} />
+        ) : null}
         {tab === "data" ? <GameDataPanel runs={data.runs} configured={data.syncConfigured} /> : null}
       </div>
     </Frame>
@@ -257,8 +275,15 @@ function GuildonImport({
   );
 }
 
-function ProfileForm({ data, onSaved }: { data: AdminData; onSaved: (message: string) => void }) {
-  const crafter = data.crafters[0];
+function ProfileForm({
+  crafter,
+  catalog,
+  onSaved,
+}: {
+  crafter: AdminCrafter;
+  catalog: AdminCatalog;
+  onSaved: (message: string) => void;
+}) {
   const [form, setForm] = useState({
     characterName: crafter.characterName,
     realm: crafter.realm ?? "",
@@ -318,7 +343,7 @@ function ProfileForm({ data, onSaved }: { data: AdminData; onSaved: (message: st
 
       <h3 className={styles.subheading}>Profession skill</h3>
       <div className={styles.fields}>
-        {data.catalog.professions.map((profession) => (
+        {catalog.professions.map((profession) => (
           <label key={profession.id} className={styles.fieldLabel}>
             {profession.name}
             <input

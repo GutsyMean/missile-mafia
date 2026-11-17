@@ -40,3 +40,28 @@ export interface CatalogRecipe {
   skillGrey: number;
   firstSeenRunId: number | null;
 }
+
+/** What `admin_directory()` returns: who has signed in, and every crafter. Site admins only. */
+export interface AdminDirectory {
+  /** Newest first. Shown by Discord name; email addresses are never sent. */
+  accounts: DirectoryAccount[];
+  crafters: DirectoryCrafter[];
+}
+
+export interface DirectoryAccount {
+  id: string;
+  name: string;
+  createdAt: string;
+  lastSignInAt: string | null;
+  isAdmin: boolean;
+}
+
+export interface DirectoryCrafter {
+  id: string;
+  slug: string;
+  characterName: string;
+  /** The account that manages this crafter, or null when nobody is linked. */
+  userId: string | null;
+  isListed: boolean;
+  recipeCount: number;
+}
