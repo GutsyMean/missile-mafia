@@ -64,6 +64,18 @@ test.describe("browsing", () => {
   });
 });
 
+test.describe("crafter sign-in", () => {
+  test("is a button at the top of the page", async ({ page }) => {
+    await page.goto("/");
+    const button = page.getByRole("link", { name: "Crafter sign-in" });
+    await expect(button).toBeVisible();
+    await expect(button).toHaveAttribute("href", "/admin");
+    const [buttonBox, listBox] = await Promise.all([button.boundingBox(), rows(page).first().boundingBox()]);
+    expect(buttonBox!.y + buttonBox!.height).toBeLessThan(listBox!.y);
+    expect(buttonBox!.height).toBeGreaterThanOrEqual(30);
+  });
+});
+
 test.describe("recipes not learned yet", () => {
   test("are listed greyed out and marked as not available", async ({ page }) => {
     await page.goto("/?crafter=damien");

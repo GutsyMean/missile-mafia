@@ -6,6 +6,24 @@
   align-content: start;
 }
 
+/* Above the window: where guild crafters sign in to manage their own list. */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  width: min(1060px, 100%);
+  margin: 0 auto;
+}
+
+.signIn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 156px;
+  height: 32px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
 .credits {
   max-width: 1060px;
   margin: 0 auto;

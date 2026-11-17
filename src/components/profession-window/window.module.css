@@ -2,7 +2,8 @@
 
 .window {
   width: min(1060px, 100%);
-  height: min(820px, calc(100dvh - 76px));
+  /* Leaves room for the sign-in button above and the credits below. */
+  height: min(820px, calc(100dvh - 118px));
   min-height: 420px;
   margin: 0 auto;
 }
@@ -628,7 +629,7 @@ select.picker {
 
 @media (max-width: 820px) {
   .window {
-    height: calc(100dvh - 20px);
+    height: calc(100dvh - 62px);
   }
 
   .body {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProfessionWindow } from "@/components/profession-window/ProfessionWindow";
+import wow from "@/components/wow/wow.module.css";
 import { unlearnedToLoad } from "@/lib/craftables/filter";
 import { loadCraftables, loadUnlearned } from "@/lib/craftables/load";
 import { DEFAULT_FILTERS, type UnlearnedDoc } from "@/lib/craftables/types";
@@ -15,6 +16,11 @@ export default async function Home() {
 
   return (
     <main className={styles.page}>
+      <header className={styles.header}>
+        <Link href="/admin" className={`${wow.button} ${styles.signIn}`}>
+          Crafter sign-in
+        </Link>
+      </header>
       <ProfessionWindow doc={doc} initialUnlearned={unlearned} />
       <p className={styles.credits}>
         {doc.build ? `Game data from build ${doc.build}` : "Game data not loaded yet"}
@@ -22,7 +28,7 @@ export default async function Home() {
         Unlock levels from <a href="https://wowforever.be">wowforever.be</a> and the{" "}
         <a href="https://warcraft.wiki.gg">Warcraft Wiki</a> (CC BY-SA). Missile Mafia is a fan site, not
         affiliated with or endorsed by Blizzard Entertainment. World of Warcraft and its art are trademarks and
-        © Blizzard Entertainment. <Link href="/admin">Crafter sign-in</Link>
+        © Blizzard Entertainment.
       </p>
     </main>
   );

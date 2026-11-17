@@ -65,7 +65,7 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
     <div className={styles.section}>
       <h2 className={styles.heading}>Crafters</h2>
       <p className={styles.lead}>
-        Guild members sign in with Discord from &ldquo;Crafter sign-in&rdquo; at the bottom of the crafting list. They
+        Guild members sign in with Discord from the &ldquo;Crafter sign-in&rdquo; button above the crafting list. They
         wait here until you make them a crafter. Changes take effect straight away.
       </p>
       {error ? <p className={styles.error}>{error}</p> : null}

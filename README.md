@@ -55,7 +55,7 @@ Trainer unlock levels are decided by the game server and are not in the game tab
 
 ## Adding guild members as crafters
 
-Members open the site, follow **Crafter sign-in** at the bottom and sign in with Discord. What happens next depends on a setting on the admin page's **Crafters** tab.
+Members open the site, press **Crafter sign-in** at the top and sign in with Discord. What happens next depends on a setting on the admin page's **Crafters** tab.
 
 **Automatic approval on.** The admin enters the guild's Discord server ID (and, to limit it, a role ID). A member of that server who signs in is asked to set up a profile (character, class, level, professions and skill) and is then taken to the recipe import. They are listed at once; nobody has to approve them.
 
