@@ -41,17 +41,17 @@ function joinDifference(image: Image, x: number): number {
 }
 
 describe("three-piece control art", () => {
-  // name, width of each end piece in the image
-  const cases: [string, number][] = [
-    ["search", 16],
-    ["button", 64],
-    ["button-pressed", 64],
-    ["button-disabled", 64],
+  // name, width of the left piece, width of the right piece (as recorded in public/ui/manifest.json)
+  const cases: [string, number, number][] = [
+    ["search", 16, 16],
+    ["button", 114, 292],
+    ["button-pressed", 114, 292],
+    ["button-disabled", 114, 292],
   ];
 
-  it.each(cases)("%s: the middle continues the ends without a visible join", async (name, end) => {
+  it.each(cases)("%s: the middle continues the ends without a visible join", async (name, left, right) => {
     const image = await load(name);
-    expect(joinDifference(image, end)).toBeLessThan(6);
-    expect(joinDifference(image, image.width - end)).toBeLessThan(6);
+    expect(joinDifference(image, left)).toBeLessThan(6);
+    expect(joinDifference(image, image.width - right)).toBeLessThan(6);
   });
 });
