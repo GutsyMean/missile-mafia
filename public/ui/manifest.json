@@ -98,7 +98,7 @@
       "height": 128
     },
     "search": {
-      "width": 48,
+      "width": 256,
       "height": 40,
       "note": "slice 0 16 0 16"
     },

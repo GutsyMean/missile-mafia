@@ -188,7 +188,7 @@ async function main() {
     await threeSlice(`button${state}`, `128-redbutton-left${state}-c60`, `_128-redbutton-center${state}-c60`, `128-redbutton-right${state}-c60`);
   }
   await single("button-highlight", atlas("128-redbutton-highlight"));
-  await threeSlice("search", "common-search-border-left-c60", "_common-search-border-center", "common-search-border-right-c60");
+  await threeSlice("search", "common-search-border-left-c60", "common-search-border-middle-c60", "common-search-border-right-c60");
   await single("search-icon", atlas("common-search-magnifyingglass"));
   await single("search-clear", atlas("common-search-clearbutton"));
   for (const [out, name] of [["dropdown", "common-dropdown-c-button-c60-2x"], ["dropdown-hover", "common-dropdown-c-button-hover-1-c60-2x"], ["dropdown-open", "common-dropdown-c-button-open-c60-2x"], ["dropdown-menu", "common-dropdown-c-bg-c60-2x"]]) {
