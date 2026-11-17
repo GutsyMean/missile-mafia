@@ -158,3 +158,40 @@ describe("buildItem — recipe items", () => {
     expect(plans.requiredSkill).toEqual({ skillLineId: 164, rank: 95 });
   });
 });
+
+describe("buildItem — use, equip and proc effects", () => {
+  it("adds a green Use line for a consumable", () => {
+    const stone = buildItem(index, 2863)!;
+    expect(stone.tooltip).toEqual([
+      { text: "Coarse Sharpening Stone", color: "quality" },
+      { text: "Requires Level 5", color: "white" },
+      { text: "Use: Increase sharp weapon damage by 3 for 30 minutes.", color: "green" },
+    ]);
+    expect(stone.tooltipComplete).toBe(true);
+  });
+
+  it("does not repeat the generic learning effect on recipe items", () => {
+    const plans = buildItem(index, 251380)!;
+    expect(plans.tooltip.filter((line) => line.color === "green")).toHaveLength(1);
+  });
+
+  it("leaves out an effect whose text needs values it cannot work out, and says so", () => {
+    const shield = buildItem(index, 22198)!;
+    expect(shield.tooltip.some((line) => line.text.includes("$"))).toBe(false);
+    expect(shield.tooltipComplete).toBe(false);
+  });
+});
+
+describe("buildItem — ranged weapons use their own damage tables", () => {
+  it("guns: Dark Iron Rifle keeps its long-standing 53 - 100", () => {
+    expect(buildItem(index, 16004)!.damage).toMatchObject({ min: 53, max: 100 });
+  });
+
+  it("wands", () => {
+    expect(buildItem(index, 11287)!.damage).toMatchObject({ min: 12, max: 22 });
+  });
+
+  it("thrown weapons", () => {
+    expect(buildItem(index, 285279)!.damage).toMatchObject({ min: 15, max: 29 });
+  });
+});

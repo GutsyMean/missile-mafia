@@ -1,0 +1,61 @@
+{{Forever only|item}}
+{{Blacksmithing}}
+'''''Forever'' blacksmithing recipes''' can be learned by players who have chosen [[Blacksmithing]] as one of their two primary professions during {{g|forever}}. There are a great number of new or updated recipes from [[Classic blacksmithing plans|Classic]].
+==Recipes==
+===Apprentice (1-75)===
+{|class="darktable zebra sortable bigtable nohover nosticky"
+|+ Apprentice blacksmithing recipes
+! Item !! Skill !! Type !! New? !! Source
+|-
+| [[Rough Weightstone]] || 15 ||  || Old || ?
+|-
+| [[Copper Bracers]] || 20 ||  || Old || ?
+|-
+| [[Sharpening Wheel]] || 20 ||  || {{text|uncommon|NEW}} || Trainer
+|-
+| [[Coarse Sharpening Stone]] || 40 ||  || Old || Trainer
+|}
+===Journeyman (76-150)===
+{|class="darktable zebra sortable bigtable nohover nosticky"
+|+ Journeyman blacksmithing recipes
+! Item !! Skill !! Type !! New? !! Source
+|-
+| [[Pearl-handled Dagger]] || 85 ||  || Old || Trainer
+|-
+| [[Veteran's Silvered Chain Helm]] || 95 ||  || {{text|uncommon|NEW}} || Drop
+|-
+| [[Bronze Battle Axe]] || 110 ||  || Old || Trainer
+|-
+| [[Silvered Bronze Gauntlets]] || 110 ||  || Old || Trainer
+|-
+| [[Shining Silver Breastplate]] || 120 ||  || Old || Trainer
+|-
+| [[Iron Buckle]] || 125 ||  || Old || Trainer
+|-
+| [[Golden Skeleton Key]] || 125 ||  || Old || Trainer
+|-
+| [[Green Iron Leggings]] || 130 ||  || Old || Trainer
+|}
+===Expert (151-225)===
+{|class="darktable zebra sortable bigtable nohover nosticky"
+|+ Expert blacksmithing recipes
+! Item !! Skill !! Type !! New? !! Source
+|-
+| [[Steel Breastplate]] || 175 ||  || Old || Trainer
+|-
+| [[Truesilver Gauntlets]] || 200 ||  || Old || Trainer
+|-
+| [[Truesilver Breastplate]] || 220 ||  || Old || Trainer
+|}
+===Artisan (226-300)===
+{|class="darktable zebra sortable bigtable nohover nosticky"
+|+ Artisan blacksmithing recipes
+! Item !! Skill !! Type !! New? !! Source
+|-
+| [[Icebane Bracers]] || 300 ||  || Old || ?
+|-
+| [[Jagged Obsidian Shield]] || 300 ||  || Old || Vendor
+|-
+| [[Icebane Bracers]] || 320 ||  || Old || ?
+|-
+| [[Jagged Obsidian Shield]] || 320 ||  || Old || ?

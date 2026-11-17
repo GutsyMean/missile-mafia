@@ -10,6 +10,7 @@ ID,NameSubtext_lang,Description_lang,AuraDescription_lang
 9987,,,
 19649,,Allows opening of standard locks.  The skeleton key is consumed in the process.,
 27561,,"When struck by a harmful spell, the caster of that spell has a $h% chance to be silenced for $27559d.",
+29641,,Fires a Shadow Shot at the target for $s1 Shadow damage.,
 1214272,,"When struck by a harmful spell, the caster of that spell has a $h% chance to be silenced for $1214273d.",
 1240944,Apprentice,$@spelldesc2018,
 1240955,Journeyman,$@spelldesc3100,

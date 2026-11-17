@@ -7,6 +7,9 @@ import {
   ITEM_CLASS_RECIPE,
   ITEM_CLASS_WEAPON,
   ITEM_FLAG2_CASTER_WEAPON,
+  ITEM_TRIGGER_ON_EQUIP,
+  ITEM_TRIGGER_ON_PROC,
+  ITEM_TRIGGER_ON_USE,
   PRIMARY_STAT_ORDER,
   STAT_BUDGET_SLOT,
   STAT_TAGS,
@@ -30,13 +33,25 @@ export interface GameDataIndex {
   skillLine: Map<number, Row>;
   strings: Map<string, string>;
   appearanceIcon: Map<number, number>;
+  itemEffects: Map<number, Row[]>;
+  spellDescription: Map<number, string>;
 }
+
+/** Effect triggers the tooltip words, in the order it lists them. */
+const EFFECT_LABEL_TAGS: [number, string][] = [
+  [ITEM_TRIGGER_ON_EQUIP, "ITEM_SPELL_TRIGGER_ONEQUIP"],
+  [ITEM_TRIGGER_ON_PROC, "ITEM_SPELL_TRIGGER_ONPROC"],
+  [ITEM_TRIGGER_ON_USE, "ITEM_SPELL_TRIGGER_ONUSE"],
+];
 
 const DAMAGE_TABLES = [
   "ItemDamageOneHand",
   "ItemDamageOneHandCaster",
   "ItemDamageTwoHand",
   "ItemDamageTwoHandCaster",
+  "ItemDamageRanged",
+  "ItemDamageWand",
+  "ItemDamageThrown",
 ];
 
 export function indexGameData(tables: Tables): GameDataIndex {
@@ -81,6 +96,10 @@ export function indexGameData(tables: Tables): GameDataIndex {
     skillLine: indexBy(requireTable(tables, "SkillLine"), "ID"),
     strings,
     appearanceIcon,
+    itemEffects: itemEffectsByItem(tables),
+    spellDescription: new Map(
+      requireTable(tables, "Spell").map((row) => [Number(row.ID), row.Description_lang]),
+    ),
   };
 }
 
@@ -162,9 +181,9 @@ function damageTableName(inventoryType: number, subclassId: number, caster: bool
     case 15:
     case 25:
     case 26:
-      if (subclassId === 19) return "ItemDamageOneHandCaster"; // wands
-      if (subclassId === 16) return "ItemDamageOneHand"; // thrown
-      return "ItemDamageTwoHand"; // bows, guns, crossbows
+      if (subclassId === 19) return "ItemDamageWand";
+      if (subclassId === 16) return "ItemDamageThrown";
+      return "ItemDamageRanged"; // bows, guns, crossbows
     default:
       return null;
   }
@@ -234,7 +253,9 @@ export function buildItem(index: GameDataIndex, itemId: number): GameItem | null
   const requiredLevel = Number(sparse.RequiredLevel);
   const classId = Number(item.ClassID);
 
-  const { stats, complete } = computeStats(index, sparse);
+  const computed = computeStats(index, sparse);
+  const stats = computed.stats;
+  let complete = computed.complete;
   const armor = computeArmor(index, item, sparse);
   const damage = computeDamage(index, item, sparse);
   const slot = slotName(index, inventoryType);
@@ -286,6 +307,22 @@ export function buildItem(index: GameDataIndex, itemId: number): GameItem | null
   for (const stat of greenStats) {
     const template = strings.get(`ITEM_MOD_${STAT_TAGS[stat.stat]}`) ?? "";
     tooltip.push({ text: `${equip} ${fill(template, stat.value)}`, color: "green" });
+  }
+
+  // Recipe items describe what they teach in their own description instead.
+  const effects = classId === ITEM_CLASS_RECIPE ? [] : (index.itemEffects.get(itemId) ?? []);
+  for (const [trigger, labelTag] of EFFECT_LABEL_TAGS) {
+    for (const effect of effects) {
+      if (Number(effect.TriggerType) !== trigger) continue;
+      const text = index.spellDescription.get(Number(effect.SpellID));
+      if (!text) continue;
+      if (text.includes("$")) {
+        // The text needs values looked up from other spell data; better absent than wrong.
+        complete = false;
+        continue;
+      }
+      tooltip.push({ text: `${strings.get(labelTag) ?? ""} ${text}`.trim(), color: "green" });
+    }
   }
 
   const description = sparse.Description_lang;

@@ -1,6 +1,7 @@
 ID,LegacySlotIndex,TriggerType,Charges,CoolDownMSec,CategoryCoolDownMSec,SpellCategoryID,SpellID,ChrSpecializationID,PlayerConditionID
 97325,0,0,-1,1000,-1,0,2829,0,0
 99800,0,0,-1,-1,-1,0,19649,0,0
+102413,0,2,0,-1,-1,0,29641,0,0
 103156,2,1,0,-1,-1,0,27561,0,0
 203972,2,1,0,-1,-1,0,1214272,0,0
 215006,1,6,0,-1,-1,0,1252280,0,0
