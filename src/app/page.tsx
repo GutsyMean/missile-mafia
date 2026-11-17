@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ProfessionWindow } from "@/components/profession-window/ProfessionWindow";
 import { loadCraftables } from "@/lib/craftables/load";
 import styles from "./page.module.css";
@@ -15,7 +16,7 @@ export default async function Home() {
         Unlock levels from <a href="https://wowforever.be">wowforever.be</a> and the{" "}
         <a href="https://warcraft.wiki.gg">Warcraft Wiki</a> (CC BY-SA). Missile Mafia is a fan site, not
         affiliated with or endorsed by Blizzard Entertainment. World of Warcraft and its art are trademarks and
-        © Blizzard Entertainment.
+        © Blizzard Entertainment. <Link href="/admin">Crafter sign-in</Link>
       </p>
     </main>
   );
