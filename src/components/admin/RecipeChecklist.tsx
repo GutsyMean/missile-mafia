@@ -31,11 +31,16 @@ function unlockLabel(recipe: CatalogRecipe): { text: string; settled: boolean } 
       return { text: `${recipe.learnSkill} (set here)`, settled: true };
     case "single_source":
       return { text: `${recipe.learnSkill}, one source`, settled: false };
-    case "disputed":
+    case "disputed": {
+      const values = [...new Set([wowForever, wiki, recipeItem].filter((v) => typeof v === "number"))];
       return {
-        text: `Sources disagree: ${[wowForever, wiki, recipeItem].filter((v) => typeof v === "number").join(" or ")}`,
+        text:
+          values.length > 1
+            ? `Sources disagree: ${values.join(" or ")}`
+            : `Sources say ${values[0]}, which the game data rules out`,
         settled: false,
       };
+    }
     default:
       return { text: "Not known", settled: false };
   }

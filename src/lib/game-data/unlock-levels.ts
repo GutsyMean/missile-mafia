@@ -123,34 +123,37 @@ function normalise(name: string): string {
   return name.toLowerCase().replace(/[’`]/g, "'").trim();
 }
 
+/**
+ * The game's own data comes first. Plans carry the skill they need, and that is
+ * what the game checks, so it wins over anything a site says: the sites still
+ * list older numbers for recipes the game has since retuned.
+ *
+ * Recipes without plans (trainer recipes) depend on the sites. A site level is
+ * ignored when the game data rules it out: a recipe cannot need more skill than
+ * the point at which the game already shows it as yellow.
+ */
 function decide(
   wowForever: number | null,
   wiki: number | null,
   recipeItem: number | null,
+  skillYellow: number,
 ): { learnSkill: number | null; status: UnlockStatus } {
-  const sites = [wowForever, wiki].filter((value): value is number => value !== null);
-
-  if (sites.length === 2) {
-    if (sites[0] === sites[1]) return { learnSkill: sites[0], status: "confirmed" };
-    // The level printed on the recipe item comes from the game itself.
-    if (recipeItem !== null && sites.includes(recipeItem)) {
-      return { learnSkill: recipeItem, status: "confirmed" };
-    }
-    return { learnSkill: null, status: "disputed" };
-  }
-  if (sites.length === 1) {
-    if (recipeItem === null) return { learnSkill: sites[0], status: "single_source" };
-    return recipeItem === sites[0]
-      ? { learnSkill: recipeItem, status: "confirmed" }
-      : { learnSkill: null, status: "disputed" };
-  }
   if (recipeItem !== null) return { learnSkill: recipeItem, status: "confirmed" };
-  return { learnSkill: null, status: "unconfirmed" };
+
+  const listed = [wowForever, wiki].filter((value): value is number => value !== null);
+  if (listed.length === 0) return { learnSkill: null, status: "unconfirmed" };
+
+  const possible = (value: number) => skillYellow <= 0 || value <= skillYellow;
+  if (!listed.every(possible)) return { learnSkill: null, status: "disputed" };
+  if (listed.length === 1) return { learnSkill: listed[0], status: "single_source" };
+  return listed[0] === listed[1]
+    ? { learnSkill: listed[0], status: "confirmed" }
+    : { learnSkill: null, status: "disputed" };
 }
 
 /**
- * Works out each recipe's unlock level from the two sites and, for plan-taught
- * recipes, the level printed on the plans. Nothing is ever estimated.
+ * Works out each recipe's unlock level: from the plans for plan-taught recipes,
+ * and from the two sites for the rest. Nothing is ever estimated.
  */
 export function resolveUnlockLevels(
   recipes: GameRecipe[],
@@ -192,7 +195,7 @@ export function resolveUnlockLevels(
     const wikiSource = wikiRow && wikiRow.source !== "?" ? wikiRow.source.toLowerCase() : null;
 
     resolved.set(recipe.id, {
-      ...decide(candidates.wowForever, candidates.wiki, candidates.recipeItem),
+      ...decide(candidates.wowForever, candidates.wiki, candidates.recipeItem, recipe.skillYellow),
       candidates,
       acquisition: site?.acquisition ?? wikiSource ?? "unknown",
       acquisitionText: site?.acquisitionText ?? null,

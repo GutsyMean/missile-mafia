@@ -18,7 +18,9 @@ export function DetailPane({ entry }: { entry: Entry }) {
     ["green", recipe.skillGreen],
     ["grey", recipe.skillGrey],
   ];
-  const shownSteps = steps.filter((step): step is [string, number] => typeof step[1] === "number" && step[1] > 0);
+  const known = steps.filter((step): step is [string, number] => typeof step[1] === "number" && step[1] > 0);
+  // Only shown when the numbers rise in order; a few recipes in the game data do not.
+  const shownSteps = known.every(([, value], index) => index === 0 || value >= known[index - 1][1]) ? known : [];
   const waiting = pending.map((crafter) => crafter.characterName);
 
   return (

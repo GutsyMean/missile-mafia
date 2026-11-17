@@ -115,6 +115,53 @@ describe("resolveUnlockLevels", () => {
     });
   });
 
+  it("trusts the level printed on the plans over the sites, even when both sites agree", () => {
+    // The game was retuned and the sites still carry the old number.
+    const stale = (name: string) => name === "Veteran's Silvered Chain Helm";
+    const result = resolveUnlockLevels(
+      recipes,
+      itemNames,
+      wowForever.map((row) => (stale(row.name) ? { ...row, learnSkill: 120 } : row)),
+      wiki.map((row) => (stale(row.name) ? { ...row, skill: 120 } : row)),
+    );
+    expect(result.get(idByName.get("Veteran's Silvered Chain Helm")!)).toMatchObject({
+      learnSkill: 95,
+      status: "confirmed",
+      candidates: { wowForever: 120, wiki: 120, recipeItem: 95 },
+    });
+  });
+
+  it("trusts the plans when the only site that lists the recipe disagrees", () => {
+    const result = resolveUnlockLevels(
+      recipes,
+      itemNames,
+      wowForever.map((row) => (row.name === "Jagged Obsidian Shield" ? { ...row, learnSkill: 310 } : row)),
+      wiki.filter((row) => row.name !== "Jagged Obsidian Shield"),
+    );
+    expect(result.get(idByName.get("Jagged Obsidian Shield")!)).toMatchObject({
+      learnSkill: 300,
+      status: "confirmed",
+      candidates: { wowForever: 310, wiki: null, recipeItem: 300 },
+    });
+  });
+
+  it("rejects a level from the sites that the game data rules out", () => {
+    // A recipe cannot need more skill than the point where the game already turns it yellow.
+    const steel = recipes.find((r) => r.name === "Steel Breastplate")!;
+    const tooHigh = steel.skillYellow + 25;
+    const result = resolveUnlockLevels(
+      recipes,
+      itemNames,
+      wowForever.map((row) => (row.name === "Steel Breastplate" ? { ...row, learnSkill: tooHigh } : row)),
+      wiki.map((row) => (row.name === "Steel Breastplate" ? { ...row, skill: tooHigh } : row)),
+    );
+    expect(result.get(steel.id)).toMatchObject({
+      learnSkill: null,
+      status: "disputed",
+      candidates: { wowForever: tooHigh, wiki: tooHigh, recipeItem: null },
+    });
+  });
+
   it("leaves a level empty and marks it disputed when the two sites disagree", () => {
     const wikiDisagreeing = wiki.map((row) =>
       row.name === "Steel Breastplate" ? { ...row, skill: 200 } : row,
