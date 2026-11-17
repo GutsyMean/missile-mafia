@@ -1,0 +1,219 @@
+-- Tests for the migrations. Each check prints "ok - ..." or aborts the run.
+\set owner '11111111-1111-1111-1111-111111111111'
+\set other '22222222-2222-2222-2222-222222222222'
+\set crafter_owner 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+\set crafter_other 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+
+insert into auth.users (id) values (:'owner'), (:'other');
+
+-- ---------------------------------------------------------------------------
+-- The sync writes game data (service role)
+-- ---------------------------------------------------------------------------
+set role service_role;
+
+select public.sync_start('cli') as run1 \gset
+select test.is(:run1::bigint > 0, true, 'sync_start returns a run id');
+
+select public.sync_apply(:run1, $json${
+  "professions": [{"id": 164, "slug": "blacksmithing", "name": "Blacksmithing", "icon_file_id": 136241, "child_skill_line_ids": [2938]}],
+  "items": [
+    {"id": 3483, "name": "Silvered Bronze Gauntlets", "quality": 2, "icon_file_id": 132939, "class_id": 4, "subclass_id": 3,
+     "inventory_type": 10, "item_level": 27, "required_level": 22, "bonding": 2, "sell_price": 965, "slot_name": "Hands",
+     "type_name": "Mail", "armor": 118, "damage": null, "stats": [{"stat": 4, "name": "Strength", "value": 4}],
+     "tooltip": [{"text": "Silvered Bronze Gauntlets", "color": "quality"}], "tooltip_complete": true, "content_hash": "i1"},
+    {"id": 250528, "name": "Veteran's Silvered Chain Helm", "quality": 3, "icon_file_id": 133141, "class_id": 4, "subclass_id": 3,
+     "inventory_type": 1, "item_level": 25, "required_level": 20, "bonding": 1, "sell_price": 1439, "slot_name": "Head",
+     "type_name": "Mail", "armor": 163, "damage": null, "stats": [],
+     "tooltip": [{"text": "Veteran's Silvered Chain Helm", "color": "quality"}], "tooltip_complete": true, "content_hash": "i2"},
+    {"id": 2841, "name": "Bronze Bar", "quality": 1, "icon_file_id": 133227, "class_id": 7, "subclass_id": 7,
+     "inventory_type": 0, "item_level": 20, "required_level": 0, "bonding": 0, "sell_price": 50, "slot_name": null,
+     "type_name": null, "armor": null, "damage": null, "stats": [],
+     "tooltip": [{"text": "Bronze Bar", "color": "quality"}], "tooltip_complete": true, "content_hash": "i3"}
+  ],
+  "recipes": [
+    {"id": 3333, "profession_id": 164, "name": "Silvered Bronze Gauntlets", "icon_file_id": 132939, "crafted_item_id": 3483,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 140, "skill_green": 155, "skill_grey": 170, "recipe_item_id": null,
+     "learn_skill": 110, "learn_skill_status": "confirmed", "learn_skill_candidates": {"wowForever": 110, "wiki": 110, "recipeItem": null},
+     "acquisition": "trainer", "acquisition_text": "Trainer · 10s", "training_cost": 1000, "category": "Mail Armor",
+     "category_order": 103, "status": "ok", "content_hash": "r1", "reagents": [[2841, 8], [2842, 1], [3478, 2]]},
+    {"id": 1252277, "profession_id": 164, "name": "Veteran's Silvered Chain Helm", "icon_file_id": 133141, "crafted_item_id": 250528,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 125, "skill_green": 140, "skill_grey": 155, "recipe_item_id": 251380,
+     "learn_skill": 95, "learn_skill_status": "confirmed", "learn_skill_candidates": {}, "acquisition": "drop vendor",
+     "acquisition_text": null, "training_cost": null, "category": "Mail Armor", "category_order": 103, "status": "ok",
+     "content_hash": "r2", "reagents": [[2841, 15]]},
+    {"id": 9999, "profession_id": 164, "name": "Mystery Recipe", "icon_file_id": 0, "crafted_item_id": null,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 10, "skill_green": 15, "skill_grey": 20, "recipe_item_id": null,
+     "learn_skill": null, "learn_skill_status": "unconfirmed", "learn_skill_candidates": {}, "acquisition": "unknown",
+     "acquisition_text": null, "training_cost": null, "category": "Other", "category_order": 990, "status": "ok",
+     "content_hash": "r3", "reagents": []}
+  ]
+}$json$::jsonb) as applied \gset
+
+select test.is((:'applied'::jsonb ->> 'newRecipes')::int, 3, 'sync_apply reports new recipes');
+select test.is((select count(*)::int from public.items), 3, 'sync_apply stores items');
+select test.is((select count(*)::int from public.recipe_reagents where recipe_id = 3333), 3, 'sync_apply stores reagents in order');
+select test.is((select item_id from public.recipe_reagents where recipe_id = 3333 and sort = 2), 3478, 'reagent order is kept');
+select test.is((select is_tradeable from public.items where id = 250528), false, 'a Bind on Pickup item is not tradeable');
+select test.is((select is_tradeable from public.items where id = 3483), true, 'a Bind on Equip item is tradeable');
+select test.is((select first_seen_run_id from public.recipes where id = 3333), :run1::bigint, 'new recipes remember the run that added them');
+select test.is(public.sync_state() -> 'items' ->> '3483', 'i1', 'sync_state returns content hashes');
+
+select public.sync_finish(:run1, 'ok', '1.60.1.70938', '{}'::jsonb, '[]'::jsonb, null, array[3333, 1252277, 9999]);
+select test.is((select status from public.sync_runs where id = :run1), 'ok', 'sync_finish closes the run');
+
+reset role;
+
+-- Crafters are seeded by the site owner, not by clients.
+insert into public.crafters (id, user_id, slug, character_name, is_listed) values
+  (:'crafter_owner', :'owner', 'damien', 'Damien', true),
+  (:'crafter_other', :'other', 'hidden', 'Hidden', false);
+insert into public.crafter_recipes (crafter_id, recipe_id) values (:'crafter_other', 1252277);
+insert into public.app_admins (user_id) values (:'owner');
+
+-- ---------------------------------------------------------------------------
+-- Visitors: read everything public, write nothing
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.login(null);
+
+select test.is((select count(*)::int from public.recipes), 3, 'a visitor can read recipes');
+select test.is((select count(*)::int from public.items), 3, 'a visitor can read items');
+select test.is((select count(*)::int from public.crafters), 1, 'a visitor sees only listed crafters');
+select test.throws($$insert into public.recipes (id, profession_id, name, skill_yellow, skill_green, skill_grey, category, content_hash) values (1, 164, 'x', 1, 1, 1, 'x', 'x')$$, '42501', 'a visitor cannot add recipes');
+select test.throws($$update public.items set name = 'hacked'$$, '42501', 'a visitor cannot change items');
+select test.throws($$delete from public.crafters$$, '42501', 'a visitor cannot delete crafters');
+select test.throws($$insert into public.crafter_recipes (crafter_id, recipe_id) values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 3333)$$, '42501', 'a visitor cannot tick recipes');
+select test.throws($$select public.sync_apply(1, '{}'::jsonb)$$, '42501', 'a visitor cannot run the sync write');
+select test.throws($$select public.sync_start('manual')$$, '42501', 'a visitor cannot start a sync run');
+select test.throws($$select public.admin_catalog()$$, '42501', 'a visitor cannot read the admin catalog');
+select test.throws($$select public.set_crafter_recipes('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', array[3333], '{}')$$, '42501', 'a visitor cannot call set_crafter_recipes');
+
+reset role;
+
+-- The sync functions are closed at the function level too, not only by table rights.
+select test.is(has_function_privilege('anon', 'public.sync_start(text)', 'execute'), false, 'visitors have no execute right on sync_start');
+select test.is(has_function_privilege('anon', 'public.sync_state()', 'execute'), false, 'visitors have no execute right on sync_state');
+select test.is(has_function_privilege('anon', 'public.sync_apply(bigint, jsonb)', 'execute'), false, 'visitors have no execute right on sync_apply');
+select test.is(has_function_privilege('authenticated', 'public.sync_apply(bigint, jsonb)', 'execute'), false, 'signed-in users have no execute right on sync_apply');
+select test.is(has_function_privilege('authenticated', 'public.sync_finish(bigint, text, text, jsonb, jsonb, text, integer[])', 'execute'), false, 'signed-in users have no execute right on sync_finish');
+select test.is(has_function_privilege('service_role', 'public.sync_apply(bigint, jsonb)', 'execute'), true, 'the service role can run sync_apply');
+
+-- ---------------------------------------------------------------------------
+-- A signed-in crafter: only their own rows
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select test.login(:'owner');
+
+select test.is(
+  public.set_crafter_recipes(:'crafter_owner', array[3333, 1252277], '{}'::int[], 'bulk') ->> 'added', '2',
+  'an owner can tick recipes for their crafter');
+select test.is(
+  public.set_crafter_recipes(:'crafter_owner', array[3333], array[1252277]) ->> 'removed', '1',
+  'an owner can untick recipes');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner'), 1, 'ticks are stored');
+select test.is(
+  test.affected($$update public.crafters set note = 'Whisper me' where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$$), 1,
+  'an owner can edit their profile');
+select test.throws($$update public.crafters set is_listed = false where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$$, '42501', 'an owner cannot change whether they are listed');
+select test.throws($$update public.crafters set user_id = null where id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'$$, '42501', 'an owner cannot reassign a crafter');
+select test.throws($$insert into public.crafters (slug, character_name) values ('new', 'New')$$, '42501', 'registration is closed: nobody can create a crafter');
+select test.is(
+  test.affected($$insert into public.crafter_professions (crafter_id, profession_id, skill) values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 164, 145)$$), 1,
+  'an owner can set their profession skill');
+
+select test.throws($$select public.set_crafter_recipes('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', array[3333], '{}')$$, '42501', 'a crafter cannot tick recipes for someone else');
+select test.throws($$insert into public.crafter_recipes (crafter_id, recipe_id) values ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 3333)$$, '42501', 'row security blocks a direct insert for someone else');
+select test.is(
+  test.affected($$delete from public.crafter_recipes where crafter_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'$$), 0,
+  'a crafter cannot untick someone else''s recipes');
+select test.is(
+  test.affected($$update public.crafters set note = 'hacked' where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'$$), 0,
+  'a crafter cannot edit someone else''s profile');
+select test.throws($$insert into public.crafter_professions (crafter_id, profession_id, skill) values ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 164, 300)$$, '42501', 'a crafter cannot set someone else''s skill');
+select test.throws($$select public.sync_apply(1, '{}'::jsonb)$$, '42501', 'a signed-in user cannot run the sync write');
+select test.throws($$update public.recipes set name = 'hacked' where id = 3333$$, '42501', 'nobody signed in can rename a recipe');
+
+-- Admin correction of an unlock level.
+select test.is(
+  test.affected($$update public.recipes set learn_skill_owner = 20 where id = 9999$$), 1,
+  'an admin can correct an unlock level');
+select test.is(
+  (select r ->> 'learnStatus' from jsonb_array_elements(public.admin_catalog() -> 'recipes') r where (r ->> 'id')::int = 9999), 'owner',
+  'the catalog marks an owner-corrected level');
+select test.is(
+  (select (r ->> 'learnSkill')::int from jsonb_array_elements(public.admin_catalog() -> 'recipes') r where (r ->> 'id')::int = 9999), 20,
+  'the catalog shows the corrected level');
+select test.is(
+  (select (r ->> 'learnSkill')::int from jsonb_array_elements(public.admin_catalog() -> 'recipes') r where (r ->> 'id')::int = 3333), 110,
+  'the catalog shows the sourced level otherwise');
+
+select test.login(:'other');
+select test.is(
+  test.affected($$update public.recipes set learn_skill_owner = 99 where id = 9999$$), 0,
+  'a non-admin cannot correct an unlock level');
+select test.is((select count(*)::int from public.crafters), 2, 'an owner can see their own unlisted crafter');
+
+reset role;
+
+-- ---------------------------------------------------------------------------
+-- The public read
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.login(null);
+select public.guild_craftables() as doc \gset
+
+select test.is(jsonb_array_length(:'doc'::jsonb -> 'recipes'), 1, 'guild_craftables lists only what listed crafters can make');
+select test.is(:'doc'::jsonb -> 'recipes' -> 0 ->> 'name', 'Silvered Bronze Gauntlets', 'the recipe is included');
+select test.is(:'doc'::jsonb -> 'recipes' -> 0 -> 'reagents', '[[2841, 8], [2842, 1], [3478, 2]]'::jsonb, 'with its reagents in order');
+select test.is(:'doc'::jsonb -> 'recipes' -> 0 -> 'crafterIds' ->> 0, :'crafter_owner', 'and who can craft it');
+select test.is(:'doc'::jsonb -> 'items' -> '3483' ->> 'tradeable', 'true', 'crafted items come with their data');
+select test.is(:'doc'::jsonb -> 'items' ? '2841', true, 'reagent items are included');
+select test.is(:'doc'::jsonb -> 'items' ? '250528', false, 'items of unlisted crafters are not');
+select test.is(:'doc'::jsonb -> 'crafters' -> 0 ->> 'characterName', 'Damien', 'crafter details are included');
+select test.is(:'doc'::jsonb -> 'crafters' -> 0 -> 'skills' ->> '164', '145', 'with their profession skill');
+select test.is(:'doc'::jsonb ->> 'build', '1.60.1.70938', 'and the game build of the last sync');
+reset role;
+
+-- ---------------------------------------------------------------------------
+-- A later sync: updates in place, keeps corrections, retires vanished recipes
+-- ---------------------------------------------------------------------------
+set role service_role;
+select public.sync_start('cron') as run2 \gset
+select public.sync_apply(:run2, $json${
+  "recipes": [
+    {"id": 9999, "profession_id": 164, "name": "Mystery Recipe (renamed)", "icon_file_id": 0, "crafted_item_id": null,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 10, "skill_green": 15, "skill_grey": 20, "recipe_item_id": null,
+     "learn_skill": 15, "learn_skill_status": "single_source", "learn_skill_candidates": {}, "acquisition": "trainer",
+     "acquisition_text": null, "training_cost": null, "category": "Other", "category_order": 990, "status": "ok",
+     "content_hash": "r3b", "reagents": [[2841, 1]]},
+    {"id": 7777, "profession_id": 164, "name": "Brand New Recipe", "icon_file_id": 0, "crafted_item_id": null,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 10, "skill_green": 15, "skill_grey": 20, "recipe_item_id": null,
+     "learn_skill": null, "learn_skill_status": "unconfirmed", "learn_skill_candidates": {}, "acquisition": "unknown",
+     "acquisition_text": null, "training_cost": null, "category": "Other", "category_order": 990, "status": "ok",
+     "content_hash": "r4", "reagents": []}
+  ]
+}$json$::jsonb) as applied2 \gset
+
+select test.is((:'applied2'::jsonb ->> 'newRecipes')::int, 1, 'a later sync counts only genuinely new recipes');
+select test.is((select name from public.recipes where id = 9999), 'Mystery Recipe (renamed)', 'changed recipes are updated in place');
+select test.is((select learn_skill_owner from public.recipes where id = 9999), 20, 'an owner correction survives the sync');
+select test.is((select first_seen_run_id from public.recipes where id = 9999), :run1::bigint, 'an updated recipe keeps its first-seen run');
+select test.is((select first_seen_run_id from public.recipes where id = 7777), :run2::bigint, 'a new recipe is tagged with the run that found it');
+select test.is((select count(*)::int from public.recipe_reagents where recipe_id = 9999), 1, 'reagents are replaced, not duplicated');
+
+select test.is(
+  public.sync_finish(:run2, 'ok', '1.60.1.70999', '{}'::jsonb, '[]'::jsonb, null, array[3333, 9999, 7777]), 1,
+  'sync_finish retires recipes the game no longer lists');
+select test.is((select status from public.recipes where id = 1252277), 'removed', 'a vanished recipe is marked removed, not deleted');
+select test.is((select count(*)::int from public.crafter_recipes where recipe_id = 1252277), 1, 'and stays on crafters'' lists');
+select test.is(public.sync_state() -> 'recipes' ? '1252277', false, 'removed recipes are offered again if they return');
+
+select public.sync_start('cron') as run3 \gset
+select public.sync_finish(:run3, 'failed', null, '{}'::jsonb, '[]'::jsonb, 'download failed', null);
+select test.is((select count(*)::int from public.recipes where status = 'removed'), 1, 'a failed sync retires nothing');
+select test.is((select error from public.sync_runs where id = :run3), 'download failed', 'a failed sync records why');
+reset role;
+
+set role anon;
+select test.is(public.guild_craftables() ->> 'build', '1.60.1.70999', 'the public read reports the latest successful build');
+reset role;
