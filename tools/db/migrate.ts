@@ -34,7 +34,8 @@ async function query<T = unknown>(sql: string): Promise<T[]> {
 async function main() {
   await query(
     "create table if not exists public.site_migrations (name text primary key, applied_at timestamptz not null default now()); " +
-      "alter table public.site_migrations enable row level security;",
+      "alter table public.site_migrations enable row level security; " +
+      "revoke all on public.site_migrations from anon, authenticated;",
   );
   const applied = new Set((await query<{ name: string }>("select name from public.site_migrations")).map((r) => r.name));
 
