@@ -2,7 +2,9 @@
 
 A site for the Missile Mafia guild in **World of Warcraft: Forever**. Guild members browse what the guild's crafters can make, with in-game tooltips and the materials each item needs. Crafters sign in with Discord to manage their own recipe list.
 
-Every item shows the profession skill it needs. Recipes a crafter has the profession for but has not learned yet are listed too, greyed out and marked *Not available yet*, with where the recipe comes from; **Available now only** hides them.
+Visitors can look at everyone's recipes, at one crafter (with their profile: character, level, class and profession skill) or at one profession. The choice is part of the link, so `/?crafter=name` can be shared.
+
+Every item shows the profession skill it needs. Recipes a crafter has the profession for but has not learned yet are listed too, greyed out and marked *Not available yet*, with where the recipe comes from; **Available now only** hides them. They are fetched one profession at a time, when a visitor picks a crafter or a profession, so the front page stays small however many crafters join. A guild with a single profession sees them straight away.
 
 - **Stack:** Next.js 16 on Vercel, Supabase (Postgres, Auth, Storage).
 - **Look:** the game's trainer window, drawn with art extracted from the game's own files.

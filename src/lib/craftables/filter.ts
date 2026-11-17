@@ -1,22 +1,69 @@
-import type { CraftablesDoc, Entry, Filters, SortMode } from "./types";
+import type { CraftablesDoc, Entry, Filters, SortMode, UnlearnedDoc } from "./types";
 
-/** Joins every recipe with the item it makes, its reagents and who can craft it. */
-export function buildEntries(doc: CraftablesDoc): Entry[] {
+/** Adds lazily loaded "not yet learned" recipes to the main document. */
+export function mergeUnlearned(doc: CraftablesDoc, extras: UnlearnedDoc[]): CraftablesDoc {
+  if (extras.length === 0) return doc;
+  const seen = new Set(doc.recipes.map((recipe) => recipe.id));
+  const recipes = [...doc.recipes];
+  const items = { ...doc.items };
+  for (const extra of extras) {
+    for (const recipe of extra.recipes) {
+      if (seen.has(recipe.id)) continue;
+      seen.add(recipe.id);
+      recipes.push(recipe);
+    }
+    Object.assign(items, extra.items);
+  }
+  return { ...doc, recipes, items };
+}
+
+/**
+ * Which professions' "not yet learned" recipes a view needs. With everyone and
+ * every profession showing, nothing is fetched (it could be the whole game),
+ * unless the guild has a single profession anyway.
+ */
+export function unlearnedToLoad(doc: CraftablesDoc, filters: Filters): number[] {
+  if (filters.availableOnly) return [];
+  const withUnlearned = (doc.unlearned ?? []).map((entry) => entry.professionId);
+  const profession = doc.professions.find((p) => p.slug === filters.profession);
+  if (profession) return withUnlearned.filter((id) => id === profession.id);
+  if (filters.crafter) {
+    const crafter = doc.crafters.find((c) => c.slug === filters.crafter);
+    if (!crafter) return [];
+    return withUnlearned.filter((id) => (crafter.skills[String(id)] ?? 0) > 0);
+  }
+  return withUnlearned.length === 1 ? withUnlearned : [];
+}
+
+/**
+ * Joins every recipe with the item it makes, its reagents and who can craft it.
+ * With a crafter, the list is theirs: only recipes of their professions, marked
+ * available when they themselves have learned them.
+ */
+export function buildEntries(doc: CraftablesDoc, crafterId: string | null = null): Entry[] {
   const crafters = new Map(doc.crafters.map((crafter) => [crafter.id, crafter]));
-  const professions = new Map(doc.professions.map((profession) => [profession.id, profession.name]));
+  const professions = new Map(doc.professions.map((profession) => [profession.id, profession]));
   const itemOf = (id: number | null) => (id === null ? null : (doc.items[String(id)] ?? null));
-  return doc.recipes.map((recipe) => {
+  const entries: Entry[] = [];
+  for (const recipe of doc.recipes) {
+    const pendingIds = recipe.pendingCrafterIds ?? [];
+    if (crafterId !== null && !recipe.crafterIds.includes(crafterId) && !pendingIds.includes(crafterId)) continue;
     const makers = recipe.crafterIds.flatMap((id) => crafters.get(id) ?? []);
-    return {
+    const profession = professions.get(recipe.professionId);
+    entries.push({
       recipe,
       item: itemOf(recipe.craftedItemId),
       reagents: recipe.reagents.map(([itemId, quantity]) => ({ item: itemOf(itemId), itemId, quantity })),
       crafters: makers,
-      pending: (recipe.pendingCrafterIds ?? []).flatMap((id) => crafters.get(id) ?? []),
-      available: makers.length > 0,
-      professionName: professions.get(recipe.professionId) ?? null,
-    };
-  });
+      pending: (crafterId !== null ? pendingIds.filter((id) => id === crafterId) : pendingIds).flatMap(
+        (id) => crafters.get(id) ?? [],
+      ),
+      available: crafterId !== null ? recipe.crafterIds.includes(crafterId) : makers.length > 0,
+      professionName: profession?.name ?? null,
+      professionSlug: profession?.slug ?? null,
+    });
+  }
+  return entries;
 }
 
 function searchText(entry: Entry): string {
@@ -63,7 +110,11 @@ const COMPARATORS: Record<SortMode, (a: Entry, b: Entry) => number> = {
 
 export function applyFilters(entries: Entry[], filters: Filters): Entry[] {
   const words = filters.search.toLowerCase().split(/\s+/).filter(Boolean);
-  return entries.filter((entry) => matches(entry, filters, words)).sort(COMPARATORS[filters.sort]);
+  // A profession the list does not have (an old link, say) filters nothing out.
+  const profession = entries.some((entry) => entry.professionSlug === filters.profession) ? filters.profession : "";
+  return entries
+    .filter((entry) => (profession === "" || entry.professionSlug === profession) && matches(entry, filters, words))
+    .sort(COMPARATORS[filters.sort]);
 }
 
 export interface EntryGroup {

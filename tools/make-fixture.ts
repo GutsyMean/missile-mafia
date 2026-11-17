@@ -1,64 +1,97 @@
 /**
- * Builds e2e/fixtures/craftables.json from the last `pnpm game-data` run: the
- * document the public window would get for one Blacksmith at skill 145. Used
- * by the end-to-end tests and for developing the window without a database.
+ * Builds the sample documents under e2e/fixtures from the last `pnpm game-data`
+ * run: what the public window would get for a guild of two crafters, a
+ * Blacksmith at skill 145 and a Tailor at skill 60. Used by the end-to-end
+ * tests and for developing the window without a database.
+ *
+ *   craftables.json   what they can make
+ *   unlearned.json    by profession, the sample recipes neither has learned
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { CraftablesDoc, ItemView } from "../src/lib/craftables/types";
+import type { CraftablesDoc, ItemView, RecipeView, UnlearnedDoc } from "../src/lib/craftables/types";
 import type { Dataset } from "../src/lib/game-data/dataset";
 
 const ROOT = path.resolve(__dirname, "..");
 const dataset = JSON.parse(readFileSync(path.join(ROOT, ".cache/dataset.json"), "utf8")) as Dataset;
 
-const SKILL = 145;
 const BLACKSMITHING = 164;
-// A few plan-taught recipes, including Bind on Pickup ones, to exercise the soulbound marking.
+const TAILORING = 197;
+const DAMIEN = "00000000-0000-4000-8000-000000000001";
+const STITCHES = "00000000-0000-4000-8000-000000000002";
+const SMITH_SKILL = 145;
+const TAILOR_SKILL = 60;
+
+type GameRecipe = Dataset["recipes"][number];
+const fromTrainer = (r: GameRecipe) => ["trainer", "starter"].includes(r.unlock.acquisition) && r.unlock.learnSkill !== null;
+const bySkill = (a: GameRecipe, b: GameRecipe) =>
+  (a.unlock.learnSkill ?? 0) - (b.unlock.learnSkill ?? 0) || a.name.localeCompare(b.name) || a.id - b.id;
+const of = (professionId: number) => dataset.recipes.filter((r) => r.professionId === professionId && r.status === "ok");
+
+// Damien: every trainer recipe up to his skill, plus a few plan-taught ones,
+// including Bind on Pickup ones, to exercise the soulbound marking.
 const EXTRA = new Set(["Veteran's Silvered Chain Helm", "Acolyte's Silvered Chain Helm", "Sterling Silver Shoulders"]);
+const smithLearned = of(BLACKSMITHING).filter((r) => (fromTrainer(r) && r.unlock.learnSkill! <= SMITH_SKILL) || EXTRA.has(r.name));
+// Not learned by anyone: trainer recipes above his skill, a vendor plan, and one whose level the sources disagree on.
+const SMITH_PENDING = new Set(["Green Iron Hauberk", "Golden Scale Bracers", "Steel Breastplate", "Azure Skyforged Chain", "Truesilver Gauntlets"]);
+const smithUnlearned = of(BLACKSMITHING).filter((r) => SMITH_PENDING.has(r.name) && !smithLearned.includes(r));
 
-// Recipes Damien has not learned, shown greyed out: trainer recipes above his skill,
-// a vendor plan, and one whose unlock level the sources disagree on.
-const PENDING = new Set(["Green Iron Hauberk", "Golden Scale Bracers", "Steel Breastplate", "Azure Skyforged Chain", "Truesilver Gauntlets"]);
-
-const learned = dataset.recipes.filter(
-  (r) =>
-    r.professionId === BLACKSMITHING &&
-    r.status === "ok" &&
-    ((["trainer", "starter"].includes(r.unlock.acquisition) &&
-      r.unlock.learnSkill !== null &&
-      r.unlock.learnSkill <= SKILL) ||
-      EXTRA.has(r.name)),
-);
-const learnedIds = new Set(learned.map((r) => r.id));
-const pending = dataset.recipes.filter(
-  (r) => r.professionId === BLACKSMITHING && r.status === "ok" && PENDING.has(r.name) && !learnedIds.has(r.id),
-);
-const recipes = [...learned, ...pending];
+// Stitches: the first few tailoring recipes, and two she has yet to reach.
+const tailorLearned = of(TAILORING).filter((r) => fromTrainer(r) && r.unlock.learnSkill! <= 40).sort(bySkill).slice(0, 4);
+const tailorUnlearned = of(TAILORING).filter((r) => fromTrainer(r) && r.unlock.learnSkill! > TAILOR_SKILL).sort(bySkill).slice(0, 2);
 
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]));
-const items: Record<string, ItemView> = {};
-const include = (id: number | null) => {
-  const item = id === null ? undefined : itemsById.get(id);
-  if (!item) return;
-  // The window does not show an item's own skill requirement.
-  const view: ItemView & { requiredSkill?: unknown } = { ...item };
-  delete view.requiredSkill;
-  items[String(item.id)] = view;
-};
-for (const recipe of recipes) {
-  include(recipe.craftedItemId);
-  for (const reagent of recipe.reagents) include(reagent.itemId);
+function itemsOf(recipes: GameRecipe[]): Record<string, ItemView> {
+  const items: Record<string, ItemView> = {};
+  const include = (id: number | null) => {
+    const item = id === null ? undefined : itemsById.get(id);
+    if (!item) return;
+    // The window does not show an item's own skill requirement.
+    const view: ItemView & { requiredSkill?: unknown } = { ...item };
+    delete view.requiredSkill;
+    items[String(item.id)] = view;
+  };
+  for (const recipe of recipes) {
+    include(recipe.craftedItemId);
+    for (const reagent of recipe.reagents) include(reagent.itemId);
+  }
+  return items;
 }
 
-const CRAFTER = "00000000-0000-4000-8000-000000000001";
-const profession = dataset.professions.find((p) => p.id === BLACKSMITHING)!;
+const view = (r: GameRecipe, crafterIds: string[], pendingCrafterIds: string[]): RecipeView => ({
+  id: r.id,
+  professionId: r.professionId,
+  name: r.name,
+  iconFileId: r.iconFileId,
+  craftedItemId: r.craftedItemId,
+  craftedCount: r.craftedCount,
+  effectText: r.effectText,
+  category: r.category,
+  categoryOrder: r.categoryOrder,
+  reagents: r.reagents.map((g) => [g.itemId, g.quantity] as [number, number]),
+  crafterIds,
+  pendingCrafterIds,
+  learnSkill: r.unlock.learnSkill,
+  skillYellow: r.skillYellow,
+  skillGreen: r.skillGreen,
+  skillGrey: r.skillGrey,
+  acquisition: r.unlock.acquisition,
+  acquisitionText: r.unlock.acquisitionText,
+});
+const inOrder = (a: RecipeView, b: RecipeView) => a.categoryOrder - b.categoryOrder || a.name.localeCompare(b.name) || a.id - b.id;
+
+const profession = (id: number) => {
+  const p = dataset.professions.find((entry) => entry.id === id)!;
+  return { id: p.id, slug: p.slug, name: p.name, iconFileId: p.iconFileId };
+};
+
 const doc: CraftablesDoc = {
   build: dataset.build,
   syncedAt: "2026-11-17T00:00:00.000Z",
-  professions: [{ id: profession.id, slug: profession.slug, name: profession.name, iconFileId: profession.iconFileId }],
+  professions: [profession(BLACKSMITHING), profession(TAILORING)],
   crafters: [
     {
-      id: CRAFTER,
+      id: DAMIEN,
       slug: "damien",
       characterName: "Damien",
       realm: null,
@@ -66,34 +99,37 @@ const doc: CraftablesDoc = {
       class: "Paladin",
       level: 24,
       note: "Bring the materials and whisper me in game. Tips welcome, never required.",
-      skills: { [String(BLACKSMITHING)]: SKILL },
+      skills: { [String(BLACKSMITHING)]: SMITH_SKILL },
+    },
+    {
+      id: STITCHES,
+      slug: "stitches",
+      characterName: "Stitches",
+      realm: null,
+      faction: "Alliance",
+      class: "Mage",
+      level: 18,
+      note: null,
+      skills: { [String(TAILORING)]: TAILOR_SKILL },
     },
   ],
-  recipes: recipes
-    .map((r) => ({
-      id: r.id,
-      professionId: r.professionId,
-      name: r.name,
-      iconFileId: r.iconFileId,
-      craftedItemId: r.craftedItemId,
-      craftedCount: r.craftedCount,
-      effectText: r.effectText,
-      category: r.category,
-      categoryOrder: r.categoryOrder,
-      reagents: r.reagents.map((g) => [g.itemId, g.quantity] as [number, number]),
-      crafterIds: learnedIds.has(r.id) ? [CRAFTER] : [],
-      pendingCrafterIds: learnedIds.has(r.id) ? [] : [CRAFTER],
-      learnSkill: r.unlock.learnSkill,
-      skillYellow: r.skillYellow,
-      skillGreen: r.skillGreen,
-      skillGrey: r.skillGrey,
-      acquisition: r.unlock.acquisition,
-      acquisitionText: r.unlock.acquisitionText,
-    }))
-    .sort((a, b) => a.categoryOrder - b.categoryOrder || a.name.localeCompare(b.name) || a.id - b.id),
-  items,
+  unlearned: [
+    { professionId: BLACKSMITHING, count: smithUnlearned.length },
+    { professionId: TAILORING, count: tailorUnlearned.length },
+  ],
+  recipes: [...smithLearned.map((r) => view(r, [DAMIEN], [])), ...tailorLearned.map((r) => view(r, [STITCHES], []))].sort(inOrder),
+  items: itemsOf([...smithLearned, ...tailorLearned]),
 };
 
-const out = path.join(ROOT, "e2e/fixtures/craftables.json");
-writeFileSync(out, JSON.stringify(doc, null, 1) + "\n");
-console.log(`Wrote ${out}: ${learned.length} learned and ${pending.length} not yet learned recipes, ${Object.keys(items).length} items`);
+const unlearned: Record<string, UnlearnedDoc> = {
+  [String(BLACKSMITHING)]: { recipes: smithUnlearned.map((r) => view(r, [], [DAMIEN])).sort(inOrder), items: itemsOf(smithUnlearned) },
+  [String(TAILORING)]: { recipes: tailorUnlearned.map((r) => view(r, [], [STITCHES])).sort(inOrder), items: itemsOf(tailorUnlearned) },
+};
+
+writeFileSync(path.join(ROOT, "e2e/fixtures/craftables.json"), JSON.stringify(doc, null, 1) + "\n");
+writeFileSync(path.join(ROOT, "e2e/fixtures/unlearned.json"), JSON.stringify(unlearned, null, 1) + "\n");
+console.log(
+  `Wrote e2e/fixtures: Damien ${smithLearned.length} learned, ${smithUnlearned.length} still to learn; ` +
+    `Stitches ${tailorLearned.length} learned (${tailorLearned.map((r) => r.name).join(", ")}), ` +
+    `${tailorUnlearned.length} still to learn (${tailorUnlearned.map((r) => `${r.name} ${r.unlock.learnSkill}`).join(", ")})`,
+);

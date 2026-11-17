@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import type { FilterOptions } from "@/lib/craftables/filter";
-import type { Filters, SortMode } from "@/lib/craftables/types";
+import type { CrafterView, Filters, ProfessionView, SortMode } from "@/lib/craftables/types";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./window.module.css";
 
 interface Props {
   filters: Filters;
   options: FilterOptions;
+  crafters: CrafterView[];
+  professions: ProfessionView[];
   onChange: (patch: Partial<Filters>) => void;
 }
 
@@ -17,7 +19,7 @@ function levelValue(text: string): number | null {
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
-export function FilterBar({ filters, options, onChange }: Props) {
+export function FilterBar({ filters, options, crafters, professions, onChange }: Props) {
   // On a phone the extra filters stay folded away until asked for.
   const [expanded, setExpanded] = useState(false);
   const active = [
@@ -47,6 +49,36 @@ export function FilterBar({ filters, options, onChange }: Props) {
 
   return (
     <form className={styles.filters} role="search" onSubmit={(event) => event.preventDefault()}>
+      {crafters.length > 0 ? (
+        <select
+          className={`${wow.field} ${styles.picker}`}
+          aria-label="Crafter"
+          value={crafters.some((crafter) => crafter.slug === filters.crafter) ? filters.crafter : ""}
+          onChange={(event) => onChange({ crafter: event.target.value })}
+        >
+          <option value="">All crafters</option>
+          {crafters.map((crafter) => (
+            <option key={crafter.id} value={crafter.slug}>
+              {crafter.characterName}
+            </option>
+          ))}
+        </select>
+      ) : null}
+      {professions.length > 0 ? (
+        <select
+          className={`${wow.field} ${styles.picker}`}
+          aria-label="Profession"
+          value={professions.some((profession) => profession.slug === filters.profession) ? filters.profession : ""}
+          onChange={(event) => onChange({ profession: event.target.value })}
+        >
+          <option value="">All professions</option>
+          {professions.map((profession) => (
+            <option key={profession.id} value={profession.slug}>
+              {profession.name}
+            </option>
+          ))}
+        </select>
+      ) : null}
       <input
         className={`${wow.field} ${styles.search}`}
         type="search"

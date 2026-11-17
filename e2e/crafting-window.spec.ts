@@ -3,12 +3,15 @@ import { expect, test, type Page } from "@playwright/test";
 const rows = (page: Page) => page.locator("[data-recipe]");
 const row = (page: Page, name: string) => page.getByRole("button", { name: new RegExp(`^${name}`) });
 const detail = (page: Page) => page.locator('[data-testid="detail"]:visible');
+const crafterPicker = (page: Page) => page.getByRole("combobox", { name: "Crafter", exact: true });
+const professionPicker = (page: Page) => page.getByRole("combobox", { name: "Profession", exact: true });
 
 test.describe("browsing", () => {
   test("lists everything the crafter can make, grouped by type", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('[data-recipe][data-available="true"]')).toHaveCount(58);
+    await expect(page.locator('[data-recipe][data-available="true"]')).toHaveCount(62);
     await expect(page.getByRole("heading", { name: /Mail Armor/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Cloth Armor/ })).toBeVisible();
   });
 
   test("shows the Blacksmithing skill each item needs", async ({ page }) => {
@@ -63,7 +66,7 @@ test.describe("browsing", () => {
 
 test.describe("recipes not learned yet", () => {
   test("are listed greyed out and marked as not available", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?crafter=damien");
     await expect(rows(page)).toHaveCount(63);
     await expect(page.getByText("63 recipes · 5 not available yet")).toBeVisible();
 
@@ -75,7 +78,7 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("come after what can be made now, soonest first", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?crafter=damien");
     const mail = page.getByRole("region", { name: "Mail Armor" }).locator("[data-recipe]");
     await expect(mail.nth(24)).toHaveAttribute("data-available", "true");
     await expect(mail.nth(25)).toContainText("Azure Skyforged Chain");
@@ -85,7 +88,7 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("say what they need and where they come from when opened", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?crafter=damien");
     await row(page, "Green Iron Hauberk").click();
     const note = detail(page).getByRole("note");
     await expect(note).toContainText("Not available yet.");
@@ -97,21 +100,83 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("admit it when the skill needed is not confirmed", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?crafter=damien");
     await row(page, "Truesilver Gauntlets").click();
     await expect(detail(page).getByText("Blacksmithing skill needed: not confirmed")).toBeVisible();
   });
 
   test("are hidden by Available now only, and the link remembers it", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/?crafter=damien");
     await page.getByLabel("Available now only").check();
     await expect(rows(page)).toHaveCount(58);
     await expect(row(page, "Green Iron Hauberk")).toHaveCount(0);
     await expect(page).toHaveURL(/available=1/);
 
-    await page.goto("/?available=1");
+    await page.goto("/?crafter=damien&available=1");
     await expect(rows(page)).toHaveCount(58);
     await expect(page.getByLabel("Available now only")).toBeChecked();
+  });
+});
+
+test.describe("choosing whose recipes to see", () => {
+  test("starts with everyone, holding back what is still to learn", async ({ page }) => {
+    await page.goto("/");
+    await expect(rows(page)).toHaveCount(62);
+    await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(0);
+    await expect(page.getByText(/62 recipes · choose a crafter or a profession/)).toBeVisible();
+    await expect(crafterPicker(page)).toHaveValue("");
+    await expect(professionPicker(page)).toHaveValue("");
+  });
+
+  test("shows one crafter's own list and profile", async ({ page }) => {
+    await page.goto("/");
+    await crafterPicker(page).selectOption({ label: "Stitches" });
+
+    await expect(rows(page)).toHaveCount(6);
+    await expect(row(page, "Linen Belt")).toHaveAttribute("data-available", "true");
+    await expect(row(page, "Woolen Boots")).toHaveAttribute("data-available", "false");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toHaveCount(0);
+
+    const profile = page.getByRole("region", { name: "Stitches's profile" });
+    await expect(profile).toContainText("Level 18 · Mage · Alliance");
+    await expect(profile.getByLabel("Stitches: Tailoring 60")).toBeVisible();
+    await expect(page).toHaveURL(/crafter=stitches/);
+  });
+
+  test("shows one profession, with what nobody has learned in it", async ({ page }) => {
+    await page.goto("/");
+    await professionPicker(page).selectOption({ label: "Blacksmithing" });
+
+    await expect(rows(page)).toHaveCount(63);
+    await expect(row(page, "Green Iron Hauberk")).toHaveAttribute("data-available", "false");
+    await expect(row(page, "Linen Belt")).toHaveCount(0);
+    await expect(page).toHaveURL(/prof=blacksmithing/);
+
+    await professionPicker(page).selectOption({ label: "All professions" });
+    await expect(rows(page)).toHaveCount(62);
+  });
+
+  test("opens a pasted link on the same crafter and profession", async ({ page }) => {
+    await page.goto("/?crafter=damien&prof=blacksmithing");
+    await expect(crafterPicker(page)).toHaveValue("damien");
+    await expect(professionPicker(page)).toHaveValue("blacksmithing");
+    await expect(rows(page)).toHaveCount(63);
+    await expect(page.getByRole("region", { name: "Damien's profile" }).getByLabel("Damien: Blacksmithing 145")).toBeVisible();
+  });
+
+  test("keeps the crafter when the other filters are cleared", async ({ page }) => {
+    await page.goto("/?crafter=stitches");
+    await page.getByRole("searchbox").fill("thunderfury");
+    await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
+    await page.getByRole("button", { name: "Clear filters" }).first().click();
+    await expect(rows(page)).toHaveCount(6);
+    await expect(crafterPicker(page)).toHaveValue("stitches");
+  });
+
+  test("shows everyone again for a link to a crafter who has left", async ({ page }) => {
+    await page.goto("/?crafter=someone-gone");
+    await expect(rows(page)).toHaveCount(62);
+    await expect(crafterPicker(page)).toHaveValue("");
   });
 });
 
@@ -121,7 +186,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("silver");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
-    await expect(page.getByText(/of 63 recipes/)).toBeVisible();
+    await expect(page.getByText(/of 62 recipes/)).toBeVisible();
   });
 
   test("finds recipes by a reagent they use", async ({ page }) => {
@@ -151,7 +216,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
-    await expect(rows(page)).toHaveCount(63);
+    await expect(rows(page)).toHaveCount(62);
   });
 });
 
@@ -193,6 +258,14 @@ test.describe("on a phone @phone", () => {
     const sheet = page.getByRole("dialog", { name: "Item details" });
     await sheet.getByRole("button", { name: "Close" }).tap();
     await expect(sheet).toBeHidden();
+  });
+
+  test("lets a crafter be chosen without opening the extra filters", async ({ page }) => {
+    await page.goto("/");
+    await expect(crafterPicker(page)).toBeVisible();
+    await crafterPicker(page).selectOption({ label: "Stitches" });
+    await expect(rows(page)).toHaveCount(6);
+    await expect(page.getByRole("region", { name: "Stitches's profile" })).toBeVisible();
   });
 
   test("keeps extra filters folded away until asked for", async ({ page }) => {

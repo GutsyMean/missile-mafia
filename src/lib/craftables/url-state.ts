@@ -18,6 +18,8 @@ export function parseViewState(params: URLSearchParams): ViewState {
   const sort = params.get("sort") as SortMode | null;
   return {
     filters: {
+      crafter: params.get("crafter") ?? "",
+      profession: params.get("prof") ?? "",
       search: params.get("q") ?? "",
       slot: params.get("slot") ?? "",
       type: params.get("type") ?? "",
@@ -34,6 +36,8 @@ export function parseViewState(params: URLSearchParams): ViewState {
 
 export function serializeViewState({ filters, recipeId }: ViewState): string {
   const params = new URLSearchParams();
+  if (filters.crafter) params.set("crafter", filters.crafter);
+  if (filters.profession) params.set("prof", filters.profession);
   if (filters.search) params.set("q", filters.search);
   if (filters.slot) params.set("slot", filters.slot);
   if (filters.type) params.set("type", filters.type);

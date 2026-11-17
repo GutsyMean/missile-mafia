@@ -1,8 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { applyFilters, buildEntries, filterOptions, groupEntries } from "@/lib/craftables/filter";
-import { DEFAULT_FILTERS, type CraftablesDoc, type Entry, type Filters } from "@/lib/craftables/types";
+import {
+  applyFilters,
+  buildEntries,
+  filterOptions,
+  groupEntries,
+  mergeUnlearned,
+  unlearnedToLoad,
+} from "@/lib/craftables/filter";
+import {
+  DEFAULT_FILTERS,
+  type CraftablesDoc,
+  type Entry,
+  type Filters,
+  type UnlearnedDoc,
+} from "@/lib/craftables/types";
 import { parseViewState, serializeViewState, type ViewState } from "@/lib/craftables/url-state";
 import { Frame } from "@/components/wow/Frame";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
@@ -49,15 +62,44 @@ function writeView(view: ViewState, history: "replace" | "push" = "replace") {
 }
 
 function isFiltered(filters: Filters): boolean {
-  return serializeViewState({ filters: { ...filters, sort: DEFAULT_FILTERS.sort }, recipeId: null }) !== "";
+  const narrowing = { ...filters, crafter: "", profession: "", sort: DEFAULT_FILTERS.sort };
+  return serializeViewState({ filters: narrowing, recipeId: null }) !== "";
 }
 
-export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
-  const entries = useMemo(() => buildEntries(doc), [doc]);
-  const options = useMemo(() => filterOptions(entries), [entries]);
+interface Props {
+  doc: CraftablesDoc;
+  /** Recipes still to learn that came with the page, by profession id. */
+  initialUnlearned?: Record<number, UnlearnedDoc>;
+}
 
+export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   const search = useSyncExternalStore(subscribeToUrl, readUrl, readUrlOnServer);
   const { filters, recipeId } = useMemo(() => parseViewState(new URLSearchParams(search)), [search]);
+
+  // Recipes nobody has learned yet are fetched per profession, when a view calls for them.
+  const [unlearned, setUnlearned] = useState(initialUnlearned);
+  const requested = useRef(new Set(Object.keys(initialUnlearned).map(Number)));
+  const wanted = useMemo(() => unlearnedToLoad(doc, filters), [doc, filters]);
+  useEffect(() => {
+    for (const id of wanted) {
+      if (requested.current.has(id)) continue;
+      requested.current.add(id);
+      fetch(`/api/unlearned/${id}`)
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+        .then((loaded: UnlearnedDoc) => setUnlearned((current) => ({ ...current, [id]: loaded })))
+        // The list still shows what can be made; the next change of view tries again.
+        .catch(() => requested.current.delete(id));
+    }
+  }, [wanted]);
+  const loadingMore = wanted.some((id) => !(id in unlearned));
+
+  // A link may name a crafter who has since left; it then shows everyone.
+  const crafter = useMemo(() => doc.crafters.find((c) => c.slug === filters.crafter) ?? null, [doc, filters.crafter]);
+  const entries = useMemo(
+    () => buildEntries(mergeUnlearned(doc, wanted.flatMap((id) => unlearned[id] ?? [])), crafter?.id ?? null),
+    [doc, wanted, unlearned, crafter],
+  );
+  const options = useMemo(() => filterOptions(entries), [entries]);
   const [hover, setHover] = useState<Hover | null>(null);
   const sheet = useRef<HTMLDialogElement>(null);
   const tooltip = useRef<HTMLDivElement>(null);
@@ -163,24 +205,54 @@ export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
     element.style.visibility = "visible";
   }, [hover]);
 
-  const profession = doc.professions[0];
-  const crafter = doc.crafters[0];
-  const skill = profession && crafter ? (crafter.skills[String(profession.id)] ?? 0) : 0;
+  // The profile shown beside the filters: the chosen crafter, or the only one there is.
+  const profiled = crafter ?? (doc.crafters.length === 1 ? doc.crafters[0] : null);
+  const chosenProfession = doc.professions.find((p) => p.slug === filters.profession) ?? null;
+  const portrait = (
+    chosenProfession ??
+    doc.professions.find((p) => profiled && (profiled.skills[String(p.id)] ?? 0) > 0) ??
+    doc.professions[0]
+  )?.iconFileId;
+  const moreToLearn =
+    !filters.availableOnly && wanted.length === 0 && !crafter && !chosenProfession && (doc.unlearned ?? []).length > 0;
   const title = "Missile Mafia Crafting";
 
   return (
     <>
-      <Frame title={title} portraitFileId={profession?.iconFileId} className={styles.window}>
+      <Frame title={title} portraitFileId={portrait} className={styles.window}>
         <div className={styles.toolbar}>
-          {profession && crafter ? (
-            <div className={styles.skill} aria-label={`${crafter.characterName}: ${profession.name} ${skill}`}>
-              <div className={styles.skillFill} style={{ width: `${Math.min(100, (skill / MAX_SKILL) * 100)}%` }} />
-              <span className={styles.skillText}>
-                {profession.name} {skill}
-              </span>
-            </div>
+          {profiled ? (
+            <section className={styles.profile} aria-label={`${profiled.characterName}'s profile`}>
+              <p className={styles.profileName}>{profiled.characterName}</p>
+              {profiled.level || profiled.class || profiled.faction ? (
+                <p className={styles.profileMeta}>
+                  {[profiled.level ? `Level ${profiled.level}` : null, profiled.class, profiled.faction]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              ) : null}
+              {doc.professions
+                .filter((p) => (profiled.skills[String(p.id)] ?? 0) > 0)
+                .map((p) => {
+                  const skill = profiled.skills[String(p.id)];
+                  return (
+                    <div key={p.id} className={styles.skill} aria-label={`${profiled.characterName}: ${p.name} ${skill}`}>
+                      <div className={styles.skillFill} style={{ width: `${Math.min(100, (skill / MAX_SKILL) * 100)}%` }} />
+                      <span className={styles.skillText}>
+                        {p.name} {skill}
+                      </span>
+                    </div>
+                  );
+                })}
+            </section>
           ) : null}
-          <FilterBar filters={filters} options={options} onChange={(patch) => setFilters({ ...filters, ...patch })} />
+          <FilterBar
+            filters={filters}
+            options={options}
+            crafters={doc.crafters}
+            professions={doc.professions}
+            onChange={(patch) => setFilters({ ...filters, ...patch })}
+          />
         </div>
 
         <div className={styles.body}>
@@ -190,7 +262,11 @@ export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
             ) : visible.length === 0 ? (
               <div className={styles.empty}>
                 <p>Nothing matches these filters.</p>
-                <button type="button" className={wow.button} onClick={() => setFilters(DEFAULT_FILTERS)}>
+                <button
+                  type="button"
+                  className={wow.button}
+                  onClick={() => setFilters({ ...DEFAULT_FILTERS, crafter: filters.crafter, profession: filters.profession })}
+                >
                   Clear filters
                 </button>
               </div>
@@ -215,9 +291,18 @@ export function ProfessionWindow({ doc }: { doc: CraftablesDoc }) {
               ? `${entries.length} recipes`
               : `${visible.length} of ${entries.length} recipes`}
             {notYet > 0 ? ` · ${notYet} not available yet` : ""}
+            {loadingMore ? " · loading what is still to learn…" : ""}
+            {moreToLearn ? " · choose a crafter or a profession to also see what is still to learn" : ""}
           </span>
           {isFiltered(filters) ? (
-            <button type="button" className={styles.linkButton} onClick={() => setFilters({ ...DEFAULT_FILTERS, sort: filters.sort })}>
+            <button
+              type="button"
+              className={styles.linkButton}
+              onClick={() =>
+                // Who and which profession is being looked at is a choice of view, not a filter to clear.
+                setFilters({ ...DEFAULT_FILTERS, crafter: filters.crafter, profession: filters.profession, sort: filters.sort })
+              }
+            >
               Clear filters
             </button>
           ) : null}

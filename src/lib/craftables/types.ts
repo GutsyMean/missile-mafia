@@ -8,6 +8,17 @@ export interface CraftablesDoc {
   crafters: CrafterView[];
   recipes: RecipeView[];
   items: Record<string, ItemView>;
+  /**
+   * Professions with recipes no listed crafter has learned yet. Those recipes are
+   * not in this document; they are fetched per profession when a view needs them.
+   */
+  unlearned?: { professionId: number; count: number }[];
+}
+
+/** The recipes of one profession that nobody has learned yet, with the items they involve. */
+export interface UnlearnedDoc {
+  recipes: RecipeView[];
+  items: Record<string, ItemView>;
 }
 
 export interface ProfessionView {
@@ -89,14 +100,22 @@ export interface Entry {
   crafters: CrafterView[];
   /** Who has the profession but has not learned it yet. */
   pending: CrafterView[];
-  /** False when no listed crafter has learned the recipe: shown greyed out. */
+  /**
+   * False when it cannot be made in this view: nobody has learned it, or the
+   * crafter being looked at has not. Shown greyed out.
+   */
   available: boolean;
   professionName: string | null;
+  professionSlug: string | null;
 }
 
 export type SortMode = "category" | "name" | "level";
 
 export interface Filters {
+  /** The crafter being looked at, by slug. Empty for everyone. */
+  crafter: string;
+  /** The profession being looked at, by slug. Empty for all of them. */
+  profession: string;
   search: string;
   slot: string;
   type: string;
@@ -110,6 +129,8 @@ export interface Filters {
 }
 
 export const DEFAULT_FILTERS: Filters = {
+  crafter: "",
+  profession: "",
   search: "",
   slot: "",
   type: "",

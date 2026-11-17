@@ -1,0 +1,1211 @@
+{
+ "164": {
+  "recipes": [
+   {
+    "id": 1301448,
+    "professionId": 164,
+    "name": "Azure Skyforged Chain",
+    "iconFileId": 7737711,
+    "craftedItemId": 277019,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      2840,
+      6
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 50,
+    "skillYellow": 55,
+    "skillGreen": 57,
+    "skillGrey": 60,
+    "acquisition": "vendor",
+    "acquisitionText": "Vendor · Vayn Moongaze (Zephras Isle)"
+   },
+   {
+    "id": 7223,
+    "professionId": 164,
+    "name": "Golden Scale Bracers",
+    "iconFileId": 132609,
+    "craftedItemId": 6040,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      3859,
+      5
+     ],
+     [
+      3486,
+      2
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 160,
+    "skillYellow": 185,
+    "skillGreen": 197,
+    "skillGrey": 210,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 10s"
+   },
+   {
+    "id": 3508,
+    "professionId": 164,
+    "name": "Green Iron Hauberk",
+    "iconFileId": 132624,
+    "craftedItemId": 3844,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      3575,
+      20
+     ],
+     [
+      3486,
+      4
+     ],
+     [
+      1529,
+      2
+     ],
+     [
+      1206,
+      2
+     ],
+     [
+      4255,
+      1
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 155,
+    "skillYellow": 180,
+    "skillGreen": 192,
+    "skillGrey": 205,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 75s"
+   },
+   {
+    "id": 9916,
+    "professionId": 164,
+    "name": "Steel Breastplate",
+    "iconFileId": 132740,
+    "craftedItemId": 7963,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      3859,
+      16
+     ],
+     [
+      3486,
+      3
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 175,
+    "skillYellow": 200,
+    "skillGreen": 212,
+    "skillGrey": 225,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 25s"
+   },
+   {
+    "id": 9954,
+    "professionId": 164,
+    "name": "Truesilver Gauntlets",
+    "iconFileId": 132963,
+    "craftedItemId": 7938,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Plate Armor",
+    "categoryOrder": 104,
+    "reagents": [
+     [
+      3860,
+      10
+     ],
+     [
+      6037,
+      8
+     ],
+     [
+      7909,
+      3
+     ],
+     [
+      3864,
+      3
+     ],
+     [
+      5966,
+      1
+     ],
+     [
+      7966,
+      2
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": null,
+    "skillYellow": 220,
+    "skillGreen": 230,
+    "skillGrey": 240,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 1g"
+   }
+  ],
+  "items": {
+   "1206": {
+    "id": 1206,
+    "name": "Moss Agate",
+    "quality": 2,
+    "iconFileId": 134105,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 25,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 400,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Moss Agate",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "1529": {
+    "id": 1529,
+    "name": "Jade",
+    "quality": 2,
+    "iconFileId": 134134,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 35,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 700,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Jade",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "2840": {
+    "id": 2840,
+    "name": "Copper Bar",
+    "quality": 1,
+    "iconFileId": 133216,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 10,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 10,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Copper Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3486": {
+    "id": 3486,
+    "name": "Heavy Grinding Stone",
+    "quality": 1,
+    "iconFileId": 135245,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 25,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 100,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Heavy Grinding Stone",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3575": {
+    "id": 3575,
+    "name": "Iron Bar",
+    "quality": 1,
+    "iconFileId": 133232,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 30,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 200,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Iron Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3844": {
+    "id": 3844,
+    "name": "Green Iron Hauberk",
+    "quality": 3,
+    "iconFileId": 132624,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 5,
+    "itemLevel": 36,
+    "requiredLevel": 31,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 5658,
+    "slotName": "Chest",
+    "typeName": "Mail",
+    "armor": 238,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 11
+     },
+     {
+      "stat": 4,
+      "name": "Strength",
+      "value": 7
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Green Iron Hauberk",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Chest",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "238 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+7 Strength",
+      "color": "white"
+     },
+     {
+      "text": "+11 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 31",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": false
+   },
+   "3859": {
+    "id": 3859,
+    "name": "Steel Bar",
+    "quality": 1,
+    "iconFileId": 133234,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 35,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 60,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Steel Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3860": {
+    "id": 3860,
+    "name": "Mithril Bar",
+    "quality": 1,
+    "iconFileId": 133220,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 40,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 400,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Mithril Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3864": {
+    "id": 3864,
+    "name": "Citrine",
+    "quality": 2,
+    "iconFileId": 134117,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 40,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 800,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Citrine",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "4255": {
+    "id": 4255,
+    "name": "Green Leather Armor",
+    "quality": 2,
+    "iconFileId": 132723,
+    "classId": 4,
+    "subclassId": 2,
+    "inventoryType": 5,
+    "itemLevel": 31,
+    "requiredLevel": 26,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 2366,
+    "slotName": "Chest",
+    "typeName": "Leather",
+    "armor": 95,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 3,
+      "name": "Agility",
+      "value": 8
+     },
+     {
+      "stat": 5,
+      "name": "Intellect",
+      "value": 8
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Green Leather Armor",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Chest",
+      "right": "Leather",
+      "color": "white"
+     },
+     {
+      "text": "95 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+8 Agility",
+      "color": "white"
+     },
+     {
+      "text": "+8 Intellect",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 26",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "5966": {
+    "id": 5966,
+    "name": "Guardian Gloves",
+    "quality": 2,
+    "iconFileId": 132939,
+    "classId": 4,
+    "subclassId": 2,
+    "inventoryType": 10,
+    "itemLevel": 38,
+    "requiredLevel": 33,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 1374,
+    "slotName": "Hands",
+    "typeName": "Leather",
+    "armor": 66,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 5,
+      "name": "Intellect",
+      "value": 8
+     },
+     {
+      "stat": 45,
+      "name": "Spell Power",
+      "value": 8
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Guardian Gloves",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Hands",
+      "right": "Leather",
+      "color": "white"
+     },
+     {
+      "text": "66 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+8 Intellect",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 33",
+      "color": "white"
+     },
+     {
+      "text": "Equip: Increases spell power by 8.",
+      "color": "green"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "6037": {
+    "id": 6037,
+    "name": "Truesilver Bar",
+    "quality": 2,
+    "iconFileId": 133222,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 50,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 1250,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Truesilver Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "6040": {
+    "id": 6040,
+    "name": "Golden Scale Bracers",
+    "quality": 2,
+    "iconFileId": 132609,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 9,
+    "itemLevel": 37,
+    "requiredLevel": 32,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 1315,
+    "slotName": "Wrist",
+    "typeName": "Mail",
+    "armor": 96,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 5
+     },
+     {
+      "stat": 4,
+      "name": "Strength",
+      "value": 6
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Golden Scale Bracers",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Wrist",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "96 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+6 Strength",
+      "color": "white"
+     },
+     {
+      "text": "+5 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 32",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "7909": {
+    "id": 7909,
+    "name": "Aquamarine",
+    "quality": 2,
+    "iconFileId": 134088,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 45,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 1000,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Aquamarine",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "7938": {
+    "id": 7938,
+    "name": "Truesilver Gauntlets",
+    "quality": 3,
+    "iconFileId": 132963,
+    "classId": 4,
+    "subclassId": 4,
+    "inventoryType": 10,
+    "itemLevel": 45,
+    "requiredLevel": 40,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 4028,
+    "slotName": "Hands",
+    "typeName": "Plate",
+    "armor": 300,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 4,
+      "name": "Strength",
+      "value": 16
+     },
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 7
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Truesilver Gauntlets",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Hands",
+      "right": "Plate",
+      "color": "white"
+     },
+     {
+      "text": "300 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+16 Strength",
+      "color": "white"
+     },
+     {
+      "text": "+7 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 40",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "7963": {
+    "id": 7963,
+    "name": "Steel Breastplate",
+    "quality": 2,
+    "iconFileId": 132740,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 5,
+    "itemLevel": 40,
+    "requiredLevel": 35,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 5615,
+    "slotName": "Chest",
+    "typeName": "Mail",
+    "armor": 231,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 12
+     },
+     {
+      "stat": 15,
+      "name": "Block",
+      "value": 10
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Steel Breastplate",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Chest",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "231 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+12 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 35",
+      "color": "white"
+     },
+     {
+      "text": "Equip: Increases your shield block by 10.",
+      "color": "green"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "7966": {
+    "id": 7966,
+    "name": "Solid Grinding Stone",
+    "quality": 1,
+    "iconFileId": 135246,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 35,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 200,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Solid Grinding Stone",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "277019": {
+    "id": 277019,
+    "name": "Azure Skyforged Chain",
+    "quality": 2,
+    "iconFileId": 7737711,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 6,
+    "itemLevel": 10,
+    "requiredLevel": 5,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 0,
+    "slotName": "Waist",
+    "typeName": "Mail",
+    "armor": 61,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 1
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Azure Skyforged Chain",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Waist",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "61 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+1 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 5",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": true
+   }
+  }
+ },
+ "197": {
+  "recipes": [
+   {
+    "id": 6521,
+    "professionId": 197,
+    "name": "Pearl-clasped Cloak",
+    "iconFileId": 133763,
+    "craftedItemId": 5542,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Cloth Armor",
+    "categoryOrder": 101,
+    "reagents": [
+     [
+      2997,
+      3
+     ],
+     [
+      2321,
+      2
+     ],
+     [
+      5498,
+      1
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000002"
+    ],
+    "learnSkill": 70,
+    "skillYellow": 95,
+    "skillGreen": 112,
+    "skillGrey": 130,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 4s"
+   },
+   {
+    "id": 2401,
+    "professionId": 197,
+    "name": "Woolen Boots",
+    "iconFileId": 132543,
+    "craftedItemId": 2583,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Cloth Armor",
+    "categoryOrder": 101,
+    "reagents": [
+     [
+      2997,
+      4
+     ],
+     [
+      2321,
+      2
+     ],
+     [
+      2318,
+      2
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000002"
+    ],
+    "learnSkill": 70,
+    "skillYellow": 95,
+    "skillGreen": 112,
+    "skillGrey": 130,
+    "acquisition": "trainer",
+    "acquisitionText": "Trainer · 3s"
+   }
+  ],
+  "items": {
+   "2318": {
+    "id": 2318,
+    "name": "Light Leather",
+    "quality": 1,
+    "iconFileId": 134252,
+    "classId": 7,
+    "subclassId": 6,
+    "inventoryType": 0,
+    "itemLevel": 10,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 15,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Light Leather",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "2321": {
+    "id": 2321,
+    "name": "Fine Thread",
+    "quality": 1,
+    "iconFileId": 132912,
+    "classId": 7,
+    "subclassId": 5,
+    "inventoryType": 0,
+    "itemLevel": 20,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 25,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Fine Thread",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "2583": {
+    "id": 2583,
+    "name": "Woolen Boots",
+    "quality": 2,
+    "iconFileId": 132543,
+    "classId": 4,
+    "subclassId": 1,
+    "inventoryType": 8,
+    "itemLevel": 19,
+    "requiredLevel": 14,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 359,
+    "slotName": "Feet",
+    "typeName": "Cloth",
+    "armor": 22,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 5,
+      "name": "Intellect",
+      "value": 2
+     },
+     {
+      "stat": 6,
+      "name": "Spirit",
+      "value": 2
+     },
+     {
+      "stat": 45,
+      "name": "Spell Power",
+      "value": 2
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Woolen Boots",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Feet",
+      "right": "Cloth",
+      "color": "white"
+     },
+     {
+      "text": "22 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+2 Intellect",
+      "color": "white"
+     },
+     {
+      "text": "+2 Spirit",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 14",
+      "color": "white"
+     },
+     {
+      "text": "Equip: Increases spell power by 2.",
+      "color": "green"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "2997": {
+    "id": 2997,
+    "name": "Bolt of Woolen Cloth",
+    "quality": 1,
+    "iconFileId": 132913,
+    "classId": 7,
+    "subclassId": 5,
+    "inventoryType": 0,
+    "itemLevel": 25,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 100,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Bolt of Woolen Cloth",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "5498": {
+    "id": 5498,
+    "name": "Small Lustrous Pearl",
+    "quality": 2,
+    "iconFileId": 134122,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 15,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 200,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Small Lustrous Pearl",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "5542": {
+    "id": 5542,
+    "name": "Pearl-clasped Cloak",
+    "quality": 2,
+    "iconFileId": 133763,
+    "classId": 4,
+    "subclassId": 1,
+    "inventoryType": 16,
+    "itemLevel": 19,
+    "requiredLevel": 14,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 370,
+    "slotName": "Back",
+    "typeName": "Cloth",
+    "armor": 16,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 5,
+      "name": "Intellect",
+      "value": 3
+     },
+     {
+      "stat": 45,
+      "name": "Spell Power",
+      "value": 2
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Pearl-clasped Cloak",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Back",
+      "right": "Cloth",
+      "color": "white"
+     },
+     {
+      "text": "16 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+3 Intellect",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 14",
+      "color": "white"
+     },
+     {
+      "text": "Equip: Increases spell power by 2.",
+      "color": "green"
+     }
+    ],
+    "tooltipComplete": true
+   }
+  }
+ }
+}
