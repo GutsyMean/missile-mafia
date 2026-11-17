@@ -35,7 +35,16 @@
   pointer-events: none;
   border: solid transparent;
   border-width: 95px 95px 100px;
-  border-image: url("/ui/frame-portrait.png") 190 190 200 190 / 95px 95px 100px round;
+  border-image: url("/ui/frame.png") 190 190 200 190 / 95px 95px 100px round;
+}
+
+/* With a portrait, the top-left corner carries the round ring it sits in. */
+.frame[data-portrait]::after {
+  border-image-source: url("/ui/frame-portrait.png");
+}
+
+.frame:not([data-portrait]) .titleBar {
+  left: 24px;
 }
 
 .titleBar {

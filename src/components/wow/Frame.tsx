@@ -12,7 +12,11 @@ interface Props {
 /** The game's standard window: bronze frame, dark title bar, round portrait. */
 export function Frame({ title, portraitFileId, children, className }: Props) {
   return (
-    <section className={`${styles.frame} ${className ?? ""}`} aria-label={title}>
+    <section
+      className={`${styles.frame} ${className ?? ""}`}
+      aria-label={title}
+      data-portrait={portraitFileId ? "" : undefined}
+    >
       {portraitFileId ? (
         <span className={styles.portrait} aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}

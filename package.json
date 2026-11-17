@@ -13,7 +13,9 @@
     "game-data": "tsx tools/game-data.ts",
     "test:db": "bash supabase/tests/run.sh",
     "ui-textures": "tsx tools/ui-textures/extract.ts",
-    "test:e2e": "playwright test --trace off"
+    "test:e2e": "playwright test --trace off",
+    "db:migrate": "tsx tools/db/migrate.ts",
+    "db:sync": "tsx tools/sync.ts"
   },
   "dependencies": {
     "@fontsource/marcellus": "^5.3.0",
@@ -25,6 +27,7 @@
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
