@@ -14,6 +14,19 @@ export const WIKI_RECIPE_PAGES: Record<string, string> = {
   tailoring: "Forever_tailoring_patterns",
 };
 
+/** Professions wowforever.be publishes a recipe table for. */
+export const WOWFOREVER_RECIPE_PAGES = new Set([
+  "alchemy",
+  "blacksmithing",
+  "cooking",
+  "enchanting",
+  "engineering",
+  "first-aid",
+  "leatherworking",
+  "mining",
+  "tailoring",
+]);
+
 export function wowForeverUrl(slug: string): string {
   return `https://wowforever.be/tradeskills/forever/${slug}/recipes/`;
 }
@@ -48,8 +61,10 @@ export async function fetchUnlockPages(
   const warnings: string[] = [];
   for (const { slug } of professions) {
     const entry: UnlockPages = {};
-    const html = await download(wowForeverUrl(slug), `wowforever.be ${slug}`, fetchFn, warnings);
-    if (html !== undefined) entry.wowForever = html;
+    if (WOWFOREVER_RECIPE_PAGES.has(slug)) {
+      const html = await download(wowForeverUrl(slug), `wowforever.be ${slug}`, fetchFn, warnings);
+      if (html !== undefined) entry.wowForever = html;
+    }
 
     const wikiTitle = WIKI_RECIPE_PAGES[slug];
     if (wikiTitle) {

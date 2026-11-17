@@ -38,6 +38,15 @@ describe("fetchUnlockPages", () => {
     });
   });
 
+  it("skips professions wowforever.be has no recipe page for", async () => {
+    const { fetchFn, calls } = fakeFetch({});
+    const poisons = { id: 40, slug: "poisons", name: "Poisons", iconFileId: 1, childSkillLineIds: [] };
+    const { pages, warnings } = await fetchUnlockPages([poisons], fetchFn);
+    expect(calls).toEqual([]);
+    expect(pages.poisons).toEqual({});
+    expect(warnings).toEqual([]);
+  });
+
   it("only asks the wiki for professions it has a page for", async () => {
     const { fetchFn, calls } = fakeFetch({
       [WOWFOREVER_BS]: "x",

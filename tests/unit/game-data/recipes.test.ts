@@ -117,3 +117,19 @@ describe("buildProfessions", () => {
     expect(professions.find((p) => p.id === 164)!.iconFileId).toBeGreaterThan(0);
   });
 });
+
+describe("buildRecipes — internal test professions", () => {
+  it("ignores skill lines the developers marked as not for players", () => {
+    const withTestRecipe = { ...tables };
+    withTestRecipe.SkillLineAbility = [
+      ...tables.SkillLineAbility,
+      { ...tables.SkillLineAbility[0], ID: "999001", SkillLine: "2933", Spell: "999001" },
+    ];
+    withTestRecipe.SpellReagents = [
+      ...tables.SpellReagents,
+      { ...tables.SpellReagents[0], ID: "999001", SpellID: "999001" },
+    ];
+    expect(tables.SkillLine.find((line) => line.ID === "2933")!.DisplayName_lang).toContain("[DNT]");
+    expect(buildRecipes(withTestRecipe).some((r) => r.id === 999001)).toBe(false);
+  });
+});

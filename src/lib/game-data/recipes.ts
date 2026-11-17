@@ -20,8 +20,11 @@ const ENCHANT_EFFECTS = new Set([
 function professionOf(skillLines: Map<number, Row>, skillLineId: number): number | null {
   const line = skillLines.get(skillLineId);
   if (!line || !PROFESSION_CATEGORIES.has(Number(line.CategoryID))) return null;
-  const parent = Number(line.ParentSkillLineID);
-  return parent > 0 ? parent : skillLineId;
+  const parentId = Number(line.ParentSkillLineID);
+  const profession = parentId > 0 ? skillLines.get(parentId) : line;
+  // "[DNT]" (do not translate) marks the developers' internal test data.
+  if (!profession || profession.DisplayName_lang.includes("[DNT]")) return null;
+  return Number(profession.ID);
 }
 
 function reagentsOf(row: Row | undefined): RecipeReagent[] {
