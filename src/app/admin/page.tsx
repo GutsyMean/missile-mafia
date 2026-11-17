@@ -14,8 +14,8 @@ export const metadata = { title: "My recipes · Missile Mafia Crafting" };
 /** "Check for game updates" runs a full sync from this page's actions. */
 export const maxDuration = 300;
 
-async function AdminContent({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
-  const [data, { welcome }] = await Promise.all([loadAdminData(), searchParams]);
+async function AdminContent({ searchParams }: { searchParams: Promise<{ welcome?: string; character?: string }> }) {
+  const [data, { welcome, character }] = await Promise.all([loadAdminData(), searchParams]);
   if (!data) redirect("/login");
 
   // A member Discord confirmed sets up their own profile.
@@ -48,8 +48,15 @@ async function AdminContent({ searchParams }: { searchParams: Promise<{ welcome?
       </Frame>
     );
   }
-  // Remount when the account's crafter changes, so the tabs start from the new list.
-  return <AdminPanel key={data.crafters[0]?.id ?? "no-crafter"} data={data} welcome={welcome === "1"} />;
+  // Remount when the account's characters change, so the page starts from the new list.
+  return (
+    <AdminPanel
+      key={data.crafters.map((crafter) => crafter.id).join(",") || "no-crafter"}
+      data={data}
+      welcome={welcome === "1"}
+      initialCrafterId={typeof character === "string" ? character : undefined}
+    />
+  );
 }
 
 export default function AdminPage({ searchParams }: PageProps<"/admin">) {

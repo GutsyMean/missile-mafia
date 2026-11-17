@@ -63,6 +63,8 @@ The check is made by the site's server, which asks Discord with the token issued
 
 **Automatic approval off** (the default), or the account is not in the server. The account waits under *Waiting for you* until an admin presses **Add as crafter**.
 
+**Several characters.** One Discord login can hold several characters (up to eight), each listed on its own with its own professions and recipes. A member adds them with **Add character** on their own page and switches between them there; a character can also have more than one profession.
+
 The same tab links or unlinks existing crafters, adds a crafter before the member has signed in, and hides a crafter from the public list. Changes take effect at once; nothing is redeployed. Signing in alone gives an account no rights.
 
 ## Working on it

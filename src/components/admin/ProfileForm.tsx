@@ -24,7 +24,8 @@ interface Props {
   professions: CatalogProfession[];
   submitLabel: string;
   onSubmit: (input: ProfileInput) => Promise<ActionResult<unknown>>;
-  onSaved: () => void;
+  /** Called with whatever the save returned, e.g. the id of a new character. */
+  onSaved: (result: unknown) => void;
 }
 
 /** A crafter's profile: used both for signing up and for editing later. */
@@ -51,7 +52,7 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
         setError(null);
         startTransition(async () => {
           const result = await onSubmit({ ...form, skills });
-          if (result.ok) onSaved();
+          if (result.ok) onSaved(result.data);
           else setError(result.error);
         });
       }}
@@ -86,7 +87,10 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
       </div>
 
       <h3 className={styles.subheading}>Profession skill</h3>
-      <p className={styles.muted}>Fill in the professions you have; leave the rest empty.</p>
+      <p className={styles.muted}>
+        For each profession this character has, type its skill level: the number on the bar in your profession
+        window, from 1 to 300 (for example 145). Leave the others empty.
+      </p>
       <div className={styles.fields}>
         {professions.map((profession) => (
           <label key={profession.id} className={styles.fieldLabel}>
@@ -94,7 +98,8 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
             <input
               className={wow.field}
               inputMode="numeric"
-              placeholder="Not learned"
+              placeholder="Skill, e.g. 145"
+              aria-label={`${profession.name} skill level, 1 to 300`}
               value={skills[String(profession.id)] ?? ""}
               onChange={(event) => setSkills((current) => ({ ...current, [String(profession.id)]: event.target.value }))}
             />

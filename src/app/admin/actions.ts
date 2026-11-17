@@ -132,10 +132,11 @@ export async function saveProfile(crafterId: string, input: ProfileInput): Promi
 }
 
 /**
- * Sign-up: a member Discord confirmed creates their own crafter profile.
- * The database refuses anyone it has no verification for.
+ * Sign-up, and adding another character later: a member Discord confirmed (or
+ * a site admin) creates a crafter profile of their own. The database refuses
+ * anyone else.
  */
-export async function signUpCrafter(input: ProfileInput): Promise<ActionResult> {
+export async function signUpCrafter(input: ProfileInput): Promise<ActionResult<{ crafterId: string }>> {
   const session = await signedIn();
   if (!session) return fail("Sign in again to continue.");
   const profile = parseProfile(input);
@@ -149,7 +150,8 @@ export async function signUpCrafter(input: ProfileInput): Promise<ActionResult> 
         : error.message,
     );
   }
-  return writeProfile(session, data as string, profile.data);
+  const written = await writeProfile(session, data as string, profile.data);
+  return written.ok ? { ok: true, data: { crafterId: data as string } } : written;
 }
 
 /**

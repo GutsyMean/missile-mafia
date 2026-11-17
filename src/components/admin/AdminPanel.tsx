@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import {
   checkForGameUpdates,
@@ -8,6 +9,7 @@ import {
   importGuildon,
   saveProfile,
   saveRecipes,
+  signUpCrafter,
   type SyncSummary,
 } from "@/app/admin/actions";
 import { signOut } from "@/app/login/actions";
@@ -17,11 +19,11 @@ import { matchGuildonExport, parseGuildonExport, type GuildonErrorReason } from 
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { CraftersPanel } from "./CraftersPanel";
-import { ProfileForm } from "./ProfileForm";
+import { EMPTY_PROFILE, ProfileForm } from "./ProfileForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
-type Tab = "recipes" | "import" | "profile" | "crafters" | "data";
+type Tab = "recipes" | "import" | "profile" | "add" | "crafters" | "data";
 
 const IMPORT_ERRORS: Record<GuildonErrorReason, string> = {
   format: "is not an export line. Copy the whole text from /gnc export.",
@@ -50,16 +52,35 @@ function profileOf(crafter: AdminCrafter) {
 
 interface Props {
   data: AdminData;
-  /** True straight after signing up: opens on the recipe import, the second step. */
+  /** True straight after adding a character: opens on the recipe import, the second step. */
   welcome?: boolean;
+  /** The character to open on, when the account has several. */
+  initialCrafterId?: string;
 }
 
-export function AdminPanel({ data, welcome = false }: Props) {
+export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
+  const router = useRouter();
+  // One login can hold several characters; the page works on one at a time.
+  const [activeId, setActiveId] = useState(
+    () => (data.crafters.find((c) => c.id === initialCrafterId) ?? data.crafters[0])?.id ?? null,
+  );
   // A site admin need not be a crafter; they then see only the admin tabs.
-  const crafter = data.crafters[0] ?? null;
+  const crafter = data.crafters.find((c) => c.id === activeId) ?? data.crafters[0] ?? null;
   const [tab, setTab] = useState<Tab>(crafter ? (welcome ? "import" : "recipes") : "crafters");
   const [settings, setSettings] = useState<AdminSettings | null>(data.settings);
-  const [ticked, setTicked] = useState(() => new Set(crafter?.recipeIds ?? []));
+  // Each character's ticks, kept while switching between them.
+  const [tickedByCrafter, setTickedByCrafter] = useState<Record<string, Set<number>>>(() =>
+    Object.fromEntries(data.crafters.map((c) => [c.id, new Set(c.recipeIds)])),
+  );
+  const ticked = useMemo(
+    () => (crafter ? (tickedByCrafter[crafter.id] ?? new Set(crafter.recipeIds)) : new Set<number>()),
+    [crafter, tickedByCrafter],
+  );
+  const setTicked = (next: Set<number>) => {
+    if (crafter) setTickedByCrafter((current) => ({ ...current, [crafter.id]: next }));
+  };
+  // Members Discord confirmed, and admins, can add characters themselves.
+  const canAddCharacter = data.isAdmin || (data.signup.open && data.signup.verified);
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
   const [directory, setDirectory] = useState<AdminDirectory | null>(data.directory);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
@@ -114,6 +135,7 @@ export function AdminPanel({ data, welcome = false }: Props) {
           ["profile", "Profile"],
         ] as [Tab, string][])
       : []),
+    ...(canAddCharacter ? ([["add", "Add character"]] as [Tab, string][]) : []),
     ...(data.isAdmin
       ? ([
           ["crafters", "Crafters"],
@@ -132,6 +154,26 @@ export function AdminPanel({ data, welcome = false }: Props) {
       className={styles.window}
     >
       <div className={styles.topbar}>
+        {data.crafters.length > 1 && crafter ? (
+          <label className={styles.inlineLabel}>
+            Character
+            <select
+              className={`${wow.field} ${styles.wideSelect}`}
+              value={crafter.id}
+              onChange={(event) => {
+                setActiveId(event.target.value);
+                setMessage(null);
+                if (tab === "add") setTab("recipes");
+              }}
+            >
+              {data.crafters.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.characterName}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         <nav className={styles.tabs} aria-label="Sections">
           {tabs.map(([id, label]) => (
             <button
@@ -165,15 +207,16 @@ export function AdminPanel({ data, welcome = false }: Props) {
       </div>
       {welcome && crafter && tab === "import" && ticked.size === 0 ? (
         <p className={styles.welcome}>
-          <strong>Welcome, {crafter.characterName}. Step 2 of 2: your recipes.</strong> Paste an export from the addon
-          below to add everything you have learned at once, or open <em>My recipes</em> and tick them by hand. Your
-          profile is already on the crafting list.
+          <strong>{crafter.characterName} is set up. Step 2 of 2: this character&apos;s recipes.</strong> Paste an
+          export from the addon below to add everything it has learned at once, or open <em>My recipes</em> and tick
+          them by hand. The profile is already on the crafting list.
         </p>
       ) : null}
 
       <div className={styles.pane}>
         {tab === "recipes" && crafter ? (
           <RecipeChecklist
+            key={crafter.id}
             catalog={catalog}
             ticked={ticked}
             skills={crafter.skills}
@@ -185,11 +228,13 @@ export function AdminPanel({ data, welcome = false }: Props) {
         ) : null}
         {tab === "import" && crafter ? (
           <GuildonImport
+            key={crafter.id}
             catalog={catalog}
             crafterId={crafter.id}
+            crafterName={crafter.characterName}
             ticked={ticked}
             onImported={(ids, text) => {
-              setTicked((current) => new Set([...current, ...ids]));
+              setTicked(new Set([...ticked, ...ids]));
               setMessage({ kind: "ok", text });
               setTab("recipes");
             }}
@@ -197,12 +242,32 @@ export function AdminPanel({ data, welcome = false }: Props) {
         ) : null}
         {tab === "profile" && crafter ? (
           <ProfileForm
-            heading="How guild members find you"
+            key={crafter.id}
+            heading={`How guild members find ${crafter.characterName}`}
             initial={profileOf(crafter)}
             professions={catalog.professions}
             submitLabel="Save profile"
             onSubmit={(input) => saveProfile(crafter.id, input)}
-            onSaved={() => setMessage({ kind: "ok", text: "Profile saved." })}
+            onSaved={() => {
+              setMessage({ kind: "ok", text: "Profile saved." });
+              router.refresh(); // the name and skill shown elsewhere on the page follow
+            }}
+          />
+        ) : null}
+        {tab === "add" && canAddCharacter ? (
+          <ProfileForm
+            heading="Add another character"
+            lead="Each character is listed on its own, with its own professions and recipes. Use this for an alt with different professions."
+            initial={EMPTY_PROFILE}
+            professions={catalog.professions}
+            submitLabel="Add character"
+            onSubmit={signUpCrafter}
+            onSaved={(result) => {
+              // Reload on the new character, at the recipe import.
+              const { crafterId } = result as { crafterId: string };
+              router.replace(`/admin?character=${crafterId}&welcome=1`);
+              router.refresh();
+            }}
           />
         ) : null}
         {tab === "crafters" && directory ? (
@@ -224,11 +289,14 @@ export function AdminPanel({ data, welcome = false }: Props) {
 function GuildonImport({
   catalog,
   crafterId,
+  crafterName,
   ticked,
   onImported,
 }: {
   catalog: AdminCatalog;
   crafterId: string;
+  /** The character these recipes will be added to. */
+  crafterName: string;
   ticked: Set<number>;
   onImported: (recipeIds: number[], message: string) => void;
 }) {
@@ -287,6 +355,12 @@ function GuildonImport({
                 ))}
               </ul>
             )}
+            {character.name.toLowerCase() !== crafterName.split(" ")[0].toLowerCase() ? (
+              <p className={styles.muted}>
+                This export is from {character.name}, and you are editing {crafterName}. Its recipes will be added
+                to {crafterName}; switch character first if that is not what you want.
+              </p>
+            ) : null}
             {match.unknownSpellIds.length > 0 ? (
               <p className={styles.muted}>
                 {match.unknownSpellIds.length} entries are not recipes this site lists and will be skipped.

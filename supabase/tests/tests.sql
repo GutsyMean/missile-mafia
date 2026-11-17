@@ -400,7 +400,20 @@ select public.signup_crafter(' Joiner ') as joiner_crafter \gset
 select test.is((select user_id from public.crafters where id = :'joiner_crafter'), :'joiner'::uuid, 'a verified member creates their own crafter');
 select test.is((select character_name from public.crafters where id = :'joiner_crafter'), 'Joiner', 'under the name they gave');
 select test.is((select is_listed from public.crafters where id = :'joiner_crafter'), true, 'and is listed straight away');
-select test.throws($$select public.signup_crafter('Second')$$, 'P0001', 'one profile per account');
+select public.signup_crafter('Joiner Alt') as joiner_alt \gset
+select test.is((select user_id from public.crafters where id = :'joiner_alt'), :'joiner'::uuid, 'a member can add another character under the same login');
+select test.is((select count(*)::int from public.crafters where user_id = (select auth.uid())), 2, 'each character is its own crafter');
+select test.is(
+  test.affected(format('insert into public.crafter_professions (crafter_id, profession_id, skill) values (%L, 164, 75)', :'joiner_alt')), 1,
+  'with its own professions');
+select count(public.signup_crafter('Alt ' || n)) from generate_series(3, 8) n;
+select test.throws($$select public.signup_crafter('One too many')$$, 'P0001', 'an account cannot hold more than eight characters');
+reset role;
+set role service_role;
+delete from public.crafters where user_id = :'joiner' and id not in (:'joiner_crafter', :'joiner_alt');
+reset role;
+set role authenticated;
+select test.login(:'joiner');
 select test.is(
   test.affected(format('update public.crafters set note = %L where id = %L', 'Whisper me', :'joiner_crafter')), 1,
   'they can then fill in their profile');
@@ -417,9 +430,12 @@ select test.is(
   (select (a ->> 'isVerifiedMember')::boolean from jsonb_array_elements(public.admin_directory() -> 'accounts') a where a ->> 'id' = :'stranger'), false,
   'and who it did not');
 select public.admin_save_settings(false, '123456789012345678', null);
+select public.signup_crafter('Damien Alt') as owner_alt \gset
+select test.is((select user_id from public.crafters where id = :'owner_alt'), :'owner'::uuid, 'an admin can add a character of their own without being verified');
 reset role;
 
 set role service_role;
+delete from public.crafters where id = :'owner_alt';
 insert into public.verified_members (user_id) values (:'stranger');
 reset role;
 set role authenticated;
