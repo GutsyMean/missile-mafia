@@ -1,0 +1,145 @@
+import { expect, test, type Page } from "@playwright/test";
+
+const rows = (page: Page) => page.locator("[data-recipe]");
+const row = (page: Page, name: string) => page.getByRole("button", { name: new RegExp(`^${name}`) });
+const detail = (page: Page) => page.locator('[data-testid="detail"]:visible');
+
+test.describe("browsing", () => {
+  test("lists everything the crafter can make, grouped by type", async ({ page }) => {
+    await page.goto("/");
+    await expect(rows(page)).toHaveCount(58);
+    await expect(page.getByRole("heading", { name: /Mail Armor/ })).toBeVisible();
+    await expect(page.getByText("58 recipes")).toBeVisible();
+  });
+
+  test("shows the in-game tooltip and the three reagents when an item is clicked", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Silvered Bronze Gauntlets").click();
+
+    const pane = detail(page);
+    for (const line of ["Binds when equipped", "118 Armor", "+4 Strength", "+4 Stamina", "+3 Spirit", "Requires Level 22"]) {
+      await expect(pane.getByText(line, { exact: true })).toBeVisible();
+    }
+    const reagents = pane.getByRole("region", { name: "Reagents" }).getByRole("listitem");
+    await expect(reagents).toHaveText(["8Bronze Bar", "1Silver Bar", "2Coarse Grinding Stone"]);
+    await expect(pane.getByText("Damien")).toBeVisible();
+  });
+
+  test("shows a tooltip beside a row on hover", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Shining Silver Breastplate").hover();
+    const tooltip = page.getByRole("tooltip");
+    await expect(tooltip).toBeVisible();
+    await expect(tooltip).toContainText("214 Armor");
+    await expect(tooltip).toContainText("+14 Strength");
+
+    await page.keyboard.press("Escape");
+    await expect(tooltip).toBeHidden();
+  });
+
+  test("warns that a Bind on Pickup craft cannot be traded", async ({ page }) => {
+    await page.goto("/");
+    const helm = row(page, "Veteran's Silvered Chain Helm");
+    await expect(helm).toContainText("Soulbound");
+    await helm.click();
+    await expect(detail(page).getByRole("note")).toContainText("cannot be traded");
+    await expect(detail(page).getByText("Binds when picked up")).toBeVisible();
+  });
+
+  test("serves item icons converted from the game's files", async ({ request }) => {
+    const response = await request.get("/icons/132939.webp");
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toBe("image/webp");
+    expect((await request.get("/icons/not-an-icon")).status()).toBe(400);
+  });
+});
+
+test.describe("search and filters", () => {
+  test("searches item names", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("searchbox").fill("silver");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
+    await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
+    await expect(page.getByText(/of 58 recipes/)).toBeVisible();
+  });
+
+  test("finds recipes by a reagent they use", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("searchbox").fill("green dye");
+    await expect(row(page, "Green Iron Leggings")).toBeVisible();
+    await expect(row(page, "Silvered Bronze Gauntlets")).toHaveCount(0);
+  });
+
+  test("filters by slot", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("Slot").selectOption("Hands");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
+    await expect(row(page, "Green Iron Leggings")).toHaveCount(0);
+  });
+
+  test("hides soulbound crafts with Tradeable only", async ({ page }) => {
+    await page.goto("/");
+    await expect(row(page, "Veteran's Silvered Chain Helm")).toBeVisible();
+    await page.getByLabel("Tradeable only").check();
+    await expect(row(page, "Veteran's Silvered Chain Helm")).toHaveCount(0);
+    await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
+  });
+
+  test("offers a way out when nothing matches", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("searchbox").fill("thunderfury");
+    await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
+    await page.getByRole("button", { name: "Clear filters" }).first().click();
+    await expect(rows(page)).toHaveCount(58);
+  });
+});
+
+test.describe("links", () => {
+  test("keeps filters and the open item in the address", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("Slot").selectOption("Hands");
+    await row(page, "Silvered Bronze Gauntlets").click();
+    await expect(page).toHaveURL(/\?slot=Hands&recipe=3333$/);
+  });
+
+  test("reopens the same item and filters from a pasted link", async ({ page }) => {
+    await page.goto("/?slot=Legs&recipe=3506");
+    await expect(detail(page).getByRole("heading", { name: "Green Iron Leggings" })).toBeVisible();
+    await expect(page.getByLabel("Slot")).toHaveValue("Legs");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toHaveCount(0);
+  });
+});
+
+test.describe("on a phone @phone", () => {
+  test("opens details as a full-screen sheet that Back closes", async ({ page }) => {
+    await page.goto("/");
+    const sheet = page.getByRole("dialog", { name: "Item details" });
+    await expect(sheet).toBeHidden();
+
+    await row(page, "Silvered Bronze Gauntlets").tap();
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText("118 Armor")).toBeVisible();
+    await expect(sheet.getByText("Coarse Grinding Stone")).toBeVisible();
+
+    await page.goBack();
+    await expect(sheet).toBeHidden();
+    await expect(rows(page).first()).toBeVisible();
+  });
+
+  test("closes the sheet with its close button", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Green Iron Leggings").tap();
+    const sheet = page.getByRole("dialog", { name: "Item details" });
+    await sheet.getByRole("button", { name: "Close" }).tap();
+    await expect(sheet).toBeHidden();
+  });
+
+  test("keeps extra filters folded away until asked for", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByLabel("Slot")).toBeHidden();
+    await page.getByRole("button", { name: /^Filters/ }).tap();
+    await page.getByLabel("Slot").selectOption("Hands");
+    await expect(page.getByRole("button", { name: "Filters (1)" })).toBeVisible();
+    await expect(row(page, "Green Iron Leggings")).toHaveCount(0);
+  });
+});

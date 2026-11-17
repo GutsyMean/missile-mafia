@@ -1,0 +1,202 @@
+{
+  "build": "1.60.1.70938",
+  "textures": {
+    "frame": {
+      "width": 636,
+      "height": 646,
+      "note": "slice 190 190 200 190"
+    },
+    "frame-portrait": {
+      "width": 636,
+      "height": 646,
+      "note": "slice 190 190 200 190"
+    },
+    "frame-bg": {
+      "width": 1024,
+      "height": 1024
+    },
+    "inset-bg": {
+      "width": 256,
+      "height": 256
+    },
+    "inset": {
+      "width": 268,
+      "height": 268,
+      "note": "slice 6 6 6 6"
+    },
+    "close": {
+      "width": 64,
+      "height": 64
+    },
+    "close-pressed": {
+      "width": 64,
+      "height": 64
+    },
+    "close-disabled": {
+      "width": 64,
+      "height": 64
+    },
+    "close-highlight": {
+      "width": 64,
+      "height": 64
+    },
+    "list-bg": {
+      "width": 299,
+      "height": 334
+    },
+    "row": {
+      "width": 293,
+      "height": 47
+    },
+    "row-highlight": {
+      "width": 293,
+      "height": 47
+    },
+    "row-selected": {
+      "width": 293,
+      "height": 47
+    },
+    "header": {
+      "width": 29,
+      "height": 26,
+      "note": "slice 0 14 0 14"
+    },
+    "skill-bar": {
+      "width": 256,
+      "height": 32
+    },
+    "skill-bar-border": {
+      "width": 256,
+      "height": 32
+    },
+    "tooltip": {
+      "width": 30,
+      "height": 30,
+      "note": "slice 7 7 7 7"
+    },
+    "tooltip-bg": {
+      "width": 64,
+      "height": 64
+    },
+    "button": {
+      "width": 470,
+      "height": 128,
+      "note": "slice 0 292 0 114"
+    },
+    "button-pressed": {
+      "width": 470,
+      "height": 128,
+      "note": "slice 0 292 0 114"
+    },
+    "button-disabled": {
+      "width": 470,
+      "height": 128,
+      "note": "slice 0 292 0 114"
+    },
+    "button-highlight": {
+      "width": 441,
+      "height": 128
+    },
+    "search": {
+      "width": 48,
+      "height": 40,
+      "note": "slice 0 16 0 16"
+    },
+    "search-icon": {
+      "width": 24,
+      "height": 24
+    },
+    "search-clear": {
+      "width": 20,
+      "height": 20
+    },
+    "dropdown": {
+      "width": 78,
+      "height": 78
+    },
+    "dropdown-hover": {
+      "width": 78,
+      "height": 78
+    },
+    "dropdown-open": {
+      "width": 78,
+      "height": 78
+    },
+    "dropdown-menu": {
+      "width": 180,
+      "height": 180
+    },
+    "checkbox": {
+      "width": 30,
+      "height": 29
+    },
+    "checkmark": {
+      "width": 30,
+      "height": 29
+    },
+    "scroll-thumb-top": {
+      "width": 8,
+      "height": 8
+    },
+    "scroll-thumb-middle": {
+      "width": 8,
+      "height": 515
+    },
+    "scroll-thumb-bottom": {
+      "width": 8,
+      "height": 36
+    },
+    "scroll-track-top": {
+      "width": 8,
+      "height": 8
+    },
+    "scroll-track-bottom": {
+      "width": 8,
+      "height": 8
+    },
+    "scroll-arrow-top": {
+      "width": 17,
+      "height": 11
+    },
+    "scroll-arrow-bottom": {
+      "width": 17,
+      "height": 11
+    },
+    "scroll-track-middle": {
+      "width": 8,
+      "height": 1
+    },
+    "slot-common": {
+      "width": 40,
+      "height": 40
+    },
+    "slot-uncommon": {
+      "width": 40,
+      "height": 40
+    },
+    "slot-rare": {
+      "width": 40,
+      "height": 40
+    },
+    "slot-epic": {
+      "width": 40,
+      "height": 40
+    },
+    "slot-legendary": {
+      "width": 40,
+      "height": 40
+    },
+    "coin-gold": {
+      "width": 20,
+      "height": 20
+    },
+    "coin-silver": {
+      "width": 20,
+      "height": 20
+    },
+    "coin-copper": {
+      "width": 20,
+      "height": 20
+    }
+  }
+}

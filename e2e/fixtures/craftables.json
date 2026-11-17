@@ -1,0 +1,5393 @@
+{
+ "build": "1.60.1.70938",
+ "syncedAt": "2026-11-17T00:00:00.000Z",
+ "professions": [
+  {
+   "id": 164,
+   "slug": "blacksmithing",
+   "name": "Blacksmithing",
+   "iconFileId": 136241
+  }
+ ],
+ "crafters": [
+  {
+   "id": "00000000-0000-4000-8000-000000000001",
+   "slug": "damien",
+   "characterName": "Damien",
+   "realm": null,
+   "faction": "Alliance",
+   "class": "Paladin",
+   "level": 24,
+   "note": "Bring the materials and whisper me in game. Tips welcome, never required.",
+   "skills": {
+    "164": 145
+   }
+  }
+ ],
+ "recipes": [
+  {
+   "id": 1252280,
+   "professionId": 164,
+   "name": "Acolyte's Silvered Chain Helm",
+   "iconFileId": 133138,
+   "craftedItemId": 250531,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     15
+    ],
+    [
+     3478,
+     6
+    ],
+    [
+     2842,
+     4
+    ],
+    [
+     249427,
+     4
+    ],
+    [
+     10940,
+     6
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2661,
+   "professionId": 164,
+   "name": "Copper Chain Belt",
+   "iconFileId": 132491,
+   "craftedItemId": 2851,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     6
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3319,
+   "professionId": 164,
+   "name": "Copper Chain Boots",
+   "iconFileId": 132535,
+   "craftedItemId": 3469,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     8
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2662,
+   "professionId": 164,
+   "name": "Copper Chain Pants",
+   "iconFileId": 134583,
+   "craftedItemId": 2852,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     4
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1252229,
+   "professionId": 164,
+   "name": "Gemmed Copper Boots",
+   "iconFileId": 132554,
+   "craftedItemId": 250620,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     2
+    ],
+    [
+     818,
+     2
+    ],
+    [
+     774,
+     2
+    ],
+    [
+     2318,
+     4
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1252231,
+   "professionId": 164,
+   "name": "Glowing Copper Boots",
+   "iconFileId": 132535,
+   "craftedItemId": 250482,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     2
+    ],
+    [
+     10938,
+     4
+    ],
+    [
+     2318,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3501,
+   "professionId": 164,
+   "name": "Green Iron Bracers",
+   "iconFileId": 132605,
+   "craftedItemId": 3835,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3575,
+     6
+    ],
+    [
+     2605,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3502,
+   "professionId": 164,
+   "name": "Green Iron Helm",
+   "iconFileId": 133071,
+   "craftedItemId": 3836,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3575,
+     12
+    ],
+    [
+     3864,
+     1
+    ],
+    [
+     2605,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3506,
+   "professionId": 164,
+   "name": "Green Iron Leggings",
+   "iconFileId": 134585,
+   "craftedItemId": 3842,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     3575,
+     8
+    ],
+    [
+     3486,
+     1
+    ],
+    [
+     2605,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2672,
+   "professionId": 164,
+   "name": "Patterned Bronze Bracers",
+   "iconFileId": 132606,
+   "craftedItemId": 2868,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     5
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 7817,
+   "professionId": 164,
+   "name": "Rough Bronze Boots",
+   "iconFileId": 132535,
+   "craftedItemId": 6350,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     6
+    ],
+    [
+     3470,
+     6
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2670,
+   "professionId": 164,
+   "name": "Rough Bronze Cuirass",
+   "iconFileId": 132630,
+   "craftedItemId": 2866,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     7
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2668,
+   "professionId": 164,
+   "name": "Rough Bronze Leggings",
+   "iconFileId": 134583,
+   "craftedItemId": 2865,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     6
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3328,
+   "professionId": 164,
+   "name": "Rough Bronze Shoulders",
+   "iconFileId": 135036,
+   "craftedItemId": 3480,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     5
+    ],
+    [
+     1210,
+     1
+    ],
+    [
+     3478,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 12260,
+   "professionId": 164,
+   "name": "Rough Copper Vest",
+   "iconFileId": 132624,
+   "craftedItemId": 10421,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     4
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2666,
+   "professionId": 164,
+   "name": "Runed Copper Belt",
+   "iconFileId": 132492,
+   "craftedItemId": 2857,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     10
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2664,
+   "professionId": 164,
+   "name": "Runed Copper Bracers",
+   "iconFileId": 132602,
+   "craftedItemId": 2854,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     10
+    ],
+    [
+     3470,
+     3
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3323,
+   "professionId": 164,
+   "name": "Runed Copper Gauntlets",
+   "iconFileId": 132938,
+   "craftedItemId": 3472,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     8
+    ],
+    [
+     3470,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3324,
+   "professionId": 164,
+   "name": "Runed Copper Pants",
+   "iconFileId": 134583,
+   "craftedItemId": 3473,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     8
+    ],
+    [
+     2320,
+     3
+    ],
+    [
+     3470,
+     3
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2675,
+   "professionId": 164,
+   "name": "Shining Silver Breastplate",
+   "iconFileId": 132750,
+   "craftedItemId": 2870,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     20
+    ],
+    [
+     1206,
+     2
+    ],
+    [
+     1705,
+     2
+    ],
+    [
+     5500,
+     2
+    ],
+    [
+     2842,
+     4
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3331,
+   "professionId": 164,
+   "name": "Silvered Bronze Boots",
+   "iconFileId": 132535,
+   "craftedItemId": 3482,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     6
+    ],
+    [
+     2842,
+     1
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3333,
+   "professionId": 164,
+   "name": "Silvered Bronze Gauntlets",
+   "iconFileId": 132939,
+   "craftedItemId": 3483,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     8
+    ],
+    [
+     2842,
+     1
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1252235,
+   "professionId": 164,
+   "name": "Sterling Silver Shoulders",
+   "iconFileId": 135040,
+   "craftedItemId": 250486,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2842,
+     6
+    ],
+    [
+     2840,
+     2
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1252230,
+   "professionId": 164,
+   "name": "Strange Copper Boots",
+   "iconFileId": 132582,
+   "craftedItemId": 250621,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2840,
+     2
+    ],
+    [
+     10940,
+     4
+    ],
+    [
+     2318,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1252277,
+   "professionId": 164,
+   "name": "Veteran's Silvered Chain Helm",
+   "iconFileId": 133141,
+   "craftedItemId": 250528,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Mail Armor",
+   "categoryOrder": 103,
+   "reagents": [
+    [
+     2841,
+     15
+    ],
+    [
+     3478,
+     6
+    ],
+    [
+     2842,
+     4
+    ],
+    [
+     249427,
+     4
+    ],
+    [
+     5498,
+     6
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2741,
+   "professionId": 164,
+   "name": "Bronze Axe",
+   "iconFileId": 132408,
+   "craftedItemId": 2849,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Axes",
+   "categoryOrder": 200,
+   "reagents": [
+    [
+     2841,
+     7
+    ],
+    [
+     2880,
+     4
+    ],
+    [
+     2319,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2738,
+   "professionId": 164,
+   "name": "Copper Axe",
+   "iconFileId": 132417,
+   "craftedItemId": 2845,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Axes",
+   "categoryOrder": 200,
+   "reagents": [
+    [
+     2840,
+     6
+    ],
+    [
+     2880,
+     1
+    ],
+    [
+     2589,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3294,
+   "professionId": 164,
+   "name": "Thick War Axe",
+   "iconFileId": 135419,
+   "craftedItemId": 3489,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Axes",
+   "categoryOrder": 200,
+   "reagents": [
+    [
+     2840,
+     10
+    ],
+    [
+     2880,
+     2
+    ],
+    [
+     2842,
+     2
+    ],
+    [
+     3470,
+     2
+    ],
+    [
+     2318,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 9987,
+   "professionId": 164,
+   "name": "Bronze Battle Axe",
+   "iconFileId": 132415,
+   "craftedItemId": 7958,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Axes",
+   "categoryOrder": 201,
+   "reagents": [
+    [
+     2841,
+     14
+    ],
+    [
+     3466,
+     1
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3293,
+   "professionId": 164,
+   "name": "Copper Battle Axe",
+   "iconFileId": 135420,
+   "craftedItemId": 3488,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Axes",
+   "categoryOrder": 201,
+   "reagents": [
+    [
+     2840,
+     12
+    ],
+    [
+     2880,
+     2
+    ],
+    [
+     774,
+     2
+    ],
+    [
+     3470,
+     2
+    ],
+    [
+     2318,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2740,
+   "professionId": 164,
+   "name": "Bronze Mace",
+   "iconFileId": 133483,
+   "craftedItemId": 2848,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Maces",
+   "categoryOrder": 204,
+   "reagents": [
+    [
+     2841,
+     6
+    ],
+    [
+     2880,
+     4
+    ],
+    [
+     2319,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2737,
+   "professionId": 164,
+   "name": "Copper Mace",
+   "iconFileId": 133476,
+   "craftedItemId": 2844,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Maces",
+   "categoryOrder": 204,
+   "reagents": [
+    [
+     2840,
+     6
+    ],
+    [
+     2880,
+     1
+    ],
+    [
+     2589,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3296,
+   "professionId": 164,
+   "name": "Heavy Bronze Mace",
+   "iconFileId": 133483,
+   "craftedItemId": 3491,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Maces",
+   "categoryOrder": 204,
+   "reagents": [
+    [
+     2841,
+     8
+    ],
+    [
+     3466,
+     1
+    ],
+    [
+     1206,
+     1
+    ],
+    [
+     1210,
+     1
+    ],
+    [
+     3478,
+     2
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 9985,
+   "professionId": 164,
+   "name": "Bronze Warhammer",
+   "iconFileId": 133055,
+   "craftedItemId": 7956,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Maces",
+   "categoryOrder": 205,
+   "reagents": [
+    [
+     2841,
+     8
+    ],
+    [
+     3466,
+     1
+    ],
+    [
+     2319,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 7408,
+   "professionId": 164,
+   "name": "Heavy Copper Maul",
+   "iconFileId": 133055,
+   "craftedItemId": 6214,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Maces",
+   "categoryOrder": 205,
+   "reagents": [
+    [
+     2840,
+     12
+    ],
+    [
+     2880,
+     2
+    ],
+    [
+     2318,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2742,
+   "professionId": 164,
+   "name": "Bronze Shortsword",
+   "iconFileId": 135274,
+   "craftedItemId": 2850,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Swords",
+   "categoryOrder": 207,
+   "reagents": [
+    [
+     2841,
+     5
+    ],
+    [
+     2880,
+     4
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2739,
+   "professionId": 164,
+   "name": "Copper Shortsword",
+   "iconFileId": 135327,
+   "craftedItemId": 2847,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "One-Handed Swords",
+   "categoryOrder": 207,
+   "reagents": [
+    [
+     2840,
+     6
+    ],
+    [
+     2880,
+     1
+    ],
+    [
+     2589,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 9986,
+   "professionId": 164,
+   "name": "Bronze Greatsword",
+   "iconFileId": 135321,
+   "craftedItemId": 7957,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Swords",
+   "categoryOrder": 208,
+   "reagents": [
+    [
+     2841,
+     12
+    ],
+    [
+     3466,
+     2
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 9983,
+   "professionId": 164,
+   "name": "Copper Claymore",
+   "iconFileId": 135322,
+   "craftedItemId": 7955,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Swords",
+   "categoryOrder": 208,
+   "reagents": [
+    [
+     2840,
+     10
+    ],
+    [
+     2880,
+     2
+    ],
+    [
+     3470,
+     1
+    ],
+    [
+     2318,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3292,
+   "professionId": 164,
+   "name": "Heavy Copper Broadsword",
+   "iconFileId": 135312,
+   "craftedItemId": 3487,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Two-Handed Swords",
+   "categoryOrder": 208,
+   "reagents": [
+    [
+     2840,
+     14
+    ],
+    [
+     2880,
+     2
+    ],
+    [
+     818,
+     2
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3491,
+   "professionId": 164,
+   "name": "Big Bronze Knife",
+   "iconFileId": 135640,
+   "craftedItemId": 3848,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Daggers",
+   "categoryOrder": 215,
+   "reagents": [
+    [
+     2841,
+     6
+    ],
+    [
+     2880,
+     4
+    ],
+    [
+     3470,
+     2
+    ],
+    [
+     818,
+     1
+    ],
+    [
+     2319,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 8880,
+   "professionId": 164,
+   "name": "Copper Dagger",
+   "iconFileId": 135650,
+   "craftedItemId": 7166,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Daggers",
+   "categoryOrder": 215,
+   "reagents": [
+    [
+     2840,
+     6
+    ],
+    [
+     2880,
+     1
+    ],
+    [
+     3470,
+     1
+    ],
+    [
+     2318,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 6517,
+   "professionId": 164,
+   "name": "Pearl-handled Dagger",
+   "iconFileId": 135641,
+   "craftedItemId": 5540,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Daggers",
+   "categoryOrder": 215,
+   "reagents": [
+    [
+     2841,
+     6
+    ],
+    [
+     3466,
+     1
+    ],
+    [
+     5498,
+     2
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2665,
+   "professionId": 164,
+   "name": "Coarse Sharpening Stone",
+   "iconFileId": 135249,
+   "craftedItemId": 2863,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2836,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3116,
+   "professionId": 164,
+   "name": "Coarse Weightstone",
+   "iconFileId": 135256,
+   "craftedItemId": 3240,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2836,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 19667,
+   "professionId": 164,
+   "name": "Golden Skeleton Key",
+   "iconFileId": 134247,
+   "craftedItemId": 15870,
+   "craftedCount": 2,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     3577,
+     1
+    ],
+    [
+     3486,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2674,
+   "professionId": 164,
+   "name": "Heavy Sharpening Stone",
+   "iconFileId": 135250,
+   "craftedItemId": 2871,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2838,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3117,
+   "professionId": 164,
+   "name": "Heavy Weightstone",
+   "iconFileId": 135257,
+   "craftedItemId": 3241,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2838,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 2660,
+   "professionId": 164,
+   "name": "Rough Sharpening Stone",
+   "iconFileId": 135248,
+   "craftedItemId": 2862,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2835,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1230171,
+   "professionId": 164,
+   "name": "Sharpening Wheel",
+   "iconFileId": 135243,
+   "craftedItemId": 279944,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2835,
+     1
+    ],
+    [
+     2840,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 19666,
+   "professionId": 164,
+   "name": "Silver Skeleton Key",
+   "iconFileId": 134237,
+   "craftedItemId": 15869,
+   "craftedCount": 2,
+   "effectText": null,
+   "category": "Consumable",
+   "categoryOrder": 500,
+   "reagents": [
+    [
+     2842,
+     1
+    ],
+    [
+     3470,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3326,
+   "professionId": 164,
+   "name": "Coarse Grinding Stone",
+   "iconFileId": 135244,
+   "craftedItemId": 3478,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     2836,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 1245287,
+   "professionId": 164,
+   "name": "Copper Rod",
+   "iconFileId": 133942,
+   "craftedItemId": 6217,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     2840,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 14379,
+   "professionId": 164,
+   "name": "Golden Rod",
+   "iconFileId": 135147,
+   "craftedItemId": 11128,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     3577,
+     1
+    ],
+    [
+     3478,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3337,
+   "professionId": 164,
+   "name": "Heavy Grinding Stone",
+   "iconFileId": 135245,
+   "craftedItemId": 3486,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     2838,
+     3
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 8768,
+   "professionId": 164,
+   "name": "Iron Buckle",
+   "iconFileId": 133607,
+   "craftedItemId": 7071,
+   "craftedCount": 2,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     3575,
+     1
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 3320,
+   "professionId": 164,
+   "name": "Rough Grinding Stone",
+   "iconFileId": 135243,
+   "craftedItemId": 3470,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     2835,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  },
+  {
+   "id": 7818,
+   "professionId": 164,
+   "name": "Silver Rod",
+   "iconFileId": 135138,
+   "craftedItemId": 6338,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Trade Goods",
+   "categoryOrder": 507,
+   "reagents": [
+    [
+     2842,
+     1
+    ],
+    [
+     3470,
+     2
+    ]
+   ],
+   "crafterIds": [
+    "00000000-0000-4000-8000-000000000001"
+   ]
+  }
+ ],
+ "items": {
+  "774": {
+   "id": 774,
+   "name": "Malachite",
+   "quality": 2,
+   "iconFileId": 134106,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 7,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 15,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Malachite",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "818": {
+   "id": 818,
+   "name": "Tigerseye",
+   "quality": 2,
+   "iconFileId": 134118,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 100,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Tigerseye",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "1206": {
+   "id": 1206,
+   "name": "Moss Agate",
+   "quality": 2,
+   "iconFileId": 134105,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 400,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Moss Agate",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "1210": {
+   "id": 1210,
+   "name": "Shadowgem",
+   "quality": 2,
+   "iconFileId": 134074,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 250,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Shadowgem",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "1705": {
+   "id": 1705,
+   "name": "Lesser Moonstone",
+   "quality": 2,
+   "iconFileId": 134087,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 600,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Lesser Moonstone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2318": {
+   "id": 2318,
+   "name": "Light Leather",
+   "quality": 1,
+   "iconFileId": 134252,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 15,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Light Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2319": {
+   "id": 2319,
+   "name": "Medium Leather",
+   "quality": 1,
+   "iconFileId": 134254,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 50,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Medium Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2320": {
+   "id": 2320,
+   "name": "Coarse Thread",
+   "quality": 1,
+   "iconFileId": 132891,
+   "classId": 7,
+   "subclassId": 5,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 2,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Coarse Thread",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2589": {
+   "id": 2589,
+   "name": "Linen Cloth",
+   "quality": 1,
+   "iconFileId": 132889,
+   "classId": 7,
+   "subclassId": 5,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 13,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Linen Cloth",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2605": {
+   "id": 2605,
+   "name": "Green Dye",
+   "quality": 1,
+   "iconFileId": 134743,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 25,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Green Dye",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2835": {
+   "id": 2835,
+   "name": "Rough Stone",
+   "quality": 1,
+   "iconFileId": 135232,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 2,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Rough Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2836": {
+   "id": 2836,
+   "name": "Coarse Stone",
+   "quality": 1,
+   "iconFileId": 135235,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 15,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Coarse Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2838": {
+   "id": 2838,
+   "name": "Heavy Stone",
+   "quality": 1,
+   "iconFileId": 135238,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 60,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2840": {
+   "id": 2840,
+   "name": "Copper Bar",
+   "quality": 1,
+   "iconFileId": 133216,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 10,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Copper Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2841": {
+   "id": 2841,
+   "name": "Bronze Bar",
+   "quality": 1,
+   "iconFileId": 133227,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 50,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Bronze Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2842": {
+   "id": 2842,
+   "name": "Silver Bar",
+   "quality": 2,
+   "iconFileId": 133215,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 100,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Silver Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2844": {
+   "id": 2844,
+   "name": "Copper Mace",
+   "quality": 1,
+   "iconFileId": 133476,
+   "classId": 2,
+   "subclassId": 4,
+   "inventoryType": 13,
+   "itemLevel": 9,
+   "requiredLevel": 4,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 106,
+   "slotName": "One-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 7,
+    "max": 13,
+    "speed": 2.6,
+    "dps": 3.8
+   },
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Copper Mace",
+     "color": "quality"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "7 - 13 Damage",
+     "right": "Speed 2.60",
+     "color": "white"
+    },
+    {
+     "text": "(3.8 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 4",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2845": {
+   "id": 2845,
+   "name": "Copper Axe",
+   "quality": 1,
+   "iconFileId": 132417,
+   "classId": 2,
+   "subclassId": 0,
+   "inventoryType": 13,
+   "itemLevel": 9,
+   "requiredLevel": 4,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 109,
+   "slotName": "One-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 6,
+    "max": 12,
+    "speed": 2.4,
+    "dps": 3.8
+   },
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Copper Axe",
+     "color": "quality"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "6 - 12 Damage",
+     "right": "Speed 2.40",
+     "color": "white"
+    },
+    {
+     "text": "(3.8 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 4",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2847": {
+   "id": 2847,
+   "name": "Copper Shortsword",
+   "quality": 2,
+   "iconFileId": 135327,
+   "classId": 2,
+   "subclassId": 7,
+   "inventoryType": 13,
+   "itemLevel": 10,
+   "requiredLevel": 4,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 110,
+   "slotName": "One-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 9,
+    "max": 18,
+    "speed": 2.5,
+    "dps": 5.4
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Shortsword",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "9 - 18 Damage",
+     "right": "Speed 2.50",
+     "color": "white"
+    },
+    {
+     "text": "(5.4 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+1 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 4",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2848": {
+   "id": 2848,
+   "name": "Bronze Mace",
+   "quality": 2,
+   "iconFileId": 133483,
+   "classId": 2,
+   "subclassId": 4,
+   "inventoryType": 13,
+   "itemLevel": 22,
+   "requiredLevel": 17,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 898,
+   "slotName": "One-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 20,
+    "max": 38,
+    "speed": 2.6,
+    "dps": 11.2
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Mace",
+     "color": "quality"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "20 - 38 Damage",
+     "right": "Speed 2.60",
+     "color": "white"
+    },
+    {
+     "text": "(11.2 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 17",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2849": {
+   "id": 2849,
+   "name": "Bronze Axe",
+   "quality": 2,
+   "iconFileId": 132408,
+   "classId": 2,
+   "subclassId": 0,
+   "inventoryType": 13,
+   "itemLevel": 23,
+   "requiredLevel": 18,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 917,
+   "slotName": "One-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 20,
+    "max": 38,
+    "speed": 2.5,
+    "dps": 11.6
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Axe",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "20 - 38 Damage",
+     "right": "Speed 2.50",
+     "color": "white"
+    },
+    {
+     "text": "(11.6 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+3 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 18",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2850": {
+   "id": 2850,
+   "name": "Bronze Shortsword",
+   "quality": 2,
+   "iconFileId": 135274,
+   "classId": 2,
+   "subclassId": 7,
+   "inventoryType": 13,
+   "itemLevel": 24,
+   "requiredLevel": 19,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1136,
+   "slotName": "One-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 21,
+    "max": 40,
+    "speed": 2.5,
+    "dps": 12.2
+   },
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Shortsword",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "21 - 40 Damage",
+     "right": "Speed 2.50",
+     "color": "white"
+    },
+    {
+     "text": "(12.2 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+3 Agility",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 19",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2851": {
+   "id": 2851,
+   "name": "Copper Chain Belt",
+   "quality": 2,
+   "iconFileId": 132491,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 6,
+   "itemLevel": 11,
+   "requiredLevel": 6,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 56,
+   "slotName": "Waist",
+   "typeName": "Mail",
+   "armor": 65,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Chain Belt",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Waist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "65 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 6",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2852": {
+   "id": 2852,
+   "name": "Copper Chain Pants",
+   "quality": 2,
+   "iconFileId": 134583,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 7,
+   "itemLevel": 10,
+   "requiredLevel": 4,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 67,
+   "slotName": "Legs",
+   "typeName": "Mail",
+   "armor": 94,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Chain Pants",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Legs",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "94 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 4",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2854": {
+   "id": 2854,
+   "name": "Runed Copper Bracers",
+   "quality": 2,
+   "iconFileId": 132602,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 9,
+   "itemLevel": 19,
+   "requiredLevel": 14,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 225,
+   "slotName": "Wrist",
+   "typeName": "Mail",
+   "armor": 72,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 2
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Runed Copper Bracers",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Wrist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "72 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+2 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+2 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 14",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2857": {
+   "id": 2857,
+   "name": "Runed Copper Belt",
+   "quality": 2,
+   "iconFileId": 132492,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 6,
+   "itemLevel": 18,
+   "requiredLevel": 13,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 198,
+   "slotName": "Waist",
+   "typeName": "Mail",
+   "armor": 91,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 3
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Runed Copper Belt",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Waist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "91 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+3 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+2 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 13",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2862": {
+   "id": 2862,
+   "name": "Rough Sharpening Stone",
+   "quality": 1,
+   "iconFileId": 135248,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 1,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 3,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Rough Sharpening Stone",
+     "color": "quality"
+    },
+    {
+     "text": "Use: Increase sharp weapon damage by 2 for 30 minutes.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2863": {
+   "id": 2863,
+   "name": "Coarse Sharpening Stone",
+   "quality": 1,
+   "iconFileId": 135249,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 5,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 10,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Coarse Sharpening Stone",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 5",
+     "color": "white"
+    },
+    {
+     "text": "Use: Increase sharp weapon damage by 3 for 30 minutes.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2865": {
+   "id": 2865,
+   "name": "Rough Bronze Leggings",
+   "quality": 2,
+   "iconFileId": 134583,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 7,
+   "itemLevel": 21,
+   "requiredLevel": 16,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 577,
+   "slotName": "Legs",
+   "typeName": "Mail",
+   "armor": 149,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Rough Bronze Leggings",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Legs",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "149 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+4 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 16",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2866": {
+   "id": 2866,
+   "name": "Rough Bronze Cuirass",
+   "quality": 2,
+   "iconFileId": 132630,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 23,
+   "requiredLevel": 18,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 601,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 177,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 8
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Rough Bronze Cuirass",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "177 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+8 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 18",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2868": {
+   "id": 2868,
+   "name": "Patterned Bronze Bracers",
+   "quality": 2,
+   "iconFileId": 132606,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 9,
+   "itemLevel": 25,
+   "requiredLevel": 20,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 507,
+   "slotName": "Wrist",
+   "typeName": "Mail",
+   "armor": 80,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 5
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Patterned Bronze Bracers",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Wrist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "80 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+5 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 20",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2870": {
+   "id": 2870,
+   "name": "Shining Silver Breastplate",
+   "quality": 3,
+   "iconFileId": 132750,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 29,
+   "requiredLevel": 24,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2935,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 214,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 14
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Shining Silver Breastplate",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "214 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+14 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 24",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2871": {
+   "id": 2871,
+   "name": "Heavy Sharpening Stone",
+   "quality": 1,
+   "iconFileId": 135250,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 15,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 40,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Sharpening Stone",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 15",
+     "color": "white"
+    },
+    {
+     "text": "Use: Increase sharp weapon damage by 4 for 30 minutes.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2880": {
+   "id": 2880,
+   "name": "Weak Flux",
+   "quality": 1,
+   "iconFileId": 133588,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 25,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Weak Flux",
+     "color": "quality"
+    },
+    {
+     "text": "\"Used by Blacksmiths to remove impurities.\"",
+     "color": "yellow"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3240": {
+   "id": 3240,
+   "name": "Coarse Weightstone",
+   "quality": 1,
+   "iconFileId": 135256,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 5,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 10,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Coarse Weightstone",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 5",
+     "color": "white"
+    },
+    {
+     "text": "Use: Increase the damage of a blunt weapon by 3 for 30 minutes.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3241": {
+   "id": 3241,
+   "name": "Heavy Weightstone",
+   "quality": 1,
+   "iconFileId": 135257,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 15,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 40,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Weightstone",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 15",
+     "color": "white"
+    },
+    {
+     "text": "Use: Increase the damage of a blunt weapon by 4 for 30 minutes.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3466": {
+   "id": 3466,
+   "name": "Strong Flux",
+   "quality": 1,
+   "iconFileId": 133587,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 500,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Strong Flux",
+     "color": "quality"
+    },
+    {
+     "text": "\"Used by blacksmiths to remove impurities.\"",
+     "color": "yellow"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3469": {
+   "id": 3469,
+   "name": "Copper Chain Boots",
+   "quality": 2,
+   "iconFileId": 132535,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 10,
+   "requiredLevel": 4,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 49,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 74,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Chain Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "74 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 4",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3470": {
+   "id": 3470,
+   "name": "Rough Grinding Stone",
+   "quality": 1,
+   "iconFileId": 135243,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 5,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Rough Grinding Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3472": {
+   "id": 3472,
+   "name": "Runed Copper Gauntlets",
+   "quality": 2,
+   "iconFileId": 132938,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 10,
+   "itemLevel": 12,
+   "requiredLevel": 7,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 71,
+   "slotName": "Hands",
+   "typeName": "Mail",
+   "armor": 77,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 1
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Runed Copper Gauntlets",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Hands",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "77 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 7",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3473": {
+   "id": 3473,
+   "name": "Runed Copper Pants",
+   "quality": 2,
+   "iconFileId": 134583,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 7,
+   "itemLevel": 13,
+   "requiredLevel": 8,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 299,
+   "slotName": "Legs",
+   "typeName": "Mail",
+   "armor": 113,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 2
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Runed Copper Pants",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Legs",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "113 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+2 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+2 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 8",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3478": {
+   "id": 3478,
+   "name": "Coarse Grinding Stone",
+   "quality": 1,
+   "iconFileId": 135244,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 10,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Coarse Grinding Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3480": {
+   "id": 3480,
+   "name": "Rough Bronze Shoulders",
+   "quality": 2,
+   "iconFileId": 135036,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 3,
+   "itemLevel": 22,
+   "requiredLevel": 17,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 532,
+   "slotName": "Shoulder",
+   "typeName": "Mail",
+   "armor": 130,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Rough Bronze Shoulders",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Shoulder",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "130 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+3 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 17",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3482": {
+   "id": 3482,
+   "name": "Silvered Bronze Boots",
+   "quality": 2,
+   "iconFileId": 132535,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 26,
+   "requiredLevel": 21,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 918,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 128,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    },
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Silvered Bronze Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "128 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+3 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 21",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3483": {
+   "id": 3483,
+   "name": "Silvered Bronze Gauntlets",
+   "quality": 2,
+   "iconFileId": 132939,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 10,
+   "itemLevel": 27,
+   "requiredLevel": 22,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 965,
+   "slotName": "Hands",
+   "typeName": "Mail",
+   "armor": 118,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    },
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Silvered Bronze Gauntlets",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Hands",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "118 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+3 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 22",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3486": {
+   "id": 3486,
+   "name": "Heavy Grinding Stone",
+   "quality": 1,
+   "iconFileId": 135245,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 100,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Grinding Stone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3487": {
+   "id": 3487,
+   "name": "Heavy Copper Broadsword",
+   "quality": 2,
+   "iconFileId": 135312,
+   "classId": 2,
+   "subclassId": 8,
+   "inventoryType": 17,
+   "itemLevel": 19,
+   "requiredLevel": 14,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1135,
+   "slotName": "Two-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 33,
+    "max": 50,
+    "speed": 3.3,
+    "dps": 12.6
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Heavy Copper Broadsword",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "33 - 50 Damage",
+     "right": "Speed 3.30",
+     "color": "white"
+    },
+    {
+     "text": "(12.6 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 14",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3488": {
+   "id": 3488,
+   "name": "Copper Battle Axe",
+   "quality": 2,
+   "iconFileId": 135420,
+   "classId": 2,
+   "subclassId": 1,
+   "inventoryType": 17,
+   "itemLevel": 13,
+   "requiredLevel": 8,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 480,
+   "slotName": "Two-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 25,
+    "max": 38,
+    "speed": 3.5,
+    "dps": 9
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Battle Axe",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "25 - 38 Damage",
+     "right": "Speed 3.50",
+     "color": "white"
+    },
+    {
+     "text": "(9.0 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 8",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3489": {
+   "id": 3489,
+   "name": "Thick War Axe",
+   "quality": 2,
+   "iconFileId": 135419,
+   "classId": 2,
+   "subclassId": 0,
+   "inventoryType": 13,
+   "itemLevel": 17,
+   "requiredLevel": 12,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 715,
+   "slotName": "One-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 15,
+    "max": 28,
+    "speed": 2.5,
+    "dps": 8.6
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Thick War Axe",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "15 - 28 Damage",
+     "right": "Speed 2.50",
+     "color": "white"
+    },
+    {
+     "text": "(8.6 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+1 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 12",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3491": {
+   "id": 3491,
+   "name": "Heavy Bronze Mace",
+   "quality": 2,
+   "iconFileId": 133483,
+   "classId": 2,
+   "subclassId": 4,
+   "inventoryType": 13,
+   "itemLevel": 25,
+   "requiredLevel": 20,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2741,
+   "slotName": "One-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 25,
+    "max": 47,
+    "speed": 2.8,
+    "dps": 12.9
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Heavy Bronze Mace",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "25 - 47 Damage",
+     "right": "Speed 2.80",
+     "color": "white"
+    },
+    {
+     "text": "(12.9 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 20",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3575": {
+   "id": 3575,
+   "name": "Iron Bar",
+   "quality": 1,
+   "iconFileId": 133232,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Iron Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3577": {
+   "id": 3577,
+   "name": "Gold Bar",
+   "quality": 2,
+   "iconFileId": 133217,
+   "classId": 7,
+   "subclassId": 7,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 600,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Gold Bar",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3835": {
+   "id": 3835,
+   "name": "Green Iron Bracers",
+   "quality": 2,
+   "iconFileId": 132605,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 9,
+   "itemLevel": 33,
+   "requiredLevel": 28,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1106,
+   "slotName": "Wrist",
+   "typeName": "Mail",
+   "armor": 91,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Green Iron Bracers",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Wrist",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "91 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 28",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3836": {
+   "id": 3836,
+   "name": "Green Iron Helm",
+   "quality": 2,
+   "iconFileId": 133071,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 1,
+   "itemLevel": 34,
+   "requiredLevel": 29,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 3053,
+   "slotName": "Head",
+   "typeName": "Mail",
+   "armor": 171,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 11
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 5
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Green Iron Helm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Head",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "171 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+5 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+11 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 29",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3842": {
+   "id": 3842,
+   "name": "Green Iron Leggings",
+   "quality": 2,
+   "iconFileId": 134585,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 7,
+   "itemLevel": 31,
+   "requiredLevel": 26,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2906,
+   "slotName": "Legs",
+   "typeName": "Mail",
+   "armor": 176,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 8
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 8
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Green Iron Leggings",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Legs",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "176 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+8 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+8 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 26",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3848": {
+   "id": 3848,
+   "name": "Big Bronze Knife",
+   "quality": 2,
+   "iconFileId": 135640,
+   "classId": 2,
+   "subclassId": 15,
+   "inventoryType": 13,
+   "itemLevel": 20,
+   "requiredLevel": 15,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 915,
+   "slotName": "One-Hand",
+   "typeName": "Dagger",
+   "armor": null,
+   "damage": {
+    "min": 13,
+    "max": 25,
+    "speed": 1.9,
+    "dps": 10
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Big Bronze Knife",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Dagger",
+     "color": "white"
+    },
+    {
+     "text": "13 - 25 Damage",
+     "right": "Speed 1.90",
+     "color": "white"
+    },
+    {
+     "text": "(10.0 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 15",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3864": {
+   "id": 3864,
+   "name": "Citrine",
+   "quality": 2,
+   "iconFileId": 134117,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 40,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 800,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Citrine",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5498": {
+   "id": 5498,
+   "name": "Small Lustrous Pearl",
+   "quality": 2,
+   "iconFileId": 134122,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Small Lustrous Pearl",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5500": {
+   "id": 5500,
+   "name": "Iridescent Pearl",
+   "quality": 2,
+   "iconFileId": 134121,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 750,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Iridescent Pearl",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5540": {
+   "id": 5540,
+   "name": "Pearl-handled Dagger",
+   "quality": 2,
+   "iconFileId": 135641,
+   "classId": 2,
+   "subclassId": 15,
+   "inventoryType": 13,
+   "itemLevel": 23,
+   "requiredLevel": 18,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2107,
+   "slotName": "One-Hand",
+   "typeName": "Dagger",
+   "armor": null,
+   "damage": {
+    "min": 13,
+    "max": 26,
+    "speed": 1.7,
+    "dps": 11.5
+   },
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 2
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Pearl-handled Dagger",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Dagger",
+     "color": "white"
+    },
+    {
+     "text": "13 - 26 Damage",
+     "right": "Speed 1.70",
+     "color": "white"
+    },
+    {
+     "text": "(11.5 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+2 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+2 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 18",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6214": {
+   "id": 6214,
+   "name": "Heavy Copper Maul",
+   "quality": 2,
+   "iconFileId": 133055,
+   "classId": 2,
+   "subclassId": 5,
+   "inventoryType": 17,
+   "itemLevel": 16,
+   "requiredLevel": 11,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 466,
+   "slotName": "Two-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 28,
+    "max": 43,
+    "speed": 3.3,
+    "dps": 10.8
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Heavy Copper Maul",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "28 - 43 Damage",
+     "right": "Speed 3.30",
+     "color": "white"
+    },
+    {
+     "text": "(10.8 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 11",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6217": {
+   "id": 6217,
+   "name": "Copper Rod",
+   "quality": 1,
+   "iconFileId": 133942,
+   "classId": 7,
+   "subclassId": 12,
+   "inventoryType": 0,
+   "itemLevel": 5,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 24,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Copper Rod",
+     "color": "quality"
+    },
+    {
+     "text": "\"Needed by an Enchanter to make a runed copper rod.\"",
+     "color": "yellow"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6338": {
+   "id": 6338,
+   "name": "Silver Rod",
+   "quality": 1,
+   "iconFileId": 135138,
+   "classId": 7,
+   "subclassId": 12,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 125,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Silver Rod",
+     "color": "quality"
+    },
+    {
+     "text": "\"Needed by Enchanters.\"",
+     "color": "yellow"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6350": {
+   "id": 6350,
+   "name": "Rough Bronze Boots",
+   "quality": 2,
+   "iconFileId": 132535,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 18,
+   "requiredLevel": 13,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 295,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 111,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 2
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Rough Bronze Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "111 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+2 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 13",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7071": {
+   "id": 7071,
+   "name": "Iron Buckle",
+   "quality": 1,
+   "iconFileId": 133607,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 100,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Iron Buckle",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7166": {
+   "id": 7166,
+   "name": "Copper Dagger",
+   "quality": 2,
+   "iconFileId": 135650,
+   "classId": 2,
+   "subclassId": 15,
+   "inventoryType": 13,
+   "itemLevel": 11,
+   "requiredLevel": 6,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 194,
+   "slotName": "One-Hand",
+   "typeName": "Dagger",
+   "armor": null,
+   "damage": {
+    "min": 7,
+    "max": 13,
+    "speed": 1.7,
+    "dps": 5.9
+   },
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Dagger",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Dagger",
+     "color": "white"
+    },
+    {
+     "text": "7 - 13 Damage",
+     "right": "Speed 1.70",
+     "color": "white"
+    },
+    {
+     "text": "(5.9 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+1 Agility",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 6",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7955": {
+   "id": 7955,
+   "name": "Copper Claymore",
+   "quality": 2,
+   "iconFileId": 135322,
+   "classId": 2,
+   "subclassId": 8,
+   "inventoryType": 17,
+   "itemLevel": 11,
+   "requiredLevel": 6,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 241,
+   "slotName": "Two-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 20,
+    "max": 31,
+    "speed": 3.3,
+    "dps": 7.7
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 1
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Copper Claymore",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "20 - 31 Damage",
+     "right": "Speed 3.30",
+     "color": "white"
+    },
+    {
+     "text": "(7.7 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+1 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 6",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7956": {
+   "id": 7956,
+   "name": "Bronze Warhammer",
+   "quality": 2,
+   "iconFileId": 133055,
+   "classId": 2,
+   "subclassId": 5,
+   "inventoryType": 17,
+   "itemLevel": 25,
+   "requiredLevel": 20,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1544,
+   "slotName": "Two-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 47,
+    "max": 71,
+    "speed": 3.5,
+    "dps": 16.9
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Warhammer",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "47 - 71 Damage",
+     "right": "Speed 3.50",
+     "color": "white"
+    },
+    {
+     "text": "(16.9 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+6 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 20",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7957": {
+   "id": 7957,
+   "name": "Bronze Greatsword",
+   "quality": 2,
+   "iconFileId": 135321,
+   "classId": 2,
+   "subclassId": 8,
+   "inventoryType": 17,
+   "itemLevel": 26,
+   "requiredLevel": 21,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2205,
+   "slotName": "Two-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 47,
+    "max": 72,
+    "speed": 3.4,
+    "dps": 17.5
+   },
+   "stats": [
+    {
+     "stat": 45,
+     "name": "Spell Power",
+     "value": 7
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Greatsword",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "47 - 72 Damage",
+     "right": "Speed 3.40",
+     "color": "white"
+    },
+    {
+     "text": "(17.5 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 21",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases spell power by 7.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7958": {
+   "id": 7958,
+   "name": "Bronze Battle Axe",
+   "quality": 2,
+   "iconFileId": 132415,
+   "classId": 2,
+   "subclassId": 1,
+   "inventoryType": 17,
+   "itemLevel": 27,
+   "requiredLevel": 22,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 2435,
+   "slotName": "Two-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 48,
+    "max": 73,
+    "speed": 3.3,
+    "dps": 18.3
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 10
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Bronze Battle Axe",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "48 - 73 Damage",
+     "right": "Speed 3.30",
+     "color": "white"
+    },
+    {
+     "text": "(18.3 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+10 Strength",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 22",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "10421": {
+   "id": 10421,
+   "name": "Rough Copper Vest",
+   "quality": 2,
+   "iconFileId": 132624,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 10,
+   "requiredLevel": 2,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 32,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 108,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 1
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Rough Copper Vest",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "108 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+1 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 2",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "10938": {
+   "id": 10938,
+   "name": "Lesser Magic Essence",
+   "quality": 2,
+   "iconFileId": 132867,
+   "classId": 7,
+   "subclassId": 12,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 1,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Lesser Magic Essence",
+     "color": "quality"
+    },
+    {
+     "text": "Use: Turn three lesser magic essences into a greater one.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "10940": {
+   "id": 10940,
+   "name": "Strange Dust",
+   "quality": 1,
+   "iconFileId": 132858,
+   "classId": 7,
+   "subclassId": 12,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 1,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Strange Dust",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "11128": {
+   "id": 11128,
+   "name": "Golden Rod",
+   "quality": 1,
+   "iconFileId": 135147,
+   "classId": 7,
+   "subclassId": 12,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 500,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Golden Rod",
+     "color": "quality"
+    },
+    {
+     "text": "\"Needed by Enchanters.\"",
+     "color": "yellow"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "15869": {
+   "id": 15869,
+   "name": "Silver Skeleton Key",
+   "quality": 2,
+   "iconFileId": 134237,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 50,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Silver Skeleton Key",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Blacksmithing (75)",
+     "color": "white"
+    },
+    {
+     "text": "Use: Allows opening of simple locks.  The skeleton key is consumed in the process.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "15870": {
+   "id": 15870,
+   "name": "Golden Skeleton Key",
+   "quality": 2,
+   "iconFileId": 134247,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 300,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Golden Skeleton Key",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Blacksmithing (125)",
+     "color": "white"
+    },
+    {
+     "text": "Use: Allows opening of standard locks.  The skeleton key is consumed in the process.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "249427": {
+   "id": 249427,
+   "name": "Pristine Leather",
+   "quality": 2,
+   "iconFileId": 348551,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 125,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Pristine Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250482": {
+   "id": 250482,
+   "name": "Glowing Copper Boots",
+   "quality": 3,
+   "iconFileId": 132535,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 15,
+   "requiredLevel": 10,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 207,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 109,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 4
+    },
+    {
+     "stat": 41,
+     "name": "Spell Healing",
+     "value": 9
+    },
+    {
+     "stat": 42,
+     "name": "Spell Damage",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Glowing Copper Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "109 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 10",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases healing done by magical spells and effects by up to 9.",
+     "color": "green"
+    },
+    {
+     "text": "Equip: Increases damage done by magical spells and effects by up to 3.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250486": {
+   "id": 250486,
+   "name": "Sterling Silver Shoulders",
+   "quality": 2,
+   "iconFileId": 135040,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 3,
+   "itemLevel": 27,
+   "requiredLevel": 22,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 490,
+   "slotName": "Shoulder",
+   "typeName": "Mail",
+   "armor": 142,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 45,
+     "name": "Spell Power",
+     "value": 4
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Sterling Silver Shoulders",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Shoulder",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "142 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 22",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases spell power by 4.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250528": {
+   "id": 250528,
+   "name": "Veteran's Silvered Chain Helm",
+   "quality": 3,
+   "iconFileId": 133141,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 1,
+   "itemLevel": 25,
+   "requiredLevel": 20,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 1439,
+   "slotName": "Head",
+   "typeName": "Mail",
+   "armor": 163,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 9
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 10
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Veteran's Silvered Chain Helm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Head",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "163 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+10 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+9 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 20",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250531": {
+   "id": 250531,
+   "name": "Acolyte's Silvered Chain Helm",
+   "quality": 3,
+   "iconFileId": 133138,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 1,
+   "itemLevel": 25,
+   "requiredLevel": 20,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 1455,
+   "slotName": "Head",
+   "typeName": "Mail",
+   "armor": 163,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 42,
+     "name": "Spell Damage",
+     "value": 7
+    },
+    {
+     "stat": 41,
+     "name": "Spell Healing",
+     "value": 21
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 9
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Acolyte's Silvered Chain Helm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Head",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "163 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+9 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 20",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases damage done by magical spells and effects by up to 7.",
+     "color": "green"
+    },
+    {
+     "text": "Equip: Increases healing done by magical spells and effects by up to 21.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250620": {
+   "id": 250620,
+   "name": "Gemmed Copper Boots",
+   "quality": 3,
+   "iconFileId": 132554,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 15,
+   "requiredLevel": 10,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 203,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 109,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Gemmed Copper Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "109 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 10",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "250621": {
+   "id": 250621,
+   "name": "Strange Copper Boots",
+   "quality": 3,
+   "iconFileId": 132582,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 8,
+   "itemLevel": 15,
+   "requiredLevel": 10,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 191,
+   "slotName": "Feet",
+   "typeName": "Mail",
+   "armor": 109,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 45,
+     "name": "Spell Power",
+     "value": 5
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Strange Copper Boots",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Feet",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "109 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 10",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases spell power by 5.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "279944": {
+   "id": 279944,
+   "name": "Sharpening Wheel",
+   "quality": 1,
+   "iconFileId": 135243,
+   "classId": 0,
+   "subclassId": 8,
+   "inventoryType": 0,
+   "itemLevel": 4,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 0,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Sharpening Wheel",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Blacksmithing (20)",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  }
+ }
+}

@@ -1,0 +1,575 @@
+/* The guild crafting window: toolbar, recipe list on the left, detail on the right. */
+
+.window {
+  width: min(1060px, 100%);
+  height: min(820px, calc(100dvh - 76px));
+  min-height: 420px;
+  margin: 0 auto;
+}
+
+/* ---- Toolbar ------------------------------------------------------------ */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  /* Clears the portrait ring, which hangs below the title bar on the left. */
+  padding: 4px 4px 8px 52px;
+}
+
+.skill {
+  position: relative;
+  flex: none;
+  width: 150px;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #5d4a2c;
+  border-radius: 3px;
+  background: rgb(0 0 60 / 0.55);
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.skillFill {
+  height: 100%;
+  background:
+    linear-gradient(rgb(40 60 255 / 0.75), rgb(40 60 255 / 0.75)),
+    url("/ui/skill-bar.png") 0 0 / 100% 100%;
+  background-blend-mode: multiply;
+}
+
+.skillText {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.filters {
+  display: flex;
+  flex: 1 1 520px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+}
+
+/* The extra filters sit inline on a wide screen and fold away on a phone. */
+.moreFilters {
+  display: contents;
+}
+
+.filterToggle {
+  display: none;
+}
+
+.search {
+  flex: 1 1 110px;
+  padding-left: 16px;
+  background: url("/ui/search-icon.png") left -2px center / 16px 16px no-repeat;
+}
+
+.levels {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.levelsLabel {
+  margin-right: 2px;
+}
+
+.level {
+  width: 46px;
+  text-align: center;
+}
+
+/* ---- Body --------------------------------------------------------------- */
+
+.body {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.listPane,
+.detailPane {
+  min-height: 0;
+  overflow-y: auto;
+  border: 6px solid transparent;
+  border-image: url("/ui/inset.png") 6 / 6px stretch;
+  overscroll-behavior: contain;
+}
+
+/* The trainer window's leather backing. */
+.listPane {
+  background: #3a2108 url("/ui/list-bg.png") center / 100% 100% no-repeat padding-box;
+  background-attachment: local, scroll;
+}
+
+.detailPane {
+  background:
+    linear-gradient(rgb(8 6 5 / 0.72), rgb(8 6 5 / 0.8)),
+    url("/ui/inset-bg.png") padding-box;
+}
+
+/* Textured scrollbars where the engine allows it; matching colours elsewhere. */
+.listPane::-webkit-scrollbar,
+.detailPane::-webkit-scrollbar {
+  width: 12px;
+}
+
+.listPane::-webkit-scrollbar-track,
+.detailPane::-webkit-scrollbar-track {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.listPane::-webkit-scrollbar-thumb,
+.detailPane::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: url("/ui/scroll-thumb-middle.png") center / 8px 100% no-repeat content-box, #6b4a2b content-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .listPane,
+  .detailPane {
+    --scrollbar-thumb: #8a6238;
+    --scrollbar-track: rgb(0 0 0 / 0.45);
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-width: thin;
+  }
+}
+
+/* ---- List --------------------------------------------------------------- */
+
+.list {
+  padding: 0 3px 6px;
+}
+
+.list > section + section {
+  margin-top: 6px;
+}
+
+.groupHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 26px;
+  margin: 0 0 2px;
+  padding: 0 4px;
+  border: solid transparent;
+  border-width: 0 14px;
+  border-image: url("/ui/header.png") 0 14 0 14 fill / 0 14px stretch;
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 400;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.groupCount {
+  color: #fff;
+  font-size: 12px;
+}
+
+.rows {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 47px;
+  padding: 0 4px;
+  border: 5px solid transparent;
+  border-image: url("/ui/row.png") 6 fill / 6px stretch;
+  /* In game the rows read as dark maroon over the leather. */
+  background: rgb(46 8 4 / 0.5);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Hover and selection are additive glows drawn over the row, as in game. */
+.row::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border: 6px solid transparent;
+  mix-blend-mode: plus-lighter;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.row:hover::after,
+.row:focus-visible::after {
+  border-image: url("/ui/row-highlight.png") 6 fill / 6px stretch;
+  opacity: 0.55;
+}
+
+.row[data-shown="true"]::after {
+  border-image: url("/ui/row-selected.png") 6 fill / 6px stretch;
+  opacity: 0.7;
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.rowText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rowName {
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.rowSub {
+  overflow: hidden;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.soulbound {
+  color: var(--red);
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Quality colours, shared by names in the list and in the detail pane. */
+.rowName[data-quality="0"],
+.detailName[data-quality="0"],
+.reagentName[data-quality="0"] {
+  color: var(--q0);
+}
+
+.rowName[data-quality="1"],
+.detailName[data-quality="1"],
+.reagentName[data-quality="1"] {
+  color: var(--q1);
+}
+
+.rowName[data-quality="2"],
+.detailName[data-quality="2"],
+.reagentName[data-quality="2"] {
+  color: var(--q2);
+}
+
+.rowName[data-quality="3"],
+.detailName[data-quality="3"],
+.reagentName[data-quality="3"] {
+  color: var(--q3);
+}
+
+.rowName[data-quality="4"],
+.detailName[data-quality="4"],
+.reagentName[data-quality="4"] {
+  color: var(--q4);
+}
+
+.rowName[data-quality="5"],
+.detailName[data-quality="5"],
+.reagentName[data-quality="5"] {
+  color: var(--q5);
+}
+
+/* ---- Detail ------------------------------------------------------------- */
+
+.detail {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  padding: 14px 16px 18px;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detailName {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.detailMeta {
+  margin: 3px 0 0;
+  color: #c8c1b3;
+  font-size: 13px;
+}
+
+.soulboundBanner {
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid #a01818;
+  border-radius: 3px;
+  background: rgb(110 10 10 / 0.35);
+  color: #ffd9d4;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.soulboundBanner strong {
+  color: var(--red);
+  font-weight: 400;
+}
+
+.effect {
+  margin: 0;
+  color: var(--effect-green);
+  font-size: 14px;
+}
+
+.sectionTitle {
+  margin: 0 0 7px;
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 400;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.reagents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px 18px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detail > section {
+  width: 100%;
+}
+
+.reagent {
+  display: grid;
+  grid-template-columns: auto 2ch minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+}
+
+.reagentCount {
+  color: #fff;
+  text-align: right;
+}
+
+.reagentName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crafters {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.crafterName {
+  color: #fff;
+}
+
+.crafterHow {
+  color: #c8c1b3;
+}
+
+.crafterNote {
+  max-width: 60ch;
+  margin: 3px 0 0;
+  color: #c8c1b3;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.external {
+  margin: 0;
+  font-size: 13px;
+}
+
+.external a {
+  color: #7fb6ff;
+}
+
+/* ---- Status strip and empty states ------------------------------------- */
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 22px;
+  padding: 6px 6px 0;
+  color: #c8c1b3;
+  font-size: 12px;
+}
+
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.empty {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  margin: 0;
+  padding: 40px 16px;
+  color: #e9e2d4;
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.empty p {
+  margin: 0;
+}
+
+/* ---- Hover tooltip ------------------------------------------------------ */
+
+.hoverTooltip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  visibility: hidden; /* shown once it has been placed beside its row */
+}
+
+@media (hover: none) {
+  .hoverTooltip {
+    display: none;
+  }
+}
+
+/* ---- Phone: the detail pane becomes a full-screen sheet ---------------- */
+
+.sheet {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .window {
+    height: calc(100dvh - 20px);
+  }
+
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detailPane {
+    display: none;
+  }
+
+  .skill {
+    width: 100%;
+  }
+
+  .toolbar {
+    padding-left: 52px;
+  }
+
+  .filterToggle {
+    display: block;
+    min-width: 0;
+  }
+
+  .moreFilters {
+    display: none;
+  }
+
+  .moreFilters[data-expanded="true"] {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    /* Use the full width under the portrait once it is cleared. */
+    margin-left: -40px;
+  }
+
+  /* Nothing is open until a row is tapped, so nothing looks selected. */
+  .row[data-shown="true"]:not([aria-pressed="true"])::after {
+    opacity: 0;
+  }
+
+  .sheet[open] {
+    display: block;
+    box-sizing: border-box;
+    width: 100vw;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0 0 24px;
+    overflow-y: auto;
+    border: 0;
+    background:
+      linear-gradient(rgb(8 6 5 / 0.8), rgb(8 6 5 / 0.88)),
+      #120c08 url("/ui/inset-bg.png");
+    color: inherit;
+    overscroll-behavior: contain;
+  }
+
+  .sheet::backdrop {
+    overflow: hidden;
+    background: #000;
+    overscroll-behavior: contain;
+  }
+
+  .sheetBar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px 10px 0;
+  }
+}
