@@ -15,7 +15,13 @@ import {
 import { signOut } from "@/app/login/actions";
 import type { AdminCrafter, AdminData, SyncRunView } from "@/lib/admin/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings } from "@/lib/admin/types";
-import { matchGuildonExport, parseGuildonExport, type GuildonErrorReason } from "@/lib/guildon";
+import {
+  matchGuildonExport,
+  parseGuildonExport,
+  planImport,
+  sameCharacter,
+  type GuildonErrorReason,
+} from "@/lib/guildon";
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { CraftersPanel } from "./CraftersPanel";
@@ -232,11 +238,13 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             catalog={catalog}
             crafterId={crafter.id}
             crafterName={crafter.characterName}
+            skills={crafter.skills}
             ticked={ticked}
             onImported={(ids, text) => {
               setTicked(new Set(ids));
               setMessage({ kind: "ok", text });
               setTab("recipes");
+              router.refresh(); // the skills the export brought show on the profile
             }}
           />
         ) : null}
@@ -300,6 +308,7 @@ function GuildonImport({
   catalog,
   crafterId,
   crafterName,
+  skills,
   ticked,
   onImported,
 }: {
@@ -307,6 +316,8 @@ function GuildonImport({
   crafterId: string;
   /** The character these recipes will be added to. */
   crafterName: string;
+  /** That character's skills now, by profession id. */
+  skills: Record<string, number>;
   ticked: Set<number>;
   onImported: (recipeIds: number[], message: string) => void;
 }) {
@@ -321,7 +332,9 @@ function GuildonImport({
       <h2 className={styles.heading}>Import the recipes you have learned</h2>
       <ol className={styles.steps}>
         <li>
-          In game, with the <em>Guildon: Crafts &amp; Recipes</em> addon installed, open your profession window once.
+          In game, with the <em>Guildon: Crafts &amp; Recipes</em> addon installed, open the window of each profession
+          you want to import. The addon records a profession&apos;s recipes when its window is open; until then it
+          only knows your skill.
         </li>
         <li>
           Type <code>/gnc export</code>, press Ctrl+C to copy the text, and paste it below.
@@ -348,7 +361,7 @@ function GuildonImport({
 
       {parsed.characters.map((character) => {
         const match = matchGuildonExport(character, catalog.professions, known);
-        const fresh = match.recipeIds.filter((id) => !ticked.has(id));
+        const plan = planImport(match, ticked, skills);
         return (
           <section key={character.name} className={styles.character} aria-label={character.name}>
             <h3 className={styles.subheading}>
@@ -365,10 +378,24 @@ function GuildonImport({
                 ))}
               </ul>
             )}
-            {character.name.toLowerCase() !== crafterName.split(" ")[0].toLowerCase() ? (
+            {!sameCharacter(character.name, crafterName) ? (
               <p className={styles.muted}>
                 This export is from {character.name}, and you are editing {crafterName}. Its recipes will be added
                 to {crafterName}; switch character first if that is not what you want.
+              </p>
+            ) : null}
+            {plan.noRecipesRecorded ? (
+              <p className={styles.error}>
+                This export lists {character.name}&apos;s professions but not a single recipe, so there are none to
+                add. The addon has not read the profession windows yet: in game, open each profession window, then
+                type <code>/gnc export</code> again and paste the new text here.
+              </p>
+            ) : null}
+            {plan.action === "skills" ? (
+              <p className={styles.muted}>
+                You can still take the skills from it (
+                {plan.skillChanges.map((change) => `${change.name} ${change.to}`).join(", ")}). Trainer recipes for
+                those skills are then added automatically.
               </p>
             ) : null}
             {match.unknownSpellIds.length > 0 ? (
@@ -379,7 +406,7 @@ function GuildonImport({
             <button
               type="button"
               className={wow.button}
-              disabled={pending || match.recipeIds.length === 0}
+              disabled={pending || plan.action === "nothing"}
               onClick={() =>
                 startTransition(async () => {
                   const result = await importGuildon(crafterId, text, character.name);
@@ -387,12 +414,20 @@ function GuildonImport({
                   else {
                     // The list as the server now has it: the import plus the trainer recipes its skills bring.
                     const gained = result.data.recipeIds.filter((id) => !ticked.has(id)).length;
-                    onImported(result.data.recipeIds, `Imported ${character.name}: ${gained} recipes added.`);
+                    const what = [
+                      plan.skillChanges.length > 0 ? "skills updated" : null,
+                      `${gained} ${gained === 1 ? "recipe" : "recipes"} added`,
+                    ].filter(Boolean);
+                    onImported(result.data.recipeIds, `Imported ${character.name}: ${what.join(", ")}.`);
                   }
                 })
               }
             >
-              {fresh.length > 0 ? `Add ${fresh.length} recipes` : "Already on your list"}
+              {plan.action === "recipes"
+                ? `Add ${plan.newRecipeIds.length} ${plan.newRecipeIds.length === 1 ? "recipe" : "recipes"}`
+                : plan.action === "skills"
+                  ? "Update skills"
+                  : "Nothing new to add"}
             </button>
           </section>
         );

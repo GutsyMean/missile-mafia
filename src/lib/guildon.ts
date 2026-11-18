@@ -140,3 +140,52 @@ export function matchGuildonExport(
   }
   return { recipeIds, unknownSpellIds, skills };
 }
+
+/** What importing one character's export would do to a crafter's list. */
+export interface ImportPlan {
+  /** Recipes in the export that are not on the list yet. */
+  newRecipeIds: number[];
+  /** Professions whose skill in the export differs from the profile. */
+  skillChanges: { professionId: number; name: string; from: number | null; to: number }[];
+  /**
+   * The export names professions but not a single recipe. The addon records a
+   * profession's recipes only once its window has been opened in game.
+   */
+  noRecipesRecorded: boolean;
+  /** What there is to do: add recipes (and skills), only update skills, or nothing. */
+  action: "recipes" | "skills" | "nothing";
+}
+
+export function planImport(
+  match: GuildonMatch,
+  /** Recipes already on the crafter's list. */
+  ticked: ReadonlySet<number>,
+  /** The crafter's skills now, by profession id. */
+  currentSkills: Record<string, number>,
+): ImportPlan {
+  const newRecipeIds = match.recipeIds.filter((id) => !ticked.has(id));
+  const skillChanges = match.skills
+    .filter((entry) => currentSkills[String(entry.professionId)] !== entry.skill)
+    .map((entry) => ({
+      professionId: entry.professionId,
+      name: entry.name,
+      from: currentSkills[String(entry.professionId)] ?? null,
+      to: entry.skill,
+    }));
+  return {
+    newRecipeIds,
+    skillChanges,
+    noRecipesRecorded: match.skills.length > 0 && match.recipeIds.length === 0 && match.unknownSpellIds.length === 0,
+    action: newRecipeIds.length > 0 ? "recipes" : skillChanges.length > 0 ? "skills" : "nothing",
+  };
+}
+
+/**
+ * Whether an export's character is the one a profile is for. Profiles are
+ * typed by hand, so a missing or extra surname still counts as the same.
+ */
+export function sameCharacter(exportName: string, profileName: string): boolean {
+  const tidy = (name: string) => name.trim().toLowerCase().replace(/\s+/g, " ");
+  const first = (name: string) => tidy(name).split(" ")[0];
+  return tidy(exportName) === tidy(profileName) || first(exportName) === first(profileName);
+}

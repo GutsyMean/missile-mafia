@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { guildonChecksum, matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
+import { guildonChecksum, matchGuildonExport, parseGuildonExport, planImport, sameCharacter } from "@/lib/guildon";
 
 /** Builds an export line the way the addon does, so tests do not hard-code checksums. */
 function exportLine(head: string): string {
@@ -112,5 +112,100 @@ describe("matchGuildonExport", () => {
     const match = matchGuildonExport(odd, professions, knownRecipes);
     expect(match.skills).toEqual([]);
     expect(match.recipeIds).toEqual([]);
+  });
+});
+
+describe("an export the addon made before it had read any profession window", () => {
+  // Same shape as a real one: four professions, each with its skill and an empty recipe list.
+  const head = "GNX1;F;Testsmith;SomeRealm;A;PALADIN;26;1794971922;129:20:75:/164:155:225:/186:146:225:/356:1:75:";
+  const line = `${head};${guildonChecksum(head)}`;
+  const catalog = [
+    { id: 129, name: "First Aid", childSkillLineIds: [] },
+    { id: 164, name: "Blacksmithing", childSkillLineIds: [] },
+    { id: 186, name: "Mining", childSkillLineIds: [] },
+    { id: 356, name: "Fishing", childSkillLineIds: [] },
+  ];
+  const known = new Map([[3333, 164]]);
+
+  it("is read without complaint: the professions are there, the recipes are not", () => {
+    const { characters, errors } = parseGuildonExport(line);
+    expect(errors).toEqual([]);
+    expect(characters[0].professions.map((p) => [p.skillLineId, p.skill, p.spellIds.length])).toEqual([
+      [129, 20, 0],
+      [164, 155, 0],
+      [186, 146, 0],
+      [356, 1, 0],
+    ]);
+  });
+
+  it("is recognised as carrying no recipes, while its skills can still be taken", () => {
+    const match = matchGuildonExport(parseGuildonExport(line).characters[0], catalog, known);
+    const plan = planImport(match, new Set([3333]), { "164": 145 });
+    expect(plan.noRecipesRecorded).toBe(true);
+    expect(plan.newRecipeIds).toEqual([]);
+    expect(plan.skillChanges).toEqual([
+      { professionId: 129, name: "First Aid", from: null, to: 20 },
+      { professionId: 164, name: "Blacksmithing", from: 145, to: 155 },
+      { professionId: 186, name: "Mining", from: null, to: 146 },
+      { professionId: 356, name: "Fishing", from: null, to: 1 },
+    ]);
+    expect(plan.action).toBe("skills");
+  });
+});
+
+describe("planImport", () => {
+  const catalog = [{ id: 164, name: "Blacksmithing", childSkillLineIds: [] }];
+  const known = new Map([
+    [3333, 164],
+    [2675, 164],
+  ]);
+  const character = (spellIds: number[], skill = 145) => ({
+    game: "F",
+    name: "Testsmith",
+    realm: "SomeRealm",
+    faction: "A",
+    className: "PALADIN",
+    level: 26,
+    exportedAt: 0,
+    professions: [{ skillLineId: 164, skill, maxSkill: 225, spellIds }],
+  });
+
+  it("adds the recipes that are not on the list yet", () => {
+    const plan = planImport(matchGuildonExport(character([3333, 2675]), catalog, known), new Set([3333]), { "164": 145 });
+    expect(plan.newRecipeIds).toEqual([2675]);
+    expect(plan.noRecipesRecorded).toBe(false);
+    expect(plan.action).toBe("recipes");
+  });
+
+  it("only updates the skill when every recipe is already there", () => {
+    const plan = planImport(matchGuildonExport(character([3333], 150), catalog, known), new Set([3333]), { "164": 145 });
+    expect(plan.skillChanges).toEqual([{ professionId: 164, name: "Blacksmithing", from: 145, to: 150 }]);
+    expect(plan.action).toBe("skills");
+  });
+
+  it("has nothing to do when the list and the skill already match", () => {
+    const plan = planImport(matchGuildonExport(character([3333]), catalog, known), new Set([3333]), { "164": 145 });
+    expect(plan.action).toBe("nothing");
+  });
+
+  it("does not call an export empty when it names recipes the site does not know", () => {
+    const plan = planImport(matchGuildonExport(character([999999]), catalog, known), new Set(), { "164": 145 });
+    expect(plan.noRecipesRecorded).toBe(false);
+  });
+});
+
+describe("sameCharacter", () => {
+  it("accepts the same name, however it is capitalised or spaced", () => {
+    expect(sameCharacter("Damien Darkkblood", "Damien Darkkblood")).toBe(true);
+    expect(sameCharacter(" damien darkkblood ", "Damien Darkkblood")).toBe(true);
+  });
+
+  it("accepts a profile that gives only the first name, or adds a surname", () => {
+    expect(sameCharacter("Damien", "Damien Darkkblood")).toBe(true);
+    expect(sameCharacter("Damien Darkkblood", "Damien")).toBe(true);
+  });
+
+  it("tells different characters apart", () => {
+    expect(sameCharacter("Needlework", "Damien Darkkblood")).toBe(false);
   });
 });
