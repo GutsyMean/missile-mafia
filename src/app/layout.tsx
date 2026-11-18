@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource/marcellus/400.css";
+import { ACCOUNT_MARKER_SCRIPT } from "@/lib/account-marker";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
+    // The script below marks the page before it is painted, which React must not mistake for a mismatch.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: ACCOUNT_MARKER_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

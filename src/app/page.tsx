@@ -17,8 +17,10 @@ export default async function Home() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
+        {/* Which of the two shows is decided in the visitor's browser: see lib/account-marker. */}
         <Link href="/admin" className={`${wow.button} ${styles.signIn}`}>
-          Crafter sign-in
+          <span className={styles.newVisitor}>Become a Crafter</span>
+          <span className={styles.returning}>Crafter sign-in</span>
         </Link>
       </header>
       <ProfessionWindow doc={doc} initialUnlearned={unlearned} />

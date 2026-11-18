@@ -28,6 +28,10 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
             Browsing the crafting list needs no account. Sign in only if you are a guild crafter managing your own
             recipe list.
           </p>
+          <p>
+            New here? Signing in with Discord is also how you join: it creates your account, and you then set up
+            your crafter profile.
+          </p>
           <Suspense fallback={null}>
             <SignInError searchParams={searchParams} />
           </Suspense>

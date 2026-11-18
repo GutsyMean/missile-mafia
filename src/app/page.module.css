@@ -24,6 +24,19 @@
   text-decoration: none;
 }
 
+/* A visitor who has signed in here before is asked to sign in; anyone else is invited to join. */
+.returning {
+  display: none;
+}
+
+:global(html[data-account]) .newVisitor {
+  display: none;
+}
+
+:global(html[data-account]) .returning {
+  display: inline;
+}
+
 .credits {
   max-width: 1060px;
   margin: 0 auto;

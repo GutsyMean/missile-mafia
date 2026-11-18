@@ -64,15 +64,28 @@ test.describe("browsing", () => {
   });
 });
 
-test.describe("crafter sign-in", () => {
-  test("is a button at the top of the page", async ({ page }) => {
+test.describe("the button for crafters", () => {
+  test("invites a new visitor to become a crafter, from the top of the page", async ({ page }) => {
     await page.goto("/");
-    const button = page.getByRole("link", { name: "Crafter sign-in" });
+    const button = page.getByRole("link", { name: "Become a Crafter" });
     await expect(button).toBeVisible();
     await expect(button).toHaveAttribute("href", "/admin");
+    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toHaveCount(0);
     const [buttonBox, listBox] = await Promise.all([button.boundingBox(), rows(page).first().boundingBox()]);
     expect(buttonBox!.y + buttonBox!.height).toBeLessThan(listBox!.y);
     expect(buttonBox!.height).toBeGreaterThanOrEqual(30);
+  });
+
+  test("asks someone who is signed in to sign in, and remembers them after they sign out", async ({ page, context }) => {
+    // A sign-in leaves a cookie like this one.
+    await context.addCookies([{ name: "sb-example-auth-token", value: "x", url: "http://localhost:3100" }]);
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Become a Crafter" })).toHaveCount(0);
+
+    await context.clearCookies();
+    await page.reload();
+    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toBeVisible();
   });
 });
 
