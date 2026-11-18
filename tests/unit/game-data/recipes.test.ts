@@ -133,3 +133,44 @@ describe("buildRecipes — internal test professions", () => {
     expect(buildRecipes(withTestRecipe).some((r) => r.id === 999001)).toBe(false);
   });
 });
+
+describe("buildRecipes — class skills are not professions", () => {
+  // Poisons (skill line 40) is something only rogues have. Give it a recipe and see what happens to it.
+  const withPoison = { ...tables };
+  withPoison.SkillLineAbility = [
+    ...tables.SkillLineAbility,
+    { ...tables.SkillLineAbility[0], ID: "999002", SkillLine: "40", Spell: "999002" },
+  ];
+  withPoison.SpellReagents = [...tables.SpellReagents, { ...tables.SpellReagents[0], ID: "999002", SpellID: "999002" }];
+  withPoison.SpellEffect = [
+    ...tables.SpellEffect,
+    ...tables.SpellEffect
+      .filter((effect) => effect.SpellID === tables.SkillLineAbility[0].Spell)
+      .map((effect, i) => ({ ...effect, ID: String(999100 + i), SpellID: "999002" })),
+  ];
+  withPoison.SpellName = [...tables.SpellName, { ...tables.SpellName[0], ID: "999002", Name_lang: "Instant Poison" }];
+
+  it("leaves out a skill only some classes can learn, and so its recipes", () => {
+    const built = buildRecipes(withPoison);
+    expect(built.some((recipe) => recipe.id === 999002)).toBe(false);
+    expect(buildProfessions(withPoison, built).map((p) => p.name)).not.toContain("Poisons");
+  });
+
+  it("goes by the game's own table of who may learn a skill", () => {
+    const classMask = (skillId: string) => tables.SkillRaceClassInfo.find((row) => row.SkillID === skillId)?.ClassMask;
+    expect(classMask("164")).toBe("-1"); // Blacksmithing: every class
+    expect(classMask("40")).not.toBe("-1"); // Poisons: rogues
+    expect(classMask("3012")).not.toBe("-1"); // Comprehension: mages
+    expect(classMask("142")).not.toBe("-1"); // Survival: some classes
+  });
+
+  it("keeps every skill when that table is not available, rather than failing", () => {
+    const without = { ...withPoison };
+    delete without.SkillRaceClassInfo;
+    expect(buildRecipes(without).some((recipe) => recipe.id === 999002)).toBe(true);
+  });
+
+  it("still lists the real professions", () => {
+    expect(buildProfessions(tables, buildRecipes(tables)).map((p) => p.name).sort()).toEqual(["Blacksmithing", "Enchanting"]);
+  });
+});

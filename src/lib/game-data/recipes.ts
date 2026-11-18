@@ -16,14 +16,32 @@ const ENCHANT_EFFECTS = new Set([
   SPELL_EFFECT_ENCHANT_HELD_ITEM,
 ]);
 
+/**
+ * Skill lines only some classes can learn: class skills such as a rogue's
+ * Poisons or a mage's Comprehension. The game files them beside First Aid and
+ * Cooking, but they are not professions. Its own table of who may learn each
+ * skill tells them apart: a profession is open to every class (mask -1).
+ */
+function classSkills(tables: Tables): Set<number> {
+  const open = new Set<number>();
+  const listed = new Set<number>();
+  for (const row of tables.SkillRaceClassInfo ?? []) {
+    const skillId = Number(row.SkillID);
+    listed.add(skillId);
+    if (Number(row.ClassMask) === -1) open.add(skillId);
+  }
+  return new Set([...listed].filter((skillId) => !open.has(skillId)));
+}
+
 /** Resolves a skill line to the profession it belongs to, or null if it is not one. */
-function professionOf(skillLines: Map<number, Row>, skillLineId: number): number | null {
+function professionOf(skillLines: Map<number, Row>, notProfessions: Set<number>, skillLineId: number): number | null {
   const line = skillLines.get(skillLineId);
   if (!line || !PROFESSION_CATEGORIES.has(Number(line.CategoryID))) return null;
   const parentId = Number(line.ParentSkillLineID);
   const profession = parentId > 0 ? skillLines.get(parentId) : line;
   // "[DNT]" (do not translate) marks the developers' internal test data.
   if (!profession || profession.DisplayName_lang.includes("[DNT]")) return null;
+  if (notProfessions.has(Number(profession.ID))) return null;
   return Number(profession.ID);
 }
 
@@ -62,11 +80,12 @@ export function buildRecipes(tables: Tables, index: GameDataIndex = indexGameDat
   const enchantments = indexBy(requireTable(tables, "SpellItemEnchantment"), "ID");
   const spellIcons = indexBy(requireTable(tables, "SpellMisc"), "SpellID");
   const teachers = teachingItems(tables, index);
+  const notProfessions = classSkills(tables);
 
   const recipes = new Map<number, GameRecipe>();
   for (const ability of requireTable(tables, "SkillLineAbility")) {
     const spellId = Number(ability.Spell);
-    const professionId = professionOf(index.skillLine, Number(ability.SkillLine));
+    const professionId = professionOf(index.skillLine, notProfessions, Number(ability.SkillLine));
     if (professionId === null || recipes.has(spellId)) continue;
 
     const effects = [...(effectsBySpell.get(spellId) ?? [])].sort(

@@ -23,6 +23,7 @@ Each run downloads the current game tables, works out what changed, writes only 
 | Data | Source |
 |---|---|
 | Recipes, reagents, items, stats | The game's own data tables, as published by [wago.tools](https://wago.tools) for the `wowf` product |
+| Which skills are professions | The game's own table of who may learn each skill: a profession is open to every class. Class skills that also make things (a rogue's Poisons, a mage's Comprehension, Survival) are left out |
 | Trainer unlock levels | [wowforever.be](https://wowforever.be) and the [Warcraft Wiki](https://warcraft.wiki.gg) (CC BY-SA) |
 | Icons and window art | The game's texture files, via wago.tools |
 

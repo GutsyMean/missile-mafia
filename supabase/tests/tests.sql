@@ -538,3 +538,59 @@ reset role;
 set role anon;
 select test.throws($$select count(*) from public.crafter_recipe_skips$$, '42501', 'visitors cannot read it at all');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- A skill the game data no longer treats as a profession drops out of the lists
+-- ---------------------------------------------------------------------------
+-- A sync once brought in "Poisons" with a recipe, and a crafter recorded a skill in it.
+set role service_role;
+select public.sync_start('cli') as run5 \gset
+select public.sync_apply(:run5, $json${
+  "professions": [{"id": 40, "slug": "poisons", "name": "Poisons", "icon_file_id": 1, "child_skill_line_ids": []}],
+  "recipes": [
+    {"id": 601, "profession_id": 40, "name": "Instant Poison", "icon_file_id": 0, "crafted_item_id": null,
+     "crafted_count": 1, "effect_text": null, "skill_yellow": 10, "skill_green": 15, "skill_grey": 20, "recipe_item_id": null,
+     "learn_skill": null, "learn_skill_status": "unconfirmed", "learn_skill_candidates": {}, "acquisition": "unknown",
+     "acquisition_text": null, "training_cost": null, "category": "Other", "category_order": 990, "status": "ok",
+     "content_hash": "p1", "reagents": []}
+  ]
+}$json$::jsonb);
+select public.sync_finish(:run5, 'ok', '1.60.1.70999', '{}'::jsonb, '[]'::jsonb, null, array[3333, 9999, 7777, 501, 502, 503, 504, 505, 506, 601]);
+insert into public.crafter_professions (crafter_id, profession_id, skill) values (:'joiner_alt', 40, 30);
+reset role;
+
+set role authenticated;
+select test.login(:'owner');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.admin_catalog() -> 'professions') p where p ->> 'name' = 'Poisons'), 1,
+  'a profession with recipes is offered on the profile and checklist');
+reset role;
+set role anon;
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'professions') p where p ->> 'name' = 'Poisons'), 1,
+  'and can be picked on the public page when a crafter has it');
+reset role;
+
+-- The next sync no longer lists its recipe: the game data stopped treating it as a profession.
+set role service_role;
+select public.sync_start('cli') as run6 \gset
+select public.sync_finish(:run6, 'ok', '1.60.1.70999', '{}'::jsonb, '[]'::jsonb, null, array[3333, 9999, 7777, 501, 502, 503, 504, 505, 506]);
+reset role;
+
+set role authenticated;
+select test.login(:'owner');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.admin_catalog() -> 'professions') p where p ->> 'name' = 'Poisons'), 0,
+  'once its recipes are retired, it is no longer offered on the profile and checklist');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.admin_catalog() -> 'professions') p where p ->> 'name' = 'Blacksmithing'), 1,
+  'real professions stay');
+reset role;
+set role anon;
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'professions') p where p ->> 'name' = 'Poisons'), 0,
+  'and it leaves the public page, even though a crafter once recorded a skill in it');
+select test.is(
+  (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'professions') p where p ->> 'name' = 'Blacksmithing'), 1,
+  'while the real ones stay there too');
+reset role;

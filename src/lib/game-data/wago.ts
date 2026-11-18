@@ -37,6 +37,7 @@ export const TABLE_NAMES = [
   "RandPropPoints",
   "SkillLine",
   "SkillLineAbility",
+  "SkillRaceClassInfo",
   "Spell",
   "SpellEffect",
   "SpellItemEnchantment",
