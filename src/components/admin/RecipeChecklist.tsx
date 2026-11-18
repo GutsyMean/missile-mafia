@@ -16,7 +16,6 @@ interface Props {
   /** The crafter's skill per profession id, used to prefill the bulk box. */
   skills: Record<string, number>;
   isAdmin: boolean;
-  busy: boolean;
   onChange: (add: number[], remove: number[], source: "manual" | "bulk") => void;
   onCorrect: (recipeId: number, level: number | null) => void;
 }
@@ -46,7 +45,7 @@ function unlockLabel(recipe: CatalogRecipe): { text: string; settled: boolean } 
   }
 }
 
-export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChange, onCorrect }: Props) {
+export function RecipeChecklist({ catalog, ticked, skills, isAdmin, onChange, onCorrect }: Props) {
   const defaultProfession =
     catalog.professions.find((p) => skills[String(p.id)] !== undefined)?.id ?? catalog.professions[0]?.id ?? 0;
   const [professionId, setProfessionId] = useState(defaultProfession);
@@ -141,7 +140,7 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
             onChange={(event) => setBulkSkill(event.target.value)}
           />
         </label>
-        <button type="button" className={wow.button} onClick={preview} disabled={busy || bulkSkill.trim() === ""}>
+        <button type="button" className={wow.button} onClick={preview} disabled={bulkSkill.trim() === ""}>
           Preview
         </button>
         <span className={styles.muted}>
@@ -187,7 +186,7 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
             </>
           ) : null}
           <div className={styles.planActions}>
-            <button type="button" className={wow.button} onClick={applyPlan} disabled={busy}>
+            <button type="button" className={wow.button} onClick={applyPlan}>
               Tick these
             </button>
             <button type="button" className={styles.linkButton} onClick={() => setPlan(null)}>
@@ -207,7 +206,6 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
                 <input
                   type="checkbox"
                   checked={checked}
-                  disabled={busy}
                   onChange={(event) =>
                     event.target.checked ? onChange([recipe.id], [], "manual") : onChange([], [recipe.id], "manual")
                   }

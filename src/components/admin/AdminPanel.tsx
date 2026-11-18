@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   checkForGameUpdates,
   correctUnlockLevel,
@@ -25,6 +25,7 @@ import {
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { CraftersPanel } from "./CraftersPanel";
+import { SaveQueue } from "@/lib/admin/save-queue";
 import { EMPTY_PROFILE, ProfileForm } from "./ProfileForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
@@ -82,9 +83,43 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
     () => (crafter ? (tickedByCrafter[crafter.id] ?? new Set(crafter.recipeIds)) : new Set<number>()),
     [crafter, tickedByCrafter],
   );
-  const setTicked = (next: Set<number>) => {
-    if (crafter) setTickedByCrafter((current) => ({ ...current, [crafter.id]: next }));
+  // Ticks are saved in the background, one queue per character, so ticking never waits for the server.
+  const queues = useRef(new Map<string, SaveQueue<"manual" | "bulk">>());
+  const [saving, setSaving] = useState(false);
+  const queueFor = (owner: AdminCrafter) => {
+    let queue = queues.current.get(owner.id);
+    if (!queue) {
+      queue = new SaveQueue<"manual" | "bulk">({
+        initial: owner.recipeIds,
+        save: async (add, remove, source) => {
+          const result = await saveRecipes(owner.id, add, remove, source);
+          return result.ok ? { ok: true } : { ok: false, error: result.error };
+        },
+        onChange: (view) => setTickedByCrafter((current) => ({ ...current, [owner.id]: view })),
+        onError: (error, undone) =>
+          setMessage({
+            kind: "error",
+            text: `Not saved: ${error} ${undone.length === 1 ? "That change was" : `Those ${undone.length} changes were`} undone.`,
+          }),
+        onBusy: () => setSaving([...queues.current.values()].some((entry) => entry.unsaved)),
+      });
+      queues.current.set(owner.id, queue);
+    }
+    return queue;
   };
+  /** The server says the list is now exactly this (after an import or a new skill). */
+  const setTicked = (next: Set<number>) => {
+    if (crafter) queueFor(crafter).reset(next);
+  };
+
+  // Closing the tab in the instant before a tick is sent would lose it; the browser asks first.
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if ([...queues.current.values()].some((entry) => entry.unsaved)) event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, []);
   // Members Discord confirmed, and admins, can add characters themselves.
   const canAddCharacter = data.isAdmin || (data.signup.open && data.signup.verified);
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
@@ -94,42 +129,28 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
 
   const changeRecipes = (add: number[], remove: number[], source: "manual" | "bulk") => {
     if (!crafter) return;
-    const before = ticked;
-    const next = new Set(ticked);
-    for (const id of add) next.add(id);
-    for (const id of remove) next.delete(id);
-    setTicked(next); // show the change at once; put it back if saving fails
-    setMessage(null);
-    startTransition(async () => {
-      const result = await saveRecipes(crafter.id, add, remove, source);
-      if (!result.ok) {
-        setTicked(before);
-        setMessage({ kind: "error", text: `Not saved: ${result.error}` });
-      } else if (source === "bulk") {
-        setMessage({ kind: "ok", text: `Added ${result.data.added} recipes to your list.` });
-      }
-    });
+    // Shown at once and saved in the background; only a failed save is undone.
+    setMessage(source === "bulk" ? { kind: "ok", text: `Added ${add.length} recipes to your list.` } : null);
+    queueFor(crafter).change(add, remove, source);
   };
 
   const correct = (recipeId: number, level: number | null) => {
-    setMessage(null);
+    const before = catalog.recipes.find((recipe) => recipe.id === recipeId);
+    if (!before) return;
+    const show = (patch: Pick<typeof before, "learnSkill" | "learnStatus">) =>
+      setCatalog((current) => ({
+        ...current,
+        recipes: current.recipes.map((recipe) => (recipe.id === recipeId ? { ...recipe, ...patch } : recipe)),
+      }));
+    // Shown at once; put back if the save fails.
+    show(level === null ? { learnSkill: null, learnStatus: "unconfirmed" } : { learnSkill: level, learnStatus: "owner" });
+    setMessage({ kind: "ok", text: level === null ? "Correction removed." : `Unlock level set to ${level}.` });
     startTransition(async () => {
       const result = await correctUnlockLevel(recipeId, level);
       if (!result.ok) {
-        setMessage({ kind: "error", text: result.error });
-        return;
+        show({ learnSkill: before.learnSkill, learnStatus: before.learnStatus });
+        setMessage({ kind: "error", text: `Not saved: ${result.error} The level was put back.` });
       }
-      setCatalog((current) => ({
-        ...current,
-        recipes: current.recipes.map((recipe) =>
-          recipe.id !== recipeId
-            ? recipe
-            : level === null
-              ? { ...recipe, learnSkill: null, learnStatus: "unconfirmed" }
-              : { ...recipe, learnSkill: level, learnStatus: "owner" },
-        ),
-      }));
-      setMessage({ kind: "ok", text: level === null ? "Correction removed." : `Unlock level set to ${level}.` });
     });
   };
 
@@ -209,7 +230,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
       </div>
 
       <div className={styles.status} role="status" data-kind={message?.kind}>
-        {message?.text ?? (pending ? "Saving…" : "")}
+        {message?.text ?? (saving || pending ? "Saving…" : "")}
       </div>
       {welcome && crafter && tab === "import" && ticked.size === 0 ? (
         <p className={styles.welcome}>
@@ -227,7 +248,6 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             ticked={ticked}
             skills={crafter.skills}
             isAdmin={data.isAdmin}
-            busy={pending}
             onChange={changeRecipes}
             onCorrect={correct}
           />
@@ -294,7 +314,9 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             settings={settings}
             serverReady={data.syncConfigured}
             ownUserId={data.userId}
-            onChange={setDirectory}
+            onChange={(next) =>
+              setDirectory((current) => (typeof next === "function" ? (current ? next(current) : current) : next))
+            }
             onSettingsChange={setSettings}
           />
         ) : null}

@@ -21,7 +21,8 @@ interface Props {
   serverReady: boolean;
   /** The admin's own account, so changes to it can refresh their own tabs. */
   ownUserId: string;
-  onChange: (directory: AdminDirectory) => void;
+  /** Takes the new list, or a function of the list as it stands. */
+  onChange: (next: AdminDirectory | ((current: AdminDirectory) => AdminDirectory)) => void;
   onSettingsChange: (settings: AdminSettings) => void;
 }
 
@@ -213,16 +214,30 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
               <input
                 type="checkbox"
                 checked={crafter.isListed}
-                disabled={pending}
                 onChange={(event) => {
                   const listed = event.target.checked;
-                  run(
-                    () => setCrafterListed(crafter.id, listed),
+                  const show = (value: boolean) =>
+                    onChange((current) => ({
+                      ...current,
+                      crafters: current.crafters.map((c) => (c.id === crafter.id ? { ...c, isListed: value } : c)),
+                    }));
+                  // Shown at once; put back if the save fails.
+                  show(listed);
+                  setError(null);
+                  setNotice(
                     listed
                       ? `${crafter.characterName} is shown on the crafting list.`
                       : `${crafter.characterName} is hidden from the crafting list.`,
-                    false,
                   );
+                  void setCrafterListed(crafter.id, listed).then((result) => {
+                    if (result.ok) {
+                      show(listed); // in case a slower change redrew the list in between
+                    } else {
+                      show(!listed);
+                      setNotice(null);
+                      setError(`Not saved: ${result.error} ${crafter.characterName} was put back.`);
+                    }
+                  });
                 }}
               />
               Shown on the crafting list
