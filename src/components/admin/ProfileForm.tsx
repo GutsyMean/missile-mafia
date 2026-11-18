@@ -89,7 +89,9 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
       <h3 className={styles.subheading}>Profession skill</h3>
       <p className={styles.muted}>
         For each profession this character has, type its skill level: the number on the bar in your profession
-        window, from 1 to 300 (for example 145). Leave the others empty.
+        window, from 1 to 300 (for example 145). Leave the others empty. Keep it up to date: when a skill
+        reaches the level a trainer teaches a recipe at, that recipe is added to this character&apos;s list
+        automatically.
       </p>
       <div className={styles.fields}>
         {professions.map((profession) => (

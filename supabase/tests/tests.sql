@@ -464,3 +464,77 @@ select test.is(
   'recipes nobody has learned are pending for every crafter with the profession');
 select test.is(has_function_privilege('anon', 'public.guild_unlearned(integer)', 'execute'), true, 'visitors can read what is still to learn');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Trainer recipes join a crafter's list by themselves as their skill rises
+-- ---------------------------------------------------------------------------
+-- The game gains some Blacksmithing recipes: trainer ones at 1, 30, 60 and 150,
+-- one whose level a single source gives, and plans sold by a vendor.
+set role service_role;
+select public.sync_start('cli') as run4 \gset
+select public.sync_apply(:run4, (
+  select jsonb_build_object('recipes', jsonb_agg(jsonb_build_object(
+    'id', r.id, 'profession_id', 164, 'name', r.name, 'icon_file_id', 0, 'crafted_item_id', null, 'crafted_count', 1,
+    'effect_text', null, 'skill_yellow', r.lvl + 25, 'skill_green', r.lvl + 40, 'skill_grey', r.lvl + 55, 'recipe_item_id', null,
+    'learn_skill', r.lvl, 'learn_skill_status', r.status, 'learn_skill_candidates', '{}'::jsonb, 'acquisition', r.how,
+    'acquisition_text', null, 'training_cost', null, 'category', 'Other', 'category_order', 990, 'status', 'ok',
+    'content_hash', 'auto-' || r.id, 'reagents', '[]'::jsonb)))
+  from (values
+    (501, 'Trainer Thirty', 30, 'confirmed', 'trainer'),
+    (502, 'Trainer Sixty', 60, 'confirmed', 'trainer'),
+    (503, 'Trainer One-Fifty', 150, 'confirmed', 'trainer'),
+    (504, 'One Source Forty', 40, 'single_source', 'trainer'),
+    (505, 'Vendor Plans Thirty', 30, 'confirmed', 'vendor'),
+    (506, 'Known From The Start', 1, 'confirmed', 'starter')
+  ) as r (id, name, lvl, status, how)
+));
+select public.sync_finish(:run4, 'ok', '1.60.1.70999', '{}'::jsonb, '[]'::jsonb, null, array[3333, 9999, 7777, 501, 502, 503, 504, 505, 506]);
+reset role;
+
+-- Damien is at Blacksmithing 145.
+select test.is(
+  (select array_agg(recipe_id order by recipe_id) from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id between 501 and 506),
+  array[501, 502, 506], 'trainer recipes the game adds within a crafter''s skill join their list');
+select test.is(
+  (select source from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 501), 'auto',
+  'and are recorded as added automatically');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 503), 0, 'a recipe above their skill does not');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 504), 0, 'a level only one source gives is not acted on');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 505), 0, 'plans bought from a vendor are left to the crafter');
+select test.is(
+  (select array_agg(recipe_id order by recipe_id) from public.crafter_recipes where crafter_id = :'joiner_alt' and recipe_id between 501 and 506),
+  array[501, 502, 506], 'every crafter with the profession gets them, each by their own skill');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'joiner_crafter' and recipe_id = 501), 0, 'a crafter below the level does not');
+
+set role authenticated;
+select test.login(:'owner');
+update public.crafter_professions set skill = 150 where crafter_id = :'crafter_owner' and profession_id = 164;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 503), 1, 'reaching a level adds the trainer recipes for it');
+
+-- What a crafter takes off stays off; putting it back is theirs to do.
+select public.set_crafter_recipes(:'crafter_owner', '{}'::int[], array[501]);
+update public.crafter_professions set skill = 151 where crafter_id = :'crafter_owner' and profession_id = 164;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 501), 0, 'a recipe the crafter unticked is not added again');
+select public.set_crafter_recipes(:'crafter_owner', array[501], '{}'::int[]);
+update public.crafter_professions set skill = 152 where crafter_id = :'crafter_owner' and profession_id = 164;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner' and recipe_id = 501), 1, 'ticking it again brings it back for good');
+select test.is((select count(*)::int from public.crafter_recipe_skips where crafter_id = :'crafter_owner' and recipe_id = 501), 0, 'and clears the note that it was taken off');
+
+select count(*)::int as before_lowering from public.crafter_recipes where crafter_id = :'crafter_owner' \gset
+update public.crafter_professions set skill = 20 where crafter_id = :'crafter_owner' and profession_id = 164;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'crafter_owner'), :before_lowering, 'lowering a skill never removes anything');
+
+-- An admin settling a level acts for everyone already past it.
+update public.recipes set learn_skill_owner = 50 where id = 504;
+select test.is((select count(*)::int from public.crafter_recipes where recipe_id = 504 and crafter_id = :'joiner_alt'), 1, 'a level an admin confirms is applied to crafters already past it');
+select test.is((select count(*)::int from public.crafter_recipes where recipe_id = 504 and crafter_id = :'crafter_owner'), 0, 'but not to one below it');
+
+select test.login(:'joiner');
+select test.throws(
+  $$insert into public.crafter_recipe_skips (crafter_id, recipe_id) values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 502)$$, '42501',
+  'a crafter cannot take recipes off someone else''s automatic list');
+select test.is((select count(*)::int from public.crafter_recipe_skips), 0, 'or see what others have taken off');
+reset role;
+set role anon;
+select test.throws($$select count(*) from public.crafter_recipe_skips$$, '42501', 'visitors cannot read it at all');
+reset role;

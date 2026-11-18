@@ -234,7 +234,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             crafterName={crafter.characterName}
             ticked={ticked}
             onImported={(ids, text) => {
-              setTicked(new Set([...ticked, ...ids]));
+              setTicked(new Set(ids));
               setMessage({ kind: "ok", text });
               setTab("recipes");
             }}
@@ -248,8 +248,18 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             professions={catalog.professions}
             submitLabel="Save profile"
             onSubmit={(input) => saveProfile(crafter.id, input)}
-            onSaved={() => {
-              setMessage({ kind: "ok", text: "Profile saved." });
+            onSaved={(result) => {
+              // A higher skill brings its trainer recipes with it.
+              const { recipeIds } = result as { recipeIds: number[] };
+              const unlocked = recipeIds.filter((id) => !ticked.has(id)).length;
+              setTicked(new Set(recipeIds));
+              setMessage({
+                kind: "ok",
+                text:
+                  unlocked > 0
+                    ? `Profile saved. ${unlocked} trainer ${unlocked === 1 ? "recipe" : "recipes"} for your skill ${unlocked === 1 ? "was" : "were"} added to your list.`
+                    : "Profile saved.",
+              });
               router.refresh(); // the name and skill shown elsewhere on the page follow
             }}
           />
@@ -374,7 +384,11 @@ function GuildonImport({
                 startTransition(async () => {
                   const result = await importGuildon(crafterId, text, character.name);
                   if (!result.ok) setError(result.error);
-                  else onImported(match.recipeIds, `Imported ${character.name}: ${result.data.added} recipes added.`);
+                  else {
+                    // The list as the server now has it: the import plus the trainer recipes its skills bring.
+                    const gained = result.data.recipeIds.filter((id) => !ticked.has(id)).length;
+                    onImported(result.data.recipeIds, `Imported ${character.name}: ${gained} recipes added.`);
+                  }
                 })
               }
             >

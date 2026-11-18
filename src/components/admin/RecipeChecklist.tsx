@@ -126,6 +126,10 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
         </select>
       </div>
 
+      <p className={styles.muted}>
+        Trainer recipes are added by themselves when the skill on your Profile tab reaches their level. Anything you
+        untick stays off. Plans from vendors, drops and quests are yours to tick.
+      </p>
       <div className={styles.bulk}>
         <label className={styles.bulkLabel}>
           Tick every trainer recipe up to skill

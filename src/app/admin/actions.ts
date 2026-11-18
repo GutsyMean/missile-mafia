@@ -123,12 +123,34 @@ async function writeProfile(session: Session, crafterId: string, profile: Parsed
   return { ok: true, data: undefined };
 }
 
-export async function saveProfile(crafterId: string, input: ProfileInput): Promise<ActionResult> {
+/** A crafter's whole recipe list. The API returns a page at a time, so read until a short page. */
+async function recipeIdsOf(session: Session, crafterId: string): Promise<number[]> {
+  const ids: number[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await session.supabase
+      .from("crafter_recipes")
+      .select("recipe_id")
+      .eq("crafter_id", crafterId)
+      .order("recipe_id")
+      .range(from, from + 999);
+    if (error) throw new Error(error.message);
+    ids.push(...(data ?? []).map((row) => row.recipe_id as number));
+    if (!data || data.length < 1000) return ids;
+  }
+}
+
+/**
+ * Saves a profile. Raising a profession's skill makes the database add the
+ * trainer recipes for the new level, so the list as it now stands is returned.
+ */
+export async function saveProfile(crafterId: string, input: ProfileInput): Promise<ActionResult<{ recipeIds: number[] }>> {
   const session = await signedIn();
   if (!session) return fail("Sign in again to save.");
   const profile = parseProfile(input);
   if (!profile.ok) return profile;
-  return writeProfile(session, crafterId, profile.data);
+  const written = await writeProfile(session, crafterId, profile.data);
+  if (!written.ok) return written;
+  return { ok: true, data: { recipeIds: await recipeIdsOf(session, crafterId) } };
 }
 
 /**
@@ -162,7 +184,7 @@ export async function importGuildon(
   crafterId: string,
   text: string,
   characterName: string,
-): Promise<ActionResult<{ added: number; unknown: number }>> {
+): Promise<ActionResult<{ added: number; unknown: number; recipeIds: number[] }>> {
   const session = await signedIn();
   if (!session) return fail("Sign in again to import.");
   if (text.length > 200_000) return fail("That export is too large.");
@@ -183,6 +205,7 @@ export async function importGuildon(
     if (error) return fail(error.message);
   }
 
+  // The skills just saved bring their trainer recipes with them (the database adds those).
   // Only ever adds: recipes ticked by hand (for example ones not trained yet) are kept.
   const { data, error } = await session.supabase.rpc("set_crafter_recipes", {
     p_crafter_id: crafterId,
@@ -192,7 +215,14 @@ export async function importGuildon(
   });
   if (error) return fail(error.message);
   updateTag(CRAFTABLES_TAG);
-  return { ok: true, data: { added: (data as { added: number }).added, unknown: match.unknownSpellIds.length } };
+  return {
+    ok: true,
+    data: {
+      added: (data as { added: number }).added,
+      unknown: match.unknownSpellIds.length,
+      recipeIds: await recipeIdsOf(session, crafterId),
+    },
+  };
 }
 
 async function signedInAdmin() {
@@ -218,6 +248,8 @@ export async function correctUnlockLevel(recipeId: number, level: number | null)
     .eq("id", recipeId);
   if (error) return fail(error.message);
   if (count === 0) return fail("That recipe could not be updated.");
+  // The level shows on the public list, and a settled trainer level adds the recipe for crafters past it.
+  updateTag(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
 }
 
