@@ -345,9 +345,92 @@ select.field {
   cursor: pointer;
 }
 
+/* Browsers that cannot restyle the list of options at least get the theme's dark ground. */
 select.field option {
   background: #14100c;
   color: #fff;
+}
+
+/* The browser's own autofill tint (a pale blue) has no place on these fields.
+   Autofill forces a background colour; a transition this long never gets there. */
+.field:autofill {
+  -webkit-text-fill-color: #fff;
+  caret-color: var(--gold);
+  transition: background-color 100000s 0s;
+}
+
+.field:-webkit-autofill {
+  -webkit-text-fill-color: #fff;
+  caret-color: var(--gold);
+  transition: background-color 100000s 0s;
+}
+
+/* Where the browser lets the list of options be styled, it gets the game's
+   dropdown: the black panel with its bronze edge, gold for the choice in
+   force and a gold wash under the pointer. Elsewhere the list stays native. */
+@supports (appearance: base-select) {
+  select.field,
+  select.field::picker(select) {
+    appearance: base-select;
+  }
+
+  select.field {
+    /* A styled dropdown sizes to its current choice; a set width keeps the bar from shifting. */
+    inline-size: var(--select-width, 124px);
+    max-width: none;
+    align-items: center;
+    overflow: hidden;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* The arrow is the game's, drawn as the background above. */
+  select.field::picker-icon {
+    display: none;
+  }
+
+  select.field::picker(select) {
+    margin-block: 3px;
+    padding: 0;
+    /* The panel's art carries a drop shadow, which sits outside the box. */
+    border: solid transparent;
+    border-width: 8px 9px;
+    border-image: url("/ui/dropdown-menu.png") 38 48 58 48 fill / 19px 24px 29px 24px / 11.5px 16.5px 21.5px 16.5px
+      stretch;
+    background: none;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  select.field option {
+    gap: 6px;
+    padding: 4px 12px 4px 4px;
+    background: none;
+    color: #fff;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  select.field option:hover,
+  select.field option:focus-visible {
+    outline: none;
+    background: rgb(255 209 0 / 0.16);
+  }
+
+  select.field option:checked {
+    color: var(--gold);
+  }
+
+  /* The tick beside the choice in force is the game's own. */
+  select.field option::checkmark {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 13px;
+    background: url("/ui/checkmark.png") center / contain no-repeat;
+  }
 }
 
 .checkbox {

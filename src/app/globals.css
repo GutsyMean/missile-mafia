@@ -28,9 +28,17 @@
   --q5: #ff8000;
 
   --tooltip-bg: rgb(8 9 22 / 0.97);
-  --focus: #7fd0ff;
+  /* Keyboard focus, text selection and other browser-drawn accents: the game's gold, never blue. */
+  --focus: #ffe27a;
 
   color-scheme: dark;
+  accent-color: var(--gold);
+  caret-color: var(--gold);
+}
+
+::selection {
+  background: rgb(255 209 0 / 0.32);
+  color: #fff;
 }
 
 * {

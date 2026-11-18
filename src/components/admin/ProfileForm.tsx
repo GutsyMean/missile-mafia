@@ -62,11 +62,11 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
       <div className={styles.fields}>
         <label className={styles.fieldLabel}>
           Character name
-          <input className={wow.field} value={form.characterName} onChange={set("characterName")} required maxLength={40} />
+          <input autoComplete="off" className={wow.field} value={form.characterName} onChange={set("characterName")} required maxLength={40} />
         </label>
         <label className={styles.fieldLabel}>
           Rule set or realm
-          <input className={wow.field} value={form.realm} onChange={set("realm")} maxLength={40} placeholder="Normal, PvP, RP…" />
+          <input autoComplete="off" className={wow.field} value={form.realm} onChange={set("realm")} maxLength={40} placeholder="Normal, PvP, RP…" />
         </label>
         <label className={styles.fieldLabel}>
           Faction
@@ -78,11 +78,11 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
         </label>
         <label className={styles.fieldLabel}>
           Class
-          <input className={wow.field} value={form.className} onChange={set("className")} maxLength={20} />
+          <input autoComplete="off" className={wow.field} value={form.className} onChange={set("className")} maxLength={20} />
         </label>
         <label className={styles.fieldLabel}>
           Level
-          <input className={wow.field} inputMode="numeric" value={form.level} onChange={set("level")} />
+          <input autoComplete="off" className={wow.field} inputMode="numeric" value={form.level} onChange={set("level")} />
         </label>
       </div>
 
@@ -97,7 +97,7 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
         {professions.map((profession) => (
           <label key={profession.id} className={styles.fieldLabel}>
             {profession.name}
-            <input
+            <input autoComplete="off"
               className={wow.field}
               inputMode="numeric"
               placeholder="Skill, e.g. 145"

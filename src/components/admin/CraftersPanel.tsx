@@ -95,7 +95,7 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
               <div className={styles.row}>
                 <label className={styles.inlineLabel}>
                   Character name
-                  <input
+                  <input autoComplete="off"
                     className={wow.field}
                     value={name}
                     maxLength={40}
@@ -243,7 +243,7 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
       >
         <label className={styles.inlineLabel}>
           Character name
-          <input className={wow.field} value={newName} maxLength={40} onChange={(event) => setNewName(event.target.value)} />
+          <input autoComplete="off" className={wow.field} value={newName} maxLength={40} onChange={(event) => setNewName(event.target.value)} />
         </label>
         <button type="submit" className={wow.button} disabled={pending || newName.trim() === ""}>
           Add crafter
@@ -302,7 +302,7 @@ function ApprovalSettings({
       <div className={styles.row}>
         <label className={styles.inlineLabel}>
           Server ID
-          <input
+          <input autoComplete="off"
             className={wow.field}
             inputMode="numeric"
             placeholder="Required"
@@ -312,7 +312,7 @@ function ApprovalSettings({
         </label>
         <label className={styles.inlineLabel}>
           Role ID
-          <input
+          <input autoComplete="off"
             className={wow.field}
             inputMode="numeric"
             placeholder="Optional: only this role"

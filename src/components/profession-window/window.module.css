@@ -63,6 +63,7 @@
 
 /* Who and which profession: wider than the other dropdowns, names are long. */
 select.picker {
+  --select-width: 170px;
   max-width: 170px;
 }
 

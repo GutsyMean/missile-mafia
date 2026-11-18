@@ -80,7 +80,7 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
           ))}
         </select>
       ) : null}
-      <input
+      <input autoComplete="off"
         className={`${wow.field} ${styles.search}`}
         type="search"
         aria-label="Search items and reagents"
@@ -103,7 +103,7 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
       {select("Stat", "stat", "Any stat", options.stats)}
       <span className={styles.levels}>
         <span className={styles.levelsLabel}>Level</span>
-        <input
+        <input autoComplete="off"
           className={`${wow.field} ${styles.level}`}
           inputMode="numeric"
           aria-label="Lowest required level"
@@ -112,7 +112,7 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
           onChange={(event) => onChange({ minLevel: levelValue(event.target.value) })}
         />
         <span aria-hidden="true">–</span>
-        <input
+        <input autoComplete="off"
           className={`${wow.field} ${styles.level}`}
           inputMode="numeric"
           aria-label="Highest required level"

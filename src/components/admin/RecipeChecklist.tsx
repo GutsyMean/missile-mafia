@@ -110,7 +110,7 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
             </option>
           ))}
         </select>
-        <input
+        <input autoComplete="off"
           className={`${wow.field} ${styles.grow}`}
           type="search"
           aria-label="Search recipes"
@@ -133,7 +133,7 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
       <div className={styles.bulk}>
         <label className={styles.bulkLabel}>
           Tick every trainer recipe up to skill
-          <input
+          <input autoComplete="off"
             className={`${wow.field} ${styles.skillInput}`}
             inputMode="numeric"
             aria-label="Skill"
@@ -229,7 +229,7 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, busy, onChan
                 {isAdmin ? (
                   editing?.id === recipe.id ? (
                     <span className={styles.edit}>
-                      <input
+                      <input autoComplete="off"
                         className={`${wow.field} ${styles.skillInput}`}
                         inputMode="numeric"
                         aria-label={`Unlock level for ${recipe.name}`}
