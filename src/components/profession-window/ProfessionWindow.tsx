@@ -7,6 +7,7 @@ import {
   filterOptions,
   groupEntries,
   mergeUnlearned,
+  resolveFilters,
   unlearnedToLoad,
 } from "@/lib/craftables/filter";
 import {
@@ -74,7 +75,11 @@ interface Props {
 
 export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   const search = useSyncExternalStore(subscribeToUrl, readUrl, readUrlOnServer);
-  const { filters, recipeId } = useMemo(() => parseViewState(new URLSearchParams(search)), [search]);
+  const { filters, recipeId } = useMemo(() => {
+    const view = parseViewState(new URLSearchParams(search));
+    // A link may name a crafter who has left or a profession the guild lacks; those fall back to everyone.
+    return { filters: resolveFilters(doc, view.filters), recipeId: view.recipeId };
+  }, [search, doc]);
 
   // Recipes nobody has learned yet are fetched per profession, when a view calls for them.
   const [unlearned, setUnlearned] = useState(initialUnlearned);
@@ -93,7 +98,6 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   }, [wanted]);
   const loadingMore = wanted.some((id) => !(id in unlearned));
 
-  // A link may name a crafter who has since left; it then shows everyone.
   const crafter = useMemo(() => doc.crafters.find((c) => c.slug === filters.crafter) ?? null, [doc, filters.crafter]);
   const entries = useMemo(
     () => buildEntries(mergeUnlearned(doc, wanted.flatMap((id) => unlearned[id] ?? [])), crafter?.id ?? null),
@@ -258,7 +262,23 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
         <div className={styles.body}>
           <div className={styles.listPane}>
             {entries.length === 0 ? (
-              <p className={styles.empty}>No crafter has listed any recipes yet.</p>
+              <p className={styles.empty}>
+                {crafter
+                  ? `${crafter.characterName} has not listed any recipes yet.`
+                  : "No crafter has listed any recipes yet."}
+              </p>
+            ) : visible.length === 0 && chosenProfession && !isFiltered(filters) ? (
+              // The choice of crafter and profession has nothing in it; say so rather than show something else.
+              <div className={styles.empty}>
+                <p>
+                  {crafter
+                    ? `${crafter.characterName} has no ${chosenProfession.name} recipes.`
+                    : `Nobody has listed ${chosenProfession.name} recipes yet.`}
+                </p>
+                <button type="button" className={wow.button} onClick={() => setFilters({ ...filters, profession: "" })}>
+                  All professions
+                </button>
+              </div>
             ) : visible.length === 0 ? (
               <div className={styles.empty}>
                 <p>Nothing matches these filters.</p>

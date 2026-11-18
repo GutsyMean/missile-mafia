@@ -108,12 +108,25 @@ const COMPARATORS: Record<SortMode, (a: Entry, b: Entry) => number> = {
   level: (a, b) => level(b) - level(a) || byName(a, b),
 };
 
+/**
+ * A link can name a crafter who has left or a profession the guild no longer
+ * has. Those two choices then fall back to "everyone" and "all professions",
+ * which is also what the pickers show. Everything else is taken as given.
+ */
+export function resolveFilters(doc: CraftablesDoc, filters: Filters): Filters {
+  const crafter = doc.crafters.some((c) => c.slug === filters.crafter) ? filters.crafter : "";
+  const profession = doc.professions.some((p) => p.slug === filters.profession) ? filters.profession : "";
+  return crafter === filters.crafter && profession === filters.profession ? filters : { ...filters, crafter, profession };
+}
+
+/** Every filter narrows the list. One that matches nothing leaves nothing: it never falls back to showing more. */
 export function applyFilters(entries: Entry[], filters: Filters): Entry[] {
   const words = filters.search.toLowerCase().split(/\s+/).filter(Boolean);
-  // A profession the list does not have (an old link, say) filters nothing out.
-  const profession = entries.some((entry) => entry.professionSlug === filters.profession) ? filters.profession : "";
   return entries
-    .filter((entry) => (profession === "" || entry.professionSlug === profession) && matches(entry, filters, words))
+    .filter(
+      (entry) =>
+        (filters.profession === "" || entry.professionSlug === filters.profession) && matches(entry, filters, words),
+    )
     .sort(COMPARATORS[filters.sort]);
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyFilters, buildEntries, mergeUnlearned, unlearnedToLoad } from "@/lib/craftables/filter";
+import { applyFilters, buildEntries, mergeUnlearned, resolveFilters, unlearnedToLoad } from "@/lib/craftables/filter";
 import { DEFAULT_FILTERS, type CraftablesDoc, type Filters, type RecipeView, type UnlearnedDoc } from "@/lib/craftables/types";
 import { parseViewState, serializeViewState } from "@/lib/craftables/url-state";
 
@@ -76,8 +76,33 @@ describe("looking at everyone", () => {
     ]);
   });
 
-  it("ignores a profession the link names but the guild does not have", () => {
-    expect(view(null, { profession: "jewelcrafting" })).toHaveLength(5);
+  it("shows nothing for a profession nobody has anything in", () => {
+    expect(view(null, { profession: "jewelcrafting" })).toEqual([]);
+  });
+});
+
+describe("resolveFilters: a link can name a crafter or profession the guild no longer has", () => {
+  const filters = (over: Partial<Filters>) => ({ ...DEFAULT_FILTERS, ...over });
+
+  it("keeps a crafter and profession the guild has", () => {
+    expect(resolveFilters(doc, filters({ crafter: "damien", profession: "tailoring" }))).toMatchObject({
+      crafter: "damien",
+      profession: "tailoring",
+    });
+  });
+
+  it("falls back to everyone for a crafter who has left", () => {
+    expect(resolveFilters(doc, filters({ crafter: "gone", profession: "tailoring" }))).toMatchObject({
+      crafter: "",
+      profession: "tailoring",
+    });
+  });
+
+  it("falls back to all professions for one the guild does not have", () => {
+    expect(resolveFilters(doc, filters({ profession: "jewelcrafting", search: "axe" }))).toMatchObject({
+      profession: "",
+      search: "axe",
+    });
   });
 });
 
@@ -97,6 +122,11 @@ describe("looking at one crafter", () => {
     const gauntlets = buildEntries(everything, "c2").find((e) => e.recipe.id === 2)!;
     expect(gauntlets.crafters.map((c) => c.characterName)).toEqual(["Damien"]);
     expect(gauntlets.pending.map((c) => c.characterName)).toEqual(["Stitches"]);
+  });
+
+  it("shows nothing when they do not have the chosen profession", () => {
+    // Damien is a blacksmith only: asking for his tailoring must not fall back to everything he makes.
+    expect(view("c1", { profession: "tailoring" })).toEqual([]);
   });
 
   it("combines with a profession", () => {

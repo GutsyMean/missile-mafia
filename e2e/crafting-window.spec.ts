@@ -185,6 +185,33 @@ test.describe("choosing whose recipes to see", () => {
     await expect(crafterPicker(page)).toHaveValue("stitches");
   });
 
+  test("shows nothing when the chosen crafter does not have the chosen profession", async ({ page }) => {
+    await page.goto("/");
+    await crafterPicker(page).selectOption({ label: "Stitches" });
+    await expect(rows(page)).toHaveCount(6);
+    await professionPicker(page).selectOption({ label: "Blacksmithing" });
+
+    await expect(rows(page)).toHaveCount(0);
+    await expect(page.getByText("Stitches has no Blacksmithing recipes.")).toBeVisible();
+    await expect(professionPicker(page)).toHaveValue("blacksmithing");
+
+    await page.getByRole("button", { name: "All professions" }).click();
+    await expect(rows(page)).toHaveCount(6);
+    await expect(crafterPicker(page)).toHaveValue("stitches");
+  });
+
+  test("keeps a filter in force, and visible, when the crafter changes under it", async ({ page }) => {
+    await page.goto("/");
+    await page.getByLabel("Slot").selectOption("Hands");
+    await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
+
+    // Stitches makes nothing for the hands: the list must go empty, not back to everything.
+    await crafterPicker(page).selectOption({ label: "Stitches" });
+    await expect(rows(page)).toHaveCount(0);
+    await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
+    await expect(page.getByLabel("Slot")).toHaveValue("Hands");
+  });
+
   test("shows everyone again for a link to a crafter who has left", async ({ page }) => {
     await page.goto("/?crafter=someone-gone");
     await expect(rows(page)).toHaveCount(62);

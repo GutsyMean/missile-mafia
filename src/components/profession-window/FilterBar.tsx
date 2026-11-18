@@ -39,7 +39,8 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
       onChange={(event) => onChange({ [key]: event.target.value })}
     >
       <option value="">{all}</option>
-      {values.map((value) => (
+      {/* A choice stays in force when the list changes under it, so it must stay visible too. */}
+      {(filters[key] && !values.includes(filters[key]) ? [filters[key], ...values] : values).map((value) => (
         <option key={value} value={value}>
           {value}
         </option>
