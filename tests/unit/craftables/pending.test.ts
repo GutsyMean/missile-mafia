@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyFilters, buildEntries, groupEntries } from "@/lib/craftables/filter";
 import { factionNote, skillLabel, sourceLabel, sourceParts } from "@/lib/craftables/pending";
 import { DEFAULT_FILTERS, type Filters } from "@/lib/craftables/types";
-import { parseViewState, serializeViewState } from "@/lib/craftables/url-state";
+import { NO_GEAR, parseViewState, serializeViewState } from "@/lib/craftables/url-state";
 import { sampleDoc, sampleDocWithPending } from "../../helpers/craftables";
 
 const entries = buildEntries(sampleDocWithPending());
@@ -102,7 +102,7 @@ describe("sourceLabel", () => {
 
 describe("the link to a view", () => {
   it("carries Available now only", () => {
-    const view = { filters: { ...DEFAULT_FILTERS, availableOnly: true }, recipeId: null };
+    const view = { filters: { ...DEFAULT_FILTERS, availableOnly: true }, recipeId: null, gear: NO_GEAR };
     expect(serializeViewState(view)).toBe("available=1");
     expect(parseViewState(new URLSearchParams("available=1"))).toEqual(view);
   });

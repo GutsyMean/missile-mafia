@@ -1,4 +1,4 @@
-import type { ItemStat, TooltipLine, WeaponDamage } from "@/lib/game-data/types";
+import type { GameClass, ItemStat, TooltipLine, WeaponDamage } from "@/lib/game-data/types";
 
 /** The document `guild_craftables()` returns: everything the public window shows. */
 export interface CraftablesDoc {
@@ -13,12 +13,22 @@ export interface CraftablesDoc {
    * not in this document; they are fetched per profession when a view needs them.
    */
   unlearned?: { professionId: number; count: number }[];
+  /** The playable classes, for choosing gear by class, talent tree and level. */
+  classes?: ClassView[];
 }
+
+/** A playable class: its talent trees, and the armour and weapons it can use from which level. */
+export type ClassView = GameClass;
 
 /** The recipes of one profession that nobody has learned yet, with the items they involve. */
 export interface UnlearnedDoc {
   recipes: RecipeView[];
   items: Record<string, ItemView>;
+}
+
+/** Gear from professions nobody in the guild has, with those professions. */
+export interface GearElsewhereDoc extends UnlearnedDoc {
+  professions: ProfessionView[];
 }
 
 export interface ProfessionView {
@@ -91,6 +101,8 @@ export interface ItemView {
   armor: number | null;
   damage: WeaponDamage | null;
   stats: ItemStat[];
+  /** The game's mask of classes that may use the item. Absent when every class may. */
+  classMask?: number | null;
   tooltip: TooltipLine[];
   tooltipComplete: boolean;
 }

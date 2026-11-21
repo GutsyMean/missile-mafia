@@ -686,3 +686,92 @@ select test.is(
   (select nullif(coalesce(quest_faction_owner, quest_faction), 'none') from public.recipes where id = 603), 'horde',
   'which keeps winning over the wiki');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Choosing gear by class, talent tree and level
+-- ---------------------------------------------------------------------------
+-- The sync brings the playable classes, a helm only Paladins may wear, and a
+-- profession nobody in the guild has (Engineering) with goggles and a bomb.
+set role service_role;
+select public.sync_start('cli') as rung \gset
+select public.sync_apply(:rung, $json${
+  "meta": {"classes": {"content_hash": "c1", "value": [{"id": 2, "slug": "paladin", "name": "Paladin",
+    "specs": [{"id": 381, "slug": "retribution", "name": "Retribution"}],
+    "proficiencies": [{"skillLineId": 293, "name": "Plate Mail", "minLevel": 40}]}]}},
+  "professions": [{"id": 202, "slug": "engineering", "name": "Engineering", "icon_file_id": 1, "child_skill_line_ids": []}],
+  "items": [
+    {"id": 7001, "name": "Justice Helm", "quality": 3, "icon_file_id": 1, "class_id": 4, "subclass_id": 4,
+     "inventory_type": 1, "item_level": 45, "required_level": 40, "bonding": 1, "sell_price": 1, "slot_name": "Head",
+     "type_name": "Plate", "armor": 300, "damage": null, "stats": [], "class_mask": 2,
+     "tooltip": [{"text": "Justice Helm", "color": "quality"}], "tooltip_complete": true, "content_hash": "g1"},
+    {"id": 7002, "name": "Flying Tiger Goggles", "quality": 2, "icon_file_id": 1, "class_id": 4, "subclass_id": 1,
+     "inventory_type": 1, "item_level": 20, "required_level": 0, "bonding": 2, "sell_price": 1, "slot_name": "Head",
+     "type_name": "Cloth", "armor": 20, "damage": null, "stats": [], "class_mask": null,
+     "tooltip": [{"text": "Flying Tiger Goggles", "color": "quality"}], "tooltip_complete": true, "content_hash": "g2"},
+    {"id": 7003, "name": "Rough Copper Bomb", "quality": 1, "icon_file_id": 1, "class_id": 0, "subclass_id": 0,
+     "inventory_type": 0, "item_level": 10, "required_level": 0, "bonding": 0, "sell_price": 1, "slot_name": null,
+     "type_name": null, "armor": null, "damage": null, "stats": [], "class_mask": null,
+     "tooltip": [{"text": "Rough Copper Bomb", "color": "quality"}], "tooltip_complete": true, "content_hash": "g3"}
+  ]
+}$json$::jsonb);
+select public.sync_apply(:rung, (
+  select jsonb_build_object('recipes', jsonb_agg(jsonb_build_object(
+    'id', r.id, 'profession_id', r.profession, 'name', r.name, 'icon_file_id', 0, 'crafted_item_id', r.item, 'crafted_count', 1,
+    'effect_text', null, 'skill_yellow', 200, 'skill_green', 210, 'skill_grey', 220, 'recipe_item_id', null,
+    'learn_skill', 100, 'learn_skill_status', 'confirmed', 'learn_skill_candidates', '{}'::jsonb, 'acquisition', 'vendor',
+    'acquisition_text', null, 'quest_faction', null, 'training_cost', null, 'category', 'Other',
+    'category_order', 990, 'status', 'ok', 'content_hash', 'gear-' || r.id, 'reagents', '[]'::jsonb)))
+  from (values
+    (701, 164, 'Justice Helm', 7001),
+    (702, 202, 'Flying Tiger Goggles', 7002),
+    (703, 202, 'Rough Copper Bomb', 7003)
+  ) as r (id, profession, name, item)
+));
+select public.sync_finish(:rung, 'ok', '1.60.1.71001', '{}'::jsonb, '[]'::jsonb, null,
+  (select array_agg(id) from public.recipes where status <> 'removed'));
+select test.is((select value -> 0 ->> 'slug' from public.game_meta where key = 'classes'), 'paladin', 'the sync stores the playable classes');
+select test.is((select class_mask from public.items where id = 7001), 2, 'and the classes an item is limited to');
+
+-- The same classes again are not rewritten.
+select updated_at as classes_written from public.game_meta where key = 'classes' \gset
+select test.is(public.sync_state() -> 'meta' ->> 'classes', 'c1', 'sync_state tells the sync which classes it holds');
+select public.sync_apply(:rung, '{"meta": {"classes": {"content_hash": "c1", "value": []}}}'::jsonb);
+select test.is(
+  (select updated_at = :'classes_written'::timestamptz and jsonb_array_length(value) = 1 from public.game_meta where key = 'classes'), true,
+  'classes that have not changed are left alone');
+reset role;
+
+set role anon;
+select test.is(public.guild_craftables() -> 'classes' -> 0 ->> 'name', 'Paladin', 'the public page gets the classes');
+select test.is(
+  public.guild_craftables() -> 'classes' -> 0 -> 'proficiencies' -> 0 ->> 'minLevel', '40',
+  'with the level each kind of armour opens at');
+select test.is(
+  public.guild_unlearned(164) -> 'items' -> '7001' ->> 'classMask', '2',
+  'an item limited to a class says so');
+select test.is(
+  (select array_agg((r ->> 'id')::int order by (r ->> 'id')::int) from jsonb_array_elements(public.guild_gear_elsewhere() -> 'recipes') r),
+  array[702], 'gear from a profession nobody has is offered, without its other recipes or the guild''s own professions');
+select test.is(
+  (public.guild_gear_elsewhere() -> 'items' -> '7002') ? 'classMask', false,
+  'an item anyone may use carries no class limit');
+select test.is(public.guild_gear_elsewhere() -> 'professions' -> 0 ->> 'slug', 'engineering', 'with the name of its profession');
+select test.is(
+  public.guild_gear_elsewhere() -> 'recipes' -> 0 -> 'pendingCrafterIds', '[]'::jsonb,
+  'and nobody is waiting to learn it');
+select test.throws(
+  $$insert into public.game_meta (key, value) values ('classes', '[]'::jsonb)$$, '42501', 'a visitor cannot write the classes');
+reset role;
+
+-- Once a listed crafter takes up the profession, its recipes move to the ones still to learn.
+set role service_role;
+insert into public.crafter_professions (crafter_id, profession_id, skill) values (:'crafter_owner', 202, 1);
+reset role;
+set role anon;
+select test.is(
+  jsonb_array_length(public.guild_gear_elsewhere() -> 'recipes'), 0,
+  'a profession someone has taken up is no longer "elsewhere"');
+select test.is(
+  (select array_agg((r ->> 'id')::int order by (r ->> 'id')::int) from jsonb_array_elements(public.guild_unlearned(202) -> 'recipes') r),
+  array[702, 703], 'its recipes are now theirs to learn');
+reset role;

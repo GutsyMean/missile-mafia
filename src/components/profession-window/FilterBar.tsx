@@ -11,6 +11,8 @@ interface Props {
   options: FilterOptions;
   crafters: CrafterView[];
   professions: ProfessionView[];
+  /** True while gear is ranked for a character: the level range and sort order then have no say. */
+  ranking?: boolean;
   onChange: (patch: Partial<Filters>) => void;
 }
 
@@ -19,7 +21,7 @@ function levelValue(text: string): number | null {
   return Number.isFinite(number) && number > 0 ? number : null;
 }
 
-export function FilterBar({ filters, options, crafters, professions, onChange }: Props) {
+export function FilterBar({ filters, options, crafters, professions, ranking = false, onChange }: Props) {
   // On a phone the extra filters stay folded away until asked for.
   const [expanded, setExpanded] = useState(false);
   const active = [
@@ -101,6 +103,8 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
       {select("Slot", "slot", "All slots", options.slots)}
       {select("Armor or weapon type", "type", "All types", options.types)}
       {select("Stat", "stat", "Any stat", options.stats)}
+      {ranking ? null : (
+        <>
       <span className={styles.levels}>
         <span className={styles.levelsLabel}>Level</span>
         <input autoComplete="off"
@@ -131,6 +135,8 @@ export function FilterBar({ filters, options, crafters, professions, onChange }:
         <option value="name">By name</option>
         <option value="level">By level</option>
       </select>
+        </>
+      )}
       <label className={wow.checkbox}>
         <input
           type="checkbox"

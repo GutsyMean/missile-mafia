@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
-import type { CraftablesDoc, UnlearnedDoc } from "./types";
+import type { CraftablesDoc, GearElsewhereDoc, UnlearnedDoc } from "./types";
 
 export const CRAFTABLES_TAG = "craftables";
 
@@ -56,4 +56,28 @@ export async function loadUnlearned(professionId: number): Promise<UnlearnedDoc>
   const { data, error } = await supabase.rpc("guild_unlearned", { p_profession_id: professionId });
   if (error) throw new Error(`Could not load the recipes still to learn: ${error.message}`);
   return (data as UnlearnedDoc | null) ?? NOTHING;
+}
+
+const NO_GEAR_ELSEWHERE: GearElsewhereDoc = { professions: [], recipes: [], items: {} };
+
+/**
+ * Things to wear and wield from professions nobody in the guild has. Only the
+ * gear finder asks for these, so that "the best craftable piece" looks at
+ * everything the game has; cached and refreshed like the rest.
+ */
+export async function loadGearElsewhere(): Promise<GearElsewhereDoc> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CRAFTABLES_TAG);
+
+  if (process.env.CRAFTABLES_FIXTURE === "1") {
+    const fixture = await import("../../../e2e/fixtures/gear.json");
+    return fixture.default as unknown as GearElsewhereDoc;
+  }
+
+  const supabase = createPublicClient();
+  if (!supabase) return NO_GEAR_ELSEWHERE;
+  const { data, error } = await supabase.rpc("guild_gear_elsewhere");
+  if (error) throw new Error(`Could not load the gear of other professions: ${error.message}`);
+  return (data as GearElsewhereDoc | null) ?? NO_GEAR_ELSEWHERE;
 }

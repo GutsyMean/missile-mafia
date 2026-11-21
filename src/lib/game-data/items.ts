@@ -15,6 +15,7 @@ import {
   STAT_TAGS,
   UNTRADEABLE_BONDINGS,
 } from "./constants";
+import { buildClasses, classBit } from "./classes";
 import { groupBy, indexBy, requireTable, type Row, type Tables } from "./tables";
 import type { GameItem, ItemStat, TooltipLine, WeaponDamage } from "./types";
 
@@ -31,6 +32,8 @@ export interface GameDataIndex {
   damage: Record<string, Map<number, Row>>;
   subclass: Map<string, Row>;
   skillLine: Map<number, Row>;
+  /** Playable classes by id, for naming the classes an item is limited to. */
+  classNames: Map<number, string>;
   strings: Map<string, string>;
   appearanceIcon: Map<number, number>;
   itemEffects: Map<number, Row[]>;
@@ -53,6 +56,13 @@ const DAMAGE_TABLES = [
   "ItemDamageWand",
   "ItemDamageThrown",
 ];
+
+/** Without the class tables no item is taken to be limited to a class, rather than failing. */
+function playableClassNames(tables: Tables): Map<number, string> {
+  const needed = ["ChrClasses", "TalentTab", "SkillRaceClassInfo", "SkillLine"];
+  if (needed.some((name) => !tables[name])) return new Map();
+  return new Map(buildClasses(tables).map((gameClass) => [gameClass.id, gameClass.name]));
+}
 
 export function indexGameData(tables: Tables): GameDataIndex {
   const strings = new Map<string, string>();
@@ -94,6 +104,7 @@ export function indexGameData(tables: Tables): GameDataIndex {
     damage,
     subclass,
     skillLine: indexBy(requireTable(tables, "SkillLine"), "ID"),
+    classNames: playableClassNames(tables),
     strings,
     appearanceIcon,
     itemEffects: itemEffectsByItem(tables),
@@ -295,6 +306,18 @@ export function buildItem(index: GameDataIndex, itemId: number): GameItem | null
     white(`${sign}${Math.abs(stat.value)} ${stat.name}`);
   }
 
+  // The mask has a bit per class, some for classes this game does not have; only real ones count.
+  const rawClassMask = Number(sparse.AllowableClass);
+  const allowed = [...index.classNames].filter(
+    ([id]) => rawClassMask === -1 || Math.floor(rawClassMask / classBit(id)) % 2 === 1,
+  );
+  const limitedToClasses = allowed.length > 0 && allowed.length < index.classNames.size;
+  const classMask = limitedToClasses ? allowed.reduce((mask, [id]) => mask + classBit(id), 0) : null;
+  if (limitedToClasses) {
+    const names = allowed.map(([, name]) => name).sort((a, b) => a.localeCompare(b));
+    white(fill(strings.get("ITEM_CLASSES_ALLOWED") ?? "Classes: %s", names.join(", ")));
+  }
+
   if (requiredLevel > 1) {
     white(fill(strings.get("ITEM_MIN_LEVEL") ?? "Requires Level %d", requiredLevel));
   }
@@ -354,6 +377,7 @@ export function buildItem(index: GameDataIndex, itemId: number): GameItem | null
     damage,
     stats,
     requiredSkill,
+    classMask,
     tooltip,
     tooltipComplete: complete,
   };

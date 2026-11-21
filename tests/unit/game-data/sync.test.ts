@@ -23,6 +23,7 @@ class MemoryStore implements GameDataStore {
   items = new Map<number, Record<string, unknown>>();
   recipes = new Map<number, Record<string, unknown>>();
   professions = new Set<number>();
+  meta = new Map<string, { value: unknown; content_hash: string }>();
   runs: { id: number; trigger: string; finish?: SyncFinish }[] = [];
   applied: SyncBatch[] = [];
 
@@ -35,11 +36,17 @@ class MemoryStore implements GameDataStore {
       Object.fromEntries(
         [...rows].filter(([, row]) => row.status !== "removed").map(([id, row]) => [id, String(row.content_hash)]),
       );
-    return { items: hashes(this.items), recipes: hashes(this.recipes), professions: [...this.professions] };
+    return {
+      items: hashes(this.items),
+      recipes: hashes(this.recipes),
+      professions: [...this.professions],
+      meta: Object.fromEntries([...this.meta].map(([key, doc]) => [key, doc.content_hash])),
+    };
   }
   async apply(_runId: number, batch: SyncBatch) {
     this.applied.push(batch);
     let newRecipes = 0;
+    for (const [key, doc] of Object.entries(batch.meta ?? {})) this.meta.set(key, doc);
     for (const p of batch.professions ?? []) this.professions.add(p.id);
     for (const row of batch.items ?? []) this.items.set(row.id, row);
     for (const row of batch.recipes ?? []) {
@@ -146,6 +153,29 @@ describe("runSync — later runs", () => {
     const second = await runSync({ store, trigger: "manual", load: load(freshDataset()) });
     expect(store.applied).toEqual([]);
     expect(second.stats).toMatchObject({ itemsWritten: 0, recipesWritten: 0, newRecipes: 0, removedRecipes: 0 });
+  });
+
+  it("stores the playable classes, and sends them again only when they change", async () => {
+    const store = new MemoryStore();
+    await runSync({ store, trigger: "manual", load: load(freshDataset()) });
+    expect(store.applied[0].meta?.classes.value).toEqual(freshDataset().classes);
+    expect((store.meta.get("classes")?.value as { slug: string }[]).map((c) => c.slug)).toContain("paladin");
+    store.applied = [];
+
+    const changed = freshDataset();
+    changed.classes[0].proficiencies[0].minLevel += 1;
+    await runSync({ store, trigger: "manual", load: load(changed) });
+    expect(store.applied).toHaveLength(1);
+    expect(store.applied[0].meta?.classes.value).toEqual(changed.classes);
+  });
+
+  it("sends the classes to a database that does not yet say which it holds", async () => {
+    const store = new MemoryStore();
+    await runSync({ store, trigger: "manual", load: load(freshDataset()) });
+    store.applied = [];
+    store.state = async () => ({ items: {}, recipes: {}, professions: [] });
+    await runSync({ store, trigger: "manual", load: load(freshDataset()) });
+    expect(store.applied.some((batch) => batch.meta?.classes)).toBe(true);
   });
 
   it("writes only the rows that changed", async () => {

@@ -8,7 +8,7 @@ import {
   unlearnedWithPage,
 } from "@/lib/craftables/filter";
 import { DEFAULT_FILTERS, type CraftablesDoc, type Filters, type RecipeView, type UnlearnedDoc } from "@/lib/craftables/types";
-import { parseViewState, serializeViewState } from "@/lib/craftables/url-state";
+import { NO_GEAR, parseViewState, serializeViewState } from "@/lib/craftables/url-state";
 
 const recipe = (over: Partial<RecipeView> & { id: number; name: string }): RecipeView => ({
   professionId: 164,
@@ -193,7 +193,7 @@ describe("unlearnedToLoad: which professions' not-yet-learned recipes to fetch",
 
 describe("the link to a view", () => {
   it("carries the chosen crafter and profession", () => {
-    const state = { filters: { ...DEFAULT_FILTERS, crafter: "damien", profession: "blacksmithing" }, recipeId: null };
+    const state = { filters: { ...DEFAULT_FILTERS, crafter: "damien", profession: "blacksmithing" }, recipeId: null, gear: NO_GEAR };
     expect(serializeViewState(state)).toBe("crafter=damien&prof=blacksmithing");
     expect(parseViewState(new URLSearchParams("crafter=damien&prof=blacksmithing"))).toEqual(state);
   });

@@ -286,6 +286,127 @@ test.describe("choosing whose recipes to see", () => {
   });
 });
 
+test.describe("best gear for a character", () => {
+  const section = (page: Page, slot: string) => page.getByRole("region", { name: slot, exact: true }).locator("[data-recipe]");
+  const choose = async (page: Page, gameClass: string, tree: string, level: string) => {
+    await page.getByRole("combobox", { name: "Class", exact: true }).selectOption({ label: gameClass });
+    await page.getByRole("combobox", { name: "Talent tree" }).selectOption({ label: tree });
+    await page.getByLabel("Character level").fill(level);
+  };
+
+  test("ranks the best craftable pieces slot by slot for a class, talent tree and level", async ({ page }) => {
+    await page.goto("/");
+    await choose(page, "Paladin", "Retribution", "31");
+
+    await expect(page.getByText("Best for a level 31 Retribution Paladin: 31 pieces for 11 slots")).toBeVisible();
+    const chest = section(page, "Chest");
+    await expect(chest).toHaveCount(3);
+    await expect(chest.nth(0)).toContainText("Shining Silver Breastplate");
+    await expect(chest.nth(0)).toContainText("Best");
+    await expect(chest.nth(1)).toContainText("Green Iron Hauberk");
+    await expect(chest.nth(1)).not.toContainText("Best");
+    await expect(section(page, "Two-Hand").nth(0)).toContainText("Bronze Battle Axe");
+    await expect(page).toHaveURL(/class=paladin&spec=retribution&lvl=31/);
+  });
+
+  test("says which order of stats it ranks by, and where that comes from", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    const order = page.getByRole("list", { name: "Order of stats" }).getByRole("listitem");
+    await expect(order.first()).toHaveText("Weapon damage");
+    await expect(order.nth(1)).toHaveText("Hit");
+    await expect(page.getByRole("link", { name: "wowforever.be Retribution guide" })).toHaveAttribute(
+      "href",
+      "https://wowforever.be/classes/paladin/retribution/",
+    );
+
+    await page.getByRole("combobox", { name: "Talent tree" }).selectOption({ label: "Protection" });
+    await expect(page.getByText("wowforever.be has no order for this talent tree yet, so this one is our own.")).toBeVisible();
+  });
+
+  test("only offers what the character can equip at that level", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    // Plate opens to a Paladin at 40.
+    await expect(section(page, "Hands").nth(0)).toContainText("Toughened Leather Gloves");
+    await expect(row(page, "Truesilver Gauntlets")).toHaveCount(0);
+    await page.getByLabel("Character level").fill("40");
+    await expect(section(page, "Hands").nth(0)).toContainText("Truesilver Gauntlets");
+
+    // A Mage wears cloth and nothing else.
+    await choose(page, "Mage", "Frost", "20");
+    await expect(page.getByText("Best for a level 20 Frost Mage: 5 pieces for 4 slots")).toBeVisible();
+    await expect(row(page, "Shining Silver Breastplate")).toHaveCount(0);
+    await expect(section(page, "Feet").nth(0)).toContainText("Woolen Boots");
+  });
+
+  test("explains why a piece ranks where it does", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await row(page, "Shining Silver Breastplate").click();
+    await expect(detail(page).getByTestId("rank")).toHaveText(
+      "Chest for a level 31 Retribution Paladin. Scores 8.2: Strength 14 (7.2) · Stamina 6 (1.0).",
+    );
+  });
+
+  test("looks at gear from professions nobody in the guild has, too", async ({ page }) => {
+    await page.goto("/?class=hunter&spec=marksmanship&lvl=30");
+    const rifle = section(page, "Ranged").nth(0);
+    await expect(rifle).toContainText("Moonsight Rifle");
+    await expect(rifle).toHaveAttribute("data-available", "false");
+    await expect(rifle).toContainText("Engineering");
+    await expect(professionPicker(page).getByRole("option", { name: "Engineering" })).toHaveCount(1);
+
+    await page.getByLabel("Available now only").check();
+    await expect(row(page, "Moonsight Rifle")).toHaveCount(0);
+    await expect(section(page, "Main Hand").nth(0)).toContainText("Bronze Shortsword");
+  });
+
+  test("shows the whole ranking for one slot when that slot is picked", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.getByLabel("Slot").selectOption("Feet");
+    await expect(section(page, "Feet")).toHaveCount(7);
+    await expect(page.getByText("Best for a level 31 Retribution Paladin: 7 pieces for 1 slot")).toBeVisible();
+  });
+
+  test("lets a visitor change the order, and remembers it", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
+
+    await page.getByRole("button", { name: "Change" }).click();
+    await page.getByRole("button", { name: "Remove Strength" }).click();
+    await page.getByRole("button", { name: "Move Stamina up" }).click();
+    await expect(page.getByText("Your own order, kept in this browser.")).toBeVisible();
+    // Without Strength the Hauberk's Stamina wins the chest.
+    await expect(section(page, "Chest").nth(0)).toContainText("Green Iron Hauberk");
+
+    await page.reload();
+    await expect(section(page, "Chest").nth(0)).toContainText("Green Iron Hauberk");
+    await expect(page.getByText("Your own order, kept in this browser.")).toBeVisible();
+
+    await page.getByRole("button", { name: "Change" }).click();
+    await page.getByRole("button", { name: "Back to the default order" }).click();
+    await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
+    await expect(page.getByRole("link", { name: "wowforever.be Retribution guide" })).toBeVisible();
+  });
+
+  test("goes back to the full list with Show everything", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await expect(page.getByLabel("Sort")).toHaveCount(0);
+    await page.getByRole("button", { name: "Show everything" }).click();
+    await expect(rows(page)).toHaveCount(71);
+    await expect(page.getByLabel("Sort")).toBeVisible();
+    await expect(row(page, "Moonsight Rifle")).toHaveCount(0);
+    await expect(page).not.toHaveURL(/class=/);
+  });
+
+  test("warns that soulbound pieces are for their crafter only", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    const warning = page.getByText("Soulbound pieces can only be worn by whoever crafts them.");
+    await expect(warning).toBeVisible();
+    await page.getByLabel("Tradeable only").check();
+    await expect(warning).toHaveCount(0);
+    await expect(section(page, "Head").nth(0)).toContainText("Green Iron Helm");
+  });
+});
+
 test.describe("search and filters", () => {
   test("searches item names", async ({ page }) => {
     await page.goto("/");

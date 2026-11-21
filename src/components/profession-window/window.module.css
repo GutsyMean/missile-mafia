@@ -128,6 +128,142 @@ select.picker {
   text-align: center;
 }
 
+/* ---- Best gear for a character ------------------------------------------ */
+
+.gear {
+  display: grid;
+  flex: 1 1 100%;
+  gap: 5px;
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 1px solid rgb(120 90 50 / 0.35);
+}
+
+.gearChoice,
+.gearOrder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
+}
+
+.gearLabel {
+  color: var(--gold);
+  font-size: 13px;
+}
+
+.gear .linkButton {
+  font-size: 12px;
+}
+
+.gearOrder {
+  color: #c8c1b3;
+  font-size: 12px;
+}
+
+/* The order of stats, read left to right with an arrow between each. */
+.gearStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 0;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  list-style: none;
+}
+
+.gearStats li + li::before {
+  margin: 0 5px;
+  color: #8d877d;
+  content: "›";
+}
+
+.gearSource {
+  flex: 1 1 260px;
+  color: #a39c8f;
+}
+
+.gearSource a {
+  color: var(--gold);
+}
+
+.gearEditor {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid rgb(120 90 50 / 0.5);
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.4);
+  font-size: 13px;
+}
+
+.gearEditor ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 2px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: place;
+}
+
+.gearEditor li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, 26px);
+  align-items: center;
+  gap: 3px;
+  color: #fff;
+  counter-increment: place;
+}
+
+.gearEditor li > span::before {
+  display: inline-block;
+  width: 22px;
+  color: #a39c8f;
+  content: counter(place) ".";
+}
+
+.gearEditor li button {
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgb(160 120 60 / 0.6);
+  border-radius: 3px;
+  background: rgb(40 28 14 / 0.9);
+  color: var(--gold);
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gearEditor li button:hover:not(:disabled) {
+  background: rgb(80 56 24 / 0.9);
+}
+
+.gearEditor li button:disabled {
+  border-color: rgb(110 100 85 / 0.4);
+  color: #6f6a60;
+  cursor: default;
+}
+
+.gearEditor li button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.gearEditorActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.gearHow {
+  margin: 0;
+  color: #a39c8f;
+  font-size: 12px;
+}
+
 /* ---- Body --------------------------------------------------------------- */
 
 .body {
@@ -353,6 +489,13 @@ select.picker {
   text-shadow: 1px 1px 0 #000;
 }
 
+/* The top piece for its slot, when gear is ranked. */
+.best {
+  color: var(--gold);
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+}
+
 .rowTags {
   display: grid;
   justify-items: end;
@@ -515,6 +658,23 @@ select.picker {
   font-weight: 400;
 }
 
+/* Why a piece ranks where it does, when gear is ranked. */
+.rankNote {
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid rgb(160 120 60 / 0.6);
+  border-radius: 3px;
+  background: rgb(60 42 16 / 0.4);
+  color: #e9e2d4;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.rankNote strong {
+  color: var(--gold);
+  font-weight: 400;
+}
+
 .soulboundBanner {
   margin: 0;
   padding: 7px 10px;
@@ -664,6 +824,40 @@ select.picker {
 @media (hover: none) {
   .hoverTooltip {
     display: none;
+  }
+}
+
+/* On a phone the gear bar keeps to two lines until its order is opened, so the list keeps its room. */
+@media (max-width: 820px) {
+  .gearOrder {
+    flex-wrap: nowrap;
+  }
+
+  .gearOrder .gearLabel {
+    flex: none;
+  }
+
+  .gear[data-editing="false"] .gearStats {
+    flex: 1 1 0;
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to right, #000 80%, transparent);
+  }
+
+  .gear[data-editing="false"] .gearSource,
+  .gear[data-editing="false"] .gearHow {
+    display: none;
+  }
+
+  .gear[data-editing="true"] .gearOrder {
+    flex-wrap: wrap;
+  }
+
+  .gearEditor {
+    max-height: 38dvh;
+    overflow-y: auto;
   }
 }
 

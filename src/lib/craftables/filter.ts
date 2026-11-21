@@ -1,4 +1,4 @@
-import type { CraftablesDoc, Entry, Filters, SortMode, UnlearnedDoc } from "./types";
+import type { CraftablesDoc, Entry, Filters, GearElsewhereDoc, SortMode, UnlearnedDoc } from "./types";
 
 /** Adds lazily loaded "not yet learned" recipes to the main document. */
 export function mergeUnlearned(doc: CraftablesDoc, extras: UnlearnedDoc[]): CraftablesDoc {
@@ -15,6 +15,15 @@ export function mergeUnlearned(doc: CraftablesDoc, extras: UnlearnedDoc[]): Craf
     Object.assign(items, extra.items);
   }
   return { ...doc, recipes, items };
+}
+
+/** Adds the gear of professions nobody has, and those professions, so they can be named and picked. */
+export function mergeGearElsewhere(doc: CraftablesDoc, elsewhere: GearElsewhereDoc | null): CraftablesDoc {
+  if (!elsewhere || elsewhere.recipes.length === 0) return doc;
+  const known = new Set(doc.professions.map((profession) => profession.id));
+  const merged = mergeUnlearned(doc, [elsewhere]);
+  const professions = [...doc.professions, ...elsewhere.professions.filter((profession) => !known.has(profession.id))];
+  return { ...merged, professions: professions.sort((a, b) => a.name.localeCompare(b.name)) };
 }
 
 /**
@@ -143,6 +152,8 @@ export interface EntryGroup {
   /** Null when the list is not grouped. */
   category: string | null;
   entries: Entry[];
+  /** True when the entries are in order of merit, best first, rather than sorted. */
+  ranked?: boolean;
 }
 
 export function groupEntries(sorted: Entry[], sort: SortMode): EntryGroup[] {

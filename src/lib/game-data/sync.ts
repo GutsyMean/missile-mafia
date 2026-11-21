@@ -17,12 +17,16 @@ export interface SyncBatch {
   professions?: DbRow[];
   items?: DbRow[];
   recipes?: DbRow[];
+  /** Small documents kept whole, by name: "classes" is the playable classes. */
+  meta?: Record<string, { value: unknown; content_hash: string }>;
 }
 
 export interface StoreState {
   items: Record<string, string>;
   recipes: Record<string, string>;
   professions: number[];
+  /** Content hashes of the whole documents, by name. Absent from a database that predates them. */
+  meta?: Record<string, string>;
 }
 
 export interface SyncStats {
@@ -108,6 +112,7 @@ export function itemRow(item: GameItem): DbRow {
     armor: item.armor,
     damage: item.damage,
     stats: item.stats,
+    class_mask: item.classMask,
     tooltip: item.tooltip,
     tooltip_complete: item.tooltipComplete,
   });
@@ -185,12 +190,17 @@ export async function runSync({ store, trigger, load, batchSize = 400 }: SyncOpt
 
     const items = changedRows(dataset.items.map(itemRow), state.items);
     const recipes = changedRows(dataset.recipes.map(recipeRow), state.recipes);
+    const classes = {
+      value: dataset.classes,
+      content_hash: createHash("sha1").update(JSON.stringify(dataset.classes)).digest("hex"),
+    };
     const knownProfessions = new Set(state.professions);
     const professionsChanged =
       recipes.length > 0 || dataset.professions.some((p) => !knownProfessions.has(p.id));
 
     // Professions first (recipes reference them), then items, then recipes.
     const batches: SyncBatch[] = [
+      ...(dataset.classes.length > 0 && state.meta?.classes !== classes.content_hash ? [{ meta: { classes } }] : []),
       ...(professionsChanged ? [{ professions: dataset.professions.map(professionRow) }] : []),
       ...chunk(items, batchSize, "items"),
       ...chunk(recipes, batchSize, "recipes"),

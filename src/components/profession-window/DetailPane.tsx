@@ -1,11 +1,22 @@
 import { SourceText } from "@/components/wow/SourceText";
 import type { Entry } from "@/lib/craftables/types";
+import type { Ranked } from "@/lib/gear/rank";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
 import styles from "./window.module.css";
 
+interface Props {
+  entry: Entry;
+  /** When gear is being chosen: what this piece scores, and for which slot. */
+  rank?: Ranked;
+  /** Who it is being chosen for, e.g. "level 31 Retribution Paladin". */
+  character?: string | null;
+}
+
+const points = (value: number) => (Math.round(value * 10) / 10).toFixed(1);
+
 /** What the selected recipe makes, what it needs, and who can make it. */
-export function DetailPane({ entry }: { entry: Entry }) {
+export function DetailPane({ entry, rank, character }: Props) {
   const { item, recipe, reagents, crafters, pending } = entry;
   const quality = item?.quality ?? 1;
   const soulbound = item ? !item.tradeable : false;
@@ -52,6 +63,22 @@ export function DetailPane({ entry }: { entry: Entry }) {
           </p>
         </div>
       </header>
+
+      {rank && character ? (
+        <p className={styles.rankNote} data-testid="rank">
+          <strong>
+            {rank.slot} for a {character}.
+          </strong>{" "}
+          {rank.parts.length > 0 ? (
+            <>
+              Scores {points(rank.score)}:{" "}
+              {rank.parts.map((part) => `${part.label} ${part.amount} (${points(part.points)})`).join(" · ")}.
+            </>
+          ) : (
+            "Ranked by item level."
+          )}
+        </p>
+      ) : null}
 
       {!entry.available ? (
         <p className={styles.pendingBanner} role="note">

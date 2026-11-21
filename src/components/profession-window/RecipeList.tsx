@@ -85,7 +85,7 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
             </h2>
           ) : null}
           <ul className={styles.rows}>
-            {entries.map((entry) => {
+            {entries.map((entry, place) => {
               const quality = entry.item?.quality ?? 1;
               const soulbound = entry.item ? !entry.item.tradeable : false;
               const skill = skillLabel(entry);
@@ -120,6 +120,7 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
                       </span>
                     </span>
                     <span className={styles.rowTags}>
+                      {group.ranked && place === 0 ? <span className={styles.best}>Best</span> : null}
                       {skill ? (
                         <span className={styles.rowSkill}>
                           <span className={styles.wideOnly}>{skill}</span>

@@ -43,6 +43,8 @@ export interface GameItem {
   damage: WeaponDamage | null;
   stats: ItemStat[];
   requiredSkill: { skillLineId: number; rank: number } | null;
+  /** The game's mask of classes that may use the item. Null when every class may. */
+  classMask: number | null;
   tooltip: TooltipLine[];
   /** False when part of the tooltip could not be reproduced from the game tables. */
   tooltipComplete: boolean;
@@ -74,6 +76,17 @@ export interface GameRecipe {
   reagents: RecipeReagent[];
   iconFileId: number;
   status: RecipeStatus;
+}
+
+export interface GameClass {
+  /** The class id (2 = Paladin). Its bit in a class mask is 2 ** (id - 1). */
+  id: number;
+  slug: string;
+  name: string;
+  /** Talent trees, in the game's order. */
+  specs: { id: number; slug: string; name: string }[];
+  /** Armour and weapon skills the class can have, with the level each opens at. */
+  proficiencies: { skillLineId: number; name: string; minLevel: number }[];
 }
 
 export interface GameProfession {

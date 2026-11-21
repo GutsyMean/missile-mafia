@@ -15,6 +15,7 @@ export const USER_AGENT = "guild-crafting-site/1.0";
 /** Every table the game-data builders read. */
 export const TABLE_NAMES = [
   "ArmorLocation",
+  "ChrClasses",
   "GlobalStrings",
   "Item",
   "ItemAppearance",
@@ -44,6 +45,7 @@ export const TABLE_NAMES = [
   "SpellMisc",
   "SpellName",
   "SpellReagents",
+  "TalentTab",
 ] as const;
 
 export type FetchLike = (url: string, init?: RequestInit) => Promise<Response>;

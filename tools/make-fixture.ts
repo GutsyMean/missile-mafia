@@ -4,12 +4,13 @@
  * Blacksmith at skill 145 and a Tailor at skill 60. Used by the end-to-end
  * tests and for developing the window without a database.
  *
- *   craftables.json   what they can make
+ *   craftables.json   what they can make, and the playable classes
  *   unlearned.json    by profession, the sample recipes neither has learned
+ *   gear.json         a little gear from two professions neither of them has
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { CraftablesDoc, ItemView, RecipeView, UnlearnedDoc } from "../src/lib/craftables/types";
+import type { CraftablesDoc, GearElsewhereDoc, ItemView, RecipeView, UnlearnedDoc } from "../src/lib/craftables/types";
 import type { Dataset } from "../src/lib/game-data/dataset";
 
 const ROOT = path.resolve(__dirname, "..");
@@ -49,6 +50,15 @@ const smithUnlearned = of(BLACKSMITHING).filter((r) => SMITH_PENDING.has(r.name)
 const tailorLearned = of(TAILORING).filter((r) => fromTrainer(r) && r.unlock.learnSkill! <= 40).sort(bySkill).slice(0, 4);
 const tailorUnlearned = of(TAILORING).filter((r) => fromTrainer(r) && r.unlock.learnSkill! > TAILOR_SKILL).sort(bySkill).slice(0, 2);
 
+// Gear of professions neither has: a gun and goggles from Engineering, and leather a Paladin might wear.
+const ENGINEERING = 202;
+const LEATHERWORKING = 165;
+const ELSEWHERE: [number, string[]][] = [
+  [ENGINEERING, ["Moonsight Rifle", "Flying Tiger Goggles", "Deadly Blunderbuss"]],
+  [LEATHERWORKING, ["Toughened Leather Gloves", "Barbaric Bracers", "Defender's Leather Helm"]],
+];
+const elsewhere = ELSEWHERE.flatMap(([professionId, names]) => of(professionId).filter((r) => names.includes(r.name)));
+
 const itemsById = new Map(dataset.items.map((item) => [item.id, item]));
 function itemsOf(recipes: GameRecipe[]): Record<string, ItemView> {
   const items: Record<string, ItemView> = {};
@@ -58,6 +68,8 @@ function itemsOf(recipes: GameRecipe[]): Record<string, ItemView> {
     // The window does not show an item's own skill requirement.
     const view: ItemView & { requiredSkill?: unknown } = { ...item };
     delete view.requiredSkill;
+    // Sent only for items limited to some classes, as the database does.
+    if (view.classMask === null) delete view.classMask;
     items[String(item.id)] = view;
   };
   for (const recipe of recipes) {
@@ -127,6 +139,7 @@ const doc: CraftablesDoc = {
     { professionId: BLACKSMITHING, count: smithUnlearned.length },
     { professionId: TAILORING, count: tailorUnlearned.length },
   ],
+  classes: dataset.classes,
   recipes: [...smithLearned.map((r) => view(r, [DAMIEN], [])), ...tailorLearned.map((r) => view(r, [STITCHES], []))].sort(inOrder),
   items: itemsOf([...smithLearned, ...tailorLearned]),
 };
@@ -138,8 +151,16 @@ const unlearned: Record<string, UnlearnedDoc> = {
 
 writeFileSync(path.join(ROOT, "e2e/fixtures/craftables.json"), JSON.stringify(doc, null, 1) + "\n");
 writeFileSync(path.join(ROOT, "e2e/fixtures/unlearned.json"), JSON.stringify(unlearned, null, 1) + "\n");
+
+const gear: GearElsewhereDoc = {
+  professions: [profession(ENGINEERING), profession(LEATHERWORKING)].sort((a, b) => a.name.localeCompare(b.name)),
+  recipes: elsewhere.map((r) => view(r, [], [])).sort(inOrder),
+  items: itemsOf(elsewhere),
+};
+writeFileSync(path.join(ROOT, "e2e/fixtures/gear.json"), JSON.stringify(gear, null, 1) + "\n");
 console.log(
   `Wrote e2e/fixtures: Damien ${smithLearned.length} learned, ${smithUnlearned.length} still to learn; ` +
     `Stitches ${tailorLearned.length} learned (${tailorLearned.map((r) => r.name).join(", ")}), ` +
-    `${tailorUnlearned.length} still to learn (${tailorUnlearned.map((r) => `${r.name} ${r.unlock.learnSkill}`).join(", ")})`,
+    `${tailorUnlearned.length} still to learn (${tailorUnlearned.map((r) => `${r.name} ${r.unlock.learnSkill}`).join(", ")}); ` +
+    `${elsewhere.length} pieces of gear from other professions (${elsewhere.map((r) => r.name).join(", ")})`,
 );

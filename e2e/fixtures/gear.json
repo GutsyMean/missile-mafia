@@ -1,0 +1,1158 @@
+{
+ "professions": [
+  {
+   "id": 202,
+   "slug": "engineering",
+   "name": "Engineering",
+   "iconFileId": 136243
+  },
+  {
+   "id": 165,
+   "slug": "leatherworking",
+   "name": "Leatherworking",
+   "iconFileId": 136247
+  }
+ ],
+ "recipes": [
+  {
+   "id": 3934,
+   "professionId": 202,
+   "name": "Flying Tiger Goggles",
+   "iconFileId": 133149,
+   "craftedItemId": 4368,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Cloth Armor",
+   "categoryOrder": 101,
+   "reagents": [
+    [
+     2318,
+     6
+    ],
+    [
+     818,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 100,
+   "skillYellow": 130,
+   "skillGreen": 145,
+   "skillGrey": 160,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 4s"
+  },
+  {
+   "id": 23399,
+   "professionId": 165,
+   "name": "Barbaric Bracers",
+   "iconFileId": 132614,
+   "craftedItemId": 18948,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Leather Armor",
+   "categoryOrder": 102,
+   "reagents": [
+    [
+     4234,
+     8
+    ],
+    [
+     4236,
+     2
+    ],
+    [
+     5498,
+     4
+    ],
+    [
+     4461,
+     1
+    ],
+    [
+     5637,
+     4
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 130,
+   "skillYellow": 155,
+   "skillGreen": 165,
+   "skillGrey": 175,
+   "acquisition": "vendor",
+   "acquisitionText": "Vendor · Saenorion (Darnassus) · Joseph Moore (Undercity)"
+  },
+  {
+   "id": 1255091,
+   "professionId": 165,
+   "name": "Defender's Leather Helm",
+   "iconFileId": 133135,
+   "craftedItemId": 252455,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Leather Armor",
+   "categoryOrder": 102,
+   "reagents": [
+    [
+     2319,
+     12
+    ],
+    [
+     4233,
+     2
+    ],
+    [
+     2458,
+     3
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 125,
+   "skillYellow": 130,
+   "skillGreen": 130,
+   "skillGrey": 130,
+   "acquisition": "drop",
+   "acquisitionText": "Drop"
+  },
+  {
+   "id": 3770,
+   "professionId": 165,
+   "name": "Toughened Leather Gloves",
+   "iconFileId": 132958,
+   "craftedItemId": 4253,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Leather Armor",
+   "categoryOrder": 102,
+   "reagents": [
+    [
+     2319,
+     4
+    ],
+    [
+     4233,
+     2
+    ],
+    [
+     3389,
+     2
+    ],
+    [
+     3182,
+     2
+    ],
+    [
+     2321,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 110,
+   "skillYellow": 135,
+   "skillGreen": 147,
+   "skillGrey": 160,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 5s"
+  },
+  {
+   "id": 3936,
+   "professionId": 202,
+   "name": "Deadly Blunderbuss",
+   "iconFileId": 135616,
+   "craftedItemId": 4369,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Guns",
+   "categoryOrder": 203,
+   "reagents": [
+    [
+     4361,
+     2
+    ],
+    [
+     4359,
+     4
+    ],
+    [
+     4399,
+     1
+    ],
+    [
+     2319,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 105,
+   "skillYellow": 130,
+   "skillGreen": 142,
+   "skillGrey": 155,
+   "acquisition": "trainer",
+   "acquisitionText": "Trainer · 4s 20c"
+  },
+  {
+   "id": 3954,
+   "professionId": 202,
+   "name": "Moonsight Rifle",
+   "iconFileId": 135615,
+   "craftedItemId": 4383,
+   "craftedCount": 1,
+   "effectText": null,
+   "category": "Guns",
+   "categoryOrder": 203,
+   "reagents": [
+    [
+     4371,
+     3
+    ],
+    [
+     4375,
+     3
+    ],
+    [
+     4400,
+     1
+    ],
+    [
+     1705,
+     2
+    ]
+   ],
+   "crafterIds": [],
+   "pendingCrafterIds": [],
+   "learnSkill": 145,
+   "skillYellow": 170,
+   "skillGreen": 182,
+   "skillGrey": 195,
+   "acquisition": "drop",
+   "acquisitionText": "Drop"
+  }
+ ],
+ "items": {
+  "818": {
+   "id": 818,
+   "name": "Tigerseye",
+   "quality": 2,
+   "iconFileId": 134118,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 100,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Tigerseye",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "1705": {
+   "id": 1705,
+   "name": "Lesser Moonstone",
+   "quality": 2,
+   "iconFileId": 134087,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 600,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Lesser Moonstone",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2318": {
+   "id": 2318,
+   "name": "Light Leather",
+   "quality": 1,
+   "iconFileId": 134252,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 15,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Light Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2319": {
+   "id": 2319,
+   "name": "Medium Leather",
+   "quality": 1,
+   "iconFileId": 134254,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 50,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Medium Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2321": {
+   "id": 2321,
+   "name": "Fine Thread",
+   "quality": 1,
+   "iconFileId": 132912,
+   "classId": 7,
+   "subclassId": 5,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 25,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Fine Thread",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2458": {
+   "id": 2458,
+   "name": "Elixir of Minor Fortitude",
+   "quality": 1,
+   "iconFileId": 134822,
+   "classId": 0,
+   "subclassId": 2,
+   "inventoryType": 0,
+   "itemLevel": 12,
+   "requiredLevel": 2,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 15,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Elixir of Minor Fortitude",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 2",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  },
+  "3182": {
+   "id": 3182,
+   "name": "Spider's Silk",
+   "quality": 1,
+   "iconFileId": 136113,
+   "classId": 7,
+   "subclassId": 5,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 387,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Spider's Silk",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "3389": {
+   "id": 3389,
+   "name": "Elixir of Lesser Defense",
+   "quality": 1,
+   "iconFileId": 134844,
+   "classId": 0,
+   "subclassId": 2,
+   "inventoryType": 0,
+   "itemLevel": 26,
+   "requiredLevel": 16,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 40,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Elixir of Lesser Defense",
+     "color": "quality"
+    },
+    {
+     "text": "Requires Level 16",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  },
+  "4233": {
+   "id": 4233,
+   "name": "Cured Medium Hide",
+   "quality": 1,
+   "iconFileId": 134354,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Cured Medium Hide",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4234": {
+   "id": 4234,
+   "name": "Heavy Leather",
+   "quality": 1,
+   "iconFileId": 134256,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 150,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Leather",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4236": {
+   "id": 4236,
+   "name": "Cured Heavy Hide",
+   "quality": 1,
+   "iconFileId": 134367,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 225,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Cured Heavy Hide",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4253": {
+   "id": 4253,
+   "name": "Toughened Leather Gloves",
+   "quality": 3,
+   "iconFileId": 132958,
+   "classId": 4,
+   "subclassId": 2,
+   "inventoryType": 10,
+   "itemLevel": 27,
+   "requiredLevel": 22,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 962,
+   "slotName": "Hands",
+   "typeName": "Leather",
+   "armor": 61,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 6
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 6
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Toughened Leather Gloves",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Hands",
+     "right": "Leather",
+     "color": "white"
+    },
+    {
+     "text": "61 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+6 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+6 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 22",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4359": {
+   "id": 4359,
+   "name": "Handful of Copper Bolts",
+   "quality": 1,
+   "iconFileId": 134068,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 8,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 12,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Handful of Copper Bolts",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4361": {
+   "id": 4361,
+   "name": "Copper Tube",
+   "quality": 1,
+   "iconFileId": 133025,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 120,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Copper Tube",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4368": {
+   "id": 4368,
+   "name": "Flying Tiger Goggles",
+   "quality": 2,
+   "iconFileId": 133149,
+   "classId": 4,
+   "subclassId": 1,
+   "inventoryType": 1,
+   "itemLevel": 20,
+   "requiredLevel": 0,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 408,
+   "slotName": "Head",
+   "typeName": "Cloth",
+   "armor": 27,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 4
+    },
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Flying Tiger Goggles",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Head",
+     "right": "Cloth",
+     "color": "white"
+    },
+    {
+     "text": "27 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+4 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Engineering (100)",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4369": {
+   "id": 4369,
+   "name": "Deadly Blunderbuss",
+   "quality": 2,
+   "iconFileId": 135616,
+   "classId": 2,
+   "subclassId": 3,
+   "inventoryType": 26,
+   "itemLevel": 21,
+   "requiredLevel": 16,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 790,
+   "slotName": "Ranged",
+   "typeName": "Gun",
+   "armor": null,
+   "damage": {
+    "min": 15,
+    "max": 28,
+    "speed": 2.6,
+    "dps": 8.3
+   },
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Deadly Blunderbuss",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Ranged",
+     "right": "Gun",
+     "color": "white"
+    },
+    {
+     "text": "15 - 28 Damage",
+     "right": "Speed 2.60",
+     "color": "white"
+    },
+    {
+     "text": "(8.3 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+2 Agility",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 16",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4371": {
+   "id": 4371,
+   "name": "Bronze Tube",
+   "quality": 1,
+   "iconFileId": 133024,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 21,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Bronze Tube",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4375": {
+   "id": 4375,
+   "name": "Whirring Bronze Gizmo",
+   "quality": 1,
+   "iconFileId": 132996,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 115,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Whirring Bronze Gizmo",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4383": {
+   "id": 4383,
+   "name": "Moonsight Rifle",
+   "quality": 2,
+   "iconFileId": 135615,
+   "classId": 2,
+   "subclassId": 3,
+   "inventoryType": 26,
+   "itemLevel": 29,
+   "requiredLevel": 24,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 3183,
+   "slotName": "Ranged",
+   "typeName": "Gun",
+   "armor": null,
+   "damage": {
+    "min": 14,
+    "max": 26,
+    "speed": 1.7,
+    "dps": 11.8
+   },
+   "stats": [
+    {
+     "stat": 31,
+     "name": "Hit",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Moonsight Rifle",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Ranged",
+     "right": "Gun",
+     "color": "white"
+    },
+    {
+     "text": "14 - 26 Damage",
+     "right": "Speed 1.70",
+     "color": "white"
+    },
+    {
+     "text": "(11.8 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 24",
+     "color": "white"
+    },
+    {
+     "text": "Equip: Increases your hit by 3.",
+     "color": "green"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4399": {
+   "id": 4399,
+   "name": "Wooden Stock",
+   "quality": 1,
+   "iconFileId": 133486,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 10,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 50,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Wooden Stock",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4400": {
+   "id": 4400,
+   "name": "Heavy Stock",
+   "quality": 1,
+   "iconFileId": 133486,
+   "classId": 7,
+   "subclassId": 1,
+   "inventoryType": 0,
+   "itemLevel": 25,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 500,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Heavy Stock",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "4461": {
+   "id": 4461,
+   "name": "Raptor Hide",
+   "quality": 1,
+   "iconFileId": 134303,
+   "classId": 7,
+   "subclassId": 6,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 208,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Raptor Hide",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5498": {
+   "id": 5498,
+   "name": "Small Lustrous Pearl",
+   "quality": 2,
+   "iconFileId": 134122,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 15,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 200,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Small Lustrous Pearl",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5637": {
+   "id": 5637,
+   "name": "Large Fang",
+   "quality": 1,
+   "iconFileId": 133725,
+   "classId": 7,
+   "subclassId": 11,
+   "inventoryType": 0,
+   "itemLevel": 30,
+   "requiredLevel": 0,
+   "bonding": 0,
+   "tradeable": true,
+   "sellPrice": 75,
+   "slotName": null,
+   "typeName": null,
+   "armor": null,
+   "damage": null,
+   "stats": [],
+   "tooltip": [
+    {
+     "text": "Large Fang",
+     "color": "quality"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "18948": {
+   "id": 18948,
+   "name": "Barbaric Bracers",
+   "quality": 3,
+   "iconFileId": 132614,
+   "classId": 4,
+   "subclassId": 2,
+   "inventoryType": 9,
+   "itemLevel": 32,
+   "requiredLevel": 27,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 1589,
+   "slotName": "Wrist",
+   "typeName": "Leather",
+   "armor": 47,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 4
+    },
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Barbaric Bracers",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Wrist",
+     "right": "Leather",
+     "color": "white"
+    },
+    {
+     "text": "47 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+4 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+4 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 27",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "252455": {
+   "id": 252455,
+   "name": "Defender's Leather Helm",
+   "quality": 3,
+   "iconFileId": 133135,
+   "classId": 4,
+   "subclassId": 2,
+   "inventoryType": 1,
+   "itemLevel": 30,
+   "requiredLevel": 25,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 1038,
+   "slotName": "Head",
+   "typeName": "Leather",
+   "armor": 84,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 13
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 12
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Defender's Leather Helm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Head",
+     "right": "Leather",
+     "color": "white"
+    },
+    {
+     "text": "84 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+12 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+13 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 25",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  }
+ }
+}

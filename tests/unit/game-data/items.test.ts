@@ -195,3 +195,21 @@ describe("buildItem — ranged weapons use their own damage tables", () => {
     expect(buildItem(index, 285279)!.damage).toMatchObject({ min: 15, max: 29 });
   });
 });
+
+describe("buildItem — items made for particular classes", () => {
+  it("records the classes and says so on the tooltip, above the level", () => {
+    const leggings = buildItem(index, 273908)!;
+    expect(leggings.name).toBe("Justice Leggings");
+    // Bit 2 is the Paladin's.
+    expect(leggings.classMask).toBe(2);
+    const lines = leggings.tooltip.map((line) => line.text);
+    expect(lines).toContain("Classes: Paladin");
+    expect(lines.indexOf("Classes: Paladin")).toBe(lines.findIndex((line) => line.startsWith("Requires Level")) - 1);
+  });
+
+  it("says nothing for an item anyone may use", () => {
+    const gauntlets = buildItem(index, 3483)!;
+    expect(gauntlets.classMask).toBeNull();
+    expect(gauntlets.tooltip.some((line) => line.text.startsWith("Classes:"))).toBe(false);
+  });
+});

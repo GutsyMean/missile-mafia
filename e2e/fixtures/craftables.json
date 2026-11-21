@@ -53,6 +53,794 @@
    "count": 2
   }
  ],
+ "classes": [
+  {
+   "id": 11,
+   "slug": "druid",
+   "name": "Druid",
+   "specs": [
+    {
+     "id": 283,
+     "slug": "balance",
+     "name": "Balance"
+    },
+    {
+     "id": 281,
+     "slug": "feral-combat",
+     "name": "Feral Combat"
+    },
+    {
+     "id": 282,
+     "slug": "restoration",
+     "name": "Restoration"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 160,
+     "name": "Two-Handed Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 229,
+     "name": "Polearms",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 473,
+     "name": "Fist Weapons",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 3014,
+     "name": "Feral Combat",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "slug": "hunter",
+   "name": "Hunter",
+   "specs": [
+    {
+     "id": 361,
+     "slug": "beast-mastery",
+     "name": "Beast Mastery"
+    },
+    {
+     "id": 363,
+     "slug": "marksmanship",
+     "name": "Marksmanship"
+    },
+    {
+     "id": 362,
+     "slug": "survival",
+     "name": "Survival"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 44,
+     "name": "Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 45,
+     "name": "Bows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 46,
+     "name": "Guns",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 55,
+     "name": "Two-Handed Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 118,
+     "name": "Dual Wield",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 172,
+     "name": "Two-Handed Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 176,
+     "name": "Thrown",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 226,
+     "name": "Crossbows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 229,
+     "name": "Polearms",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 413,
+     "name": "Mail",
+     "minLevel": 40
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 473,
+     "name": "Fist Weapons",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "slug": "mage",
+   "name": "Mage",
+   "specs": [
+    {
+     "id": 81,
+     "slug": "arcane",
+     "name": "Arcane"
+    },
+    {
+     "id": 41,
+     "slug": "fire",
+     "name": "Fire"
+    },
+    {
+     "id": 61,
+     "slug": "frost",
+     "name": "Frost"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 228,
+     "name": "Wands",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "slug": "paladin",
+   "name": "Paladin",
+   "specs": [
+    {
+     "id": 382,
+     "slug": "holy",
+     "name": "Holy"
+    },
+    {
+     "id": 383,
+     "slug": "protection",
+     "name": "Protection"
+    },
+    {
+     "id": 381,
+     "slug": "retribution",
+     "name": "Retribution"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 44,
+     "name": "Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 55,
+     "name": "Two-Handed Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 160,
+     "name": "Two-Handed Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 172,
+     "name": "Two-Handed Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 229,
+     "name": "Polearms",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 293,
+     "name": "Plate Mail",
+     "minLevel": 40
+    },
+    {
+     "skillLineId": 413,
+     "name": "Mail",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 433,
+     "name": "Shield",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "slug": "priest",
+   "name": "Priest",
+   "specs": [
+    {
+     "id": 201,
+     "slug": "discipline",
+     "name": "Discipline"
+    },
+    {
+     "id": 202,
+     "slug": "holy",
+     "name": "Holy"
+    },
+    {
+     "id": 203,
+     "slug": "shadow",
+     "name": "Shadow"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 228,
+     "name": "Wands",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "slug": "rogue",
+   "name": "Rogue",
+   "specs": [
+    {
+     "id": 182,
+     "slug": "assassination",
+     "name": "Assassination"
+    },
+    {
+     "id": 181,
+     "slug": "combat",
+     "name": "Combat"
+    },
+    {
+     "id": 183,
+     "slug": "subtlety",
+     "name": "Subtlety"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 44,
+     "name": "Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 45,
+     "name": "Bows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 46,
+     "name": "Guns",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 118,
+     "name": "Dual Wield",
+     "minLevel": 10
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 176,
+     "name": "Thrown",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 226,
+     "name": "Crossbows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 473,
+     "name": "Fist Weapons",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "slug": "shaman",
+   "name": "Shaman",
+   "specs": [
+    {
+     "id": 261,
+     "slug": "elemental",
+     "name": "Elemental"
+    },
+    {
+     "id": 263,
+     "slug": "enhancement",
+     "name": "Enhancement"
+    },
+    {
+     "id": 262,
+     "slug": "restoration",
+     "name": "Restoration"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 44,
+     "name": "Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 118,
+     "name": "Dual Wield",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 160,
+     "name": "Two-Handed Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 172,
+     "name": "Two-Handed Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 413,
+     "name": "Mail",
+     "minLevel": 40
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 433,
+     "name": "Shield",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 473,
+     "name": "Fist Weapons",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "slug": "warlock",
+   "name": "Warlock",
+   "specs": [
+    {
+     "id": 302,
+     "slug": "affliction",
+     "name": "Affliction"
+    },
+    {
+     "id": 303,
+     "slug": "demonology",
+     "name": "Demonology"
+    },
+    {
+     "id": 301,
+     "slug": "destruction",
+     "name": "Destruction"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 228,
+     "name": "Wands",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "slug": "warrior",
+   "name": "Warrior",
+   "specs": [
+    {
+     "id": 161,
+     "slug": "arms",
+     "name": "Arms"
+    },
+    {
+     "id": 164,
+     "slug": "fury",
+     "name": "Fury"
+    },
+    {
+     "id": 163,
+     "slug": "protection",
+     "name": "Protection"
+    }
+   ],
+   "proficiencies": [
+    {
+     "skillLineId": 43,
+     "name": "Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 44,
+     "name": "Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 45,
+     "name": "Bows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 46,
+     "name": "Guns",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 54,
+     "name": "Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 55,
+     "name": "Two-Handed Swords",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 95,
+     "name": "Defense",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 118,
+     "name": "Dual Wield",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 136,
+     "name": "Staves",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 160,
+     "name": "Two-Handed Maces",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 162,
+     "name": "Unarmed",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 172,
+     "name": "Two-Handed Axes",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 173,
+     "name": "Daggers",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 176,
+     "name": "Thrown",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 226,
+     "name": "Crossbows",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 229,
+     "name": "Polearms",
+     "minLevel": 20
+    },
+    {
+     "skillLineId": 293,
+     "name": "Plate Mail",
+     "minLevel": 40
+    },
+    {
+     "skillLineId": 413,
+     "name": "Mail",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 414,
+     "name": "Leather",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 415,
+     "name": "Cloth",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 433,
+     "name": "Shield",
+     "minLevel": 1
+    },
+    {
+     "skillLineId": 473,
+     "name": "Fist Weapons",
+     "minLevel": 1
+    }
+   ]
+  }
+ ],
  "recipes": [
   {
    "id": 2385,

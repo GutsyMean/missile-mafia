@@ -1,9 +1,10 @@
+import { buildClasses } from "./classes";
 import { ARMOR_SUBCLASS_SHIELD, ITEM_CLASS_ARMOR, ITEM_CLASS_WEAPON } from "./constants";
 import { buildItem, indexGameData, type GameDataIndex } from "./items";
 import type { QuestFaction } from "./quest-factions";
 import { buildProfessions, buildRecipes } from "./recipes";
 import { requireTable, type Tables } from "./tables";
-import type { GameItem, GameProfession, GameRecipe } from "./types";
+import type { GameClass, GameItem, GameProfession, GameRecipe } from "./types";
 import {
   parseWikiRecipeTable,
   parseWowForeverRecipes,
@@ -21,6 +22,8 @@ export interface DatasetRecipe extends GameRecipe {
 export interface Dataset {
   build: string;
   professions: GameProfession[];
+  /** The playable classes, for choosing gear by class, talent tree and level. */
+  classes: GameClass[];
   items: GameItem[];
   recipes: DatasetRecipe[];
 }
@@ -111,5 +114,11 @@ export function buildDataset(
     }
   }
 
-  return { build, professions, items: [...items.values()], recipes: datasetRecipes };
+  return {
+    build,
+    professions,
+    classes: buildClasses(tables),
+    items: [...items.values()],
+    recipes: datasetRecipes,
+  };
 }
