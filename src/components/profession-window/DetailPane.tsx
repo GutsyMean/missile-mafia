@@ -1,4 +1,4 @@
-import { sourceLabel } from "@/lib/craftables/pending";
+import { SourceText } from "@/components/wow/SourceText";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
@@ -59,7 +59,7 @@ export function DetailPane({ entry }: { entry: Entry }) {
           {waiting.length > 0
             ? `${waiting.join(", ")} ${waiting.length === 1 ? "has" : "have"} not learned this recipe.`
             : "Nobody in the guild has learned this recipe."}
-          {learnSkill !== null ? ` It needs ${profession} ${learnSkill}.` : ""} Source: {sourceLabel(recipe)}.
+          {learnSkill !== null ? ` It needs ${profession} ${learnSkill}.` : ""} Source: <SourceText recipe={recipe} />.
         </p>
       ) : null}
 

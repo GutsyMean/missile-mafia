@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   checkForGameUpdates,
+  correctQuestFaction,
   correctUnlockLevel,
   importGuildon,
   saveProfile,
@@ -14,7 +15,7 @@ import {
 } from "@/app/admin/actions";
 import { signOut } from "@/app/login/actions";
 import type { AdminCrafter, AdminData, SyncRunView } from "@/lib/admin/load";
-import type { AdminCatalog, AdminDirectory, AdminSettings } from "@/lib/admin/types";
+import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import {
   matchGuildonExport,
   parseGuildonExport,
@@ -154,6 +155,29 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
     });
   };
 
+  const correctFaction = (recipeId: number, faction: QuestFactionChoice | null) => {
+    const before = catalog.recipes.find((recipe) => recipe.id === recipeId);
+    if (!before) return;
+    const show = (questFactionOwner: QuestFactionChoice | null) =>
+      setCatalog((current) => ({
+        ...current,
+        recipes: current.recipes.map((recipe) => (recipe.id === recipeId ? { ...recipe, questFactionOwner } : recipe)),
+      }));
+    // Shown at once; put back if the save fails.
+    show(faction);
+    setMessage({
+      kind: "ok",
+      text: faction === null ? "Left to the wiki again." : `Saved for ${before.name}.`,
+    });
+    startTransition(async () => {
+      const result = await correctQuestFaction(recipeId, faction);
+      if (!result.ok) {
+        show(before.questFactionOwner);
+        setMessage({ kind: "error", text: `Not saved: ${result.error} The choice was put back.` });
+      }
+    });
+  };
+
   const tabs: [Tab, string][] = [
     ...(crafter
       ? ([
@@ -250,6 +274,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             isAdmin={data.isAdmin}
             onChange={changeRecipes}
             onCorrect={correct}
+            onCorrectFaction={correctFaction}
           />
         ) : null}
         {tab === "import" && crafter ? (

@@ -32,8 +32,17 @@ const of = (professionId: number) => dataset.recipes.filter((r) => r.professionI
 // including Bind on Pickup ones, to exercise the soulbound marking.
 const EXTRA = new Set(["Veteran's Silvered Chain Helm", "Acolyte's Silvered Chain Helm", "Sterling Silver Shoulders"]);
 const smithLearned = of(BLACKSMITHING).filter((r) => (fromTrainer(r) && r.unlock.learnSkill! <= SMITH_SKILL) || EXTRA.has(r.name));
-// Not learned by anyone: trainer recipes above his skill, a vendor plan, and one whose level the sources disagree on.
-const SMITH_PENDING = new Set(["Green Iron Hauberk", "Golden Scale Bracers", "Steel Breastplate", "Azure Skyforged Chain", "Truesilver Gauntlets"]);
+// Not learned by anyone: trainer recipes above his skill, a vendor plan, one whose level the sources
+// disagree on, and two from quests only one faction can do (Horde, then Alliance).
+const SMITH_PENDING = new Set([
+  "Green Iron Hauberk",
+  "Golden Scale Bracers",
+  "Steel Breastplate",
+  "Azure Skyforged Chain",
+  "Truesilver Gauntlets",
+  "Barbaric Iron Shoulders",
+  "Ironforge Breastplate",
+]);
 const smithUnlearned = of(BLACKSMITHING).filter((r) => SMITH_PENDING.has(r.name) && !smithLearned.includes(r));
 
 // Stitches: the first few tailoring recipes, and two she has yet to reach.
@@ -77,6 +86,7 @@ const view = (r: GameRecipe, crafterIds: string[], pendingCrafterIds: string[]):
   skillGrey: r.skillGrey,
   acquisition: r.unlock.acquisition,
   acquisitionText: r.unlock.acquisitionText,
+  ...(r.unlock.questFaction ? { questFaction: r.unlock.questFaction } : {}),
 });
 const inOrder = (a: RecipeView, b: RecipeView) => a.categoryOrder - b.categoryOrder || a.name.localeCompare(b.name) || a.id - b.id;
 

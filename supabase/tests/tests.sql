@@ -594,3 +594,95 @@ select test.is(
   (select count(*)::int from jsonb_array_elements(public.guild_craftables() -> 'professions') p where p ->> 'name' = 'Blacksmithing'), 1,
   'while the real ones stay there too');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Recipes from a quest that only one faction can do
+-- ---------------------------------------------------------------------------
+-- The sync brings in three quest recipes: one the wiki says is Horde only, one
+-- Alliance only, and one it says nothing about.
+set role service_role;
+select public.sync_start('cli') as runq \gset
+select public.sync_apply(:runq, (
+  select jsonb_build_object('recipes', jsonb_agg(jsonb_build_object(
+    'id', r.id, 'profession_id', 164, 'name', r.name, 'icon_file_id', 0, 'crafted_item_id', null, 'crafted_count', 1,
+    'effect_text', null, 'skill_yellow', 200, 'skill_green', 210, 'skill_grey', 220, 'recipe_item_id', null,
+    'learn_skill', 180, 'learn_skill_status', 'confirmed', 'learn_skill_candidates', '{}'::jsonb, 'acquisition', 'quest',
+    'acquisition_text', 'Quest · ' || r.quest, 'quest_faction', r.faction, 'training_cost', null, 'category', 'Other',
+    'category_order', 990, 'status', 'ok', 'content_hash', 'quest-' || r.id, 'reagents', '[]'::jsonb)))
+  from (values
+    (601, 'Horde Quest Plans', 'Trampled Under Foot', 'horde'),
+    (602, 'Alliance Quest Plans', 'Gearing Redridge', 'alliance'),
+    (603, 'Open Quest Plans', 'Sweet Serenity', null)
+  ) as r (id, name, quest, faction)
+));
+select public.sync_finish(:runq, 'ok', '1.60.1.71000', '{}'::jsonb, '[]'::jsonb, null,
+  (select array_agg(id) from public.recipes where status <> 'removed'));
+select test.is((select quest_faction from public.recipes where id = 601), 'horde', 'the sync stores the faction a quest is limited to');
+select test.throws(
+  $$update public.recipes set quest_faction = 'undead' where id = 603$$, '23514', 'only the two factions can be stored');
+-- Someone has learned the Alliance one.
+insert into public.crafter_recipes (crafter_id, recipe_id, source) values (:'crafter_owner', 602, 'manual');
+reset role;
+
+set role anon;
+select test.is(
+  (select r ->> 'questFaction' from jsonb_array_elements(public.guild_unlearned(164) -> 'recipes') r where (r ->> 'id')::int = 601), 'horde',
+  'a recipe nobody has learned says its quest is Horde only');
+select test.is(
+  (select r ? 'questFaction' from jsonb_array_elements(public.guild_unlearned(164) -> 'recipes') r where (r ->> 'id')::int = 603), false,
+  'a recipe open to both says nothing');
+select test.is(
+  (select r ->> 'questFaction' from jsonb_array_elements(public.guild_craftables() -> 'recipes') r where (r ->> 'id')::int = 602), 'alliance',
+  'a learned recipe carries it too');
+select test.throws(
+  $$update public.recipes set quest_faction_owner = 'horde' where id = 603$$, '42501', 'a visitor cannot mark a recipe');
+reset role;
+
+-- A site admin records what they saw in the game.
+set role authenticated;
+select test.login(:'other');
+select test.is(
+  test.affected($$update public.recipes set quest_faction_owner = 'horde' where id = 603$$), 0,
+  'a signed-in member who is not an admin cannot mark a recipe');
+select test.login(:'owner');
+select test.is(
+  test.affected($$update public.recipes set quest_faction_owner = 'horde' where id = 603$$), 1,
+  'an admin can mark a recipe the wiki says nothing about');
+select test.is(
+  test.affected($$update public.recipes set quest_faction_owner = 'none' where id = 601$$), 1,
+  'and can overrule the wiki');
+select test.throws(
+  $$update public.recipes set quest_faction = 'alliance' where id = 601$$, '42501', 'but cannot rewrite what the sync recorded');
+select test.is(
+  (select jsonb_build_array(r -> 'questFactionWiki', r -> 'questFactionOwner')
+   from jsonb_array_elements(public.admin_catalog() -> 'recipes') r where (r ->> 'id')::int = 601),
+  '["horde", "none"]'::jsonb, 'the catalog shows both what the wiki says and what the admin chose');
+reset role;
+
+set role anon;
+select test.is(
+  (select r ->> 'questFaction' from jsonb_array_elements(public.guild_unlearned(164) -> 'recipes') r where (r ->> 'id')::int = 603), 'horde',
+  'visitors see the admin''s mark');
+select test.is(
+  (select r ? 'questFaction' from jsonb_array_elements(public.guild_unlearned(164) -> 'recipes') r where (r ->> 'id')::int = 601), false,
+  'and no mark where the admin said both factions can get it');
+reset role;
+
+-- The next sync has different news from the wiki; the admin's word still stands.
+set role service_role;
+select public.sync_start('cli') as runq2 \gset
+select public.sync_apply(:runq2, (
+  select jsonb_build_object('recipes', jsonb_agg(jsonb_build_object(
+    'id', r.id, 'profession_id', 164, 'name', r.name, 'icon_file_id', 0, 'crafted_item_id', null, 'crafted_count', 1,
+    'effect_text', null, 'skill_yellow', 200, 'skill_green', 210, 'skill_grey', 220, 'recipe_item_id', null,
+    'learn_skill', 180, 'learn_skill_status', 'confirmed', 'learn_skill_candidates', '{}'::jsonb, 'acquisition', 'quest',
+    'acquisition_text', null, 'quest_faction', r.faction, 'training_cost', null, 'category', 'Other',
+    'category_order', 990, 'status', 'ok', 'content_hash', 'quest2-' || r.id, 'reagents', '[]'::jsonb)))
+  from (values (601, 'Horde Quest Plans', null), (603, 'Open Quest Plans', 'alliance')) as r (id, name, faction)
+));
+select test.is((select quest_faction from public.recipes where id = 601), null, 'a sync clears a mark the wiki no longer makes');
+select test.is((select quest_faction_owner from public.recipes where id = 601), 'none', 'and leaves the admin''s choice alone');
+select test.is(
+  (select nullif(coalesce(quest_faction_owner, quest_faction), 'none') from public.recipes where id = 603), 'horde',
+  'which keeps winning over the wiki');
+reset role;

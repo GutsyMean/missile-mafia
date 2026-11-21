@@ -92,8 +92,8 @@ test.describe("the button for crafters", () => {
 test.describe("recipes not learned yet", () => {
   test("are listed greyed out and marked as not available", async ({ page }) => {
     await page.goto("/?crafter=damien");
-    await expect(rows(page)).toHaveCount(63);
-    await expect(page.getByText("63 recipes · 5 not available yet")).toBeVisible();
+    await expect(rows(page)).toHaveCount(65);
+    await expect(page.getByText("65 recipes · 7 not available yet")).toBeVisible();
 
     const hauberk = row(page, "Green Iron Hauberk");
     await expect(hauberk).toHaveAttribute("data-available", "false");
@@ -107,9 +107,31 @@ test.describe("recipes not learned yet", () => {
     const mail = page.getByRole("region", { name: "Mail Armor" }).locator("[data-recipe]");
     await expect(mail.nth(24)).toHaveAttribute("data-available", "true");
     await expect(mail.nth(25)).toContainText("Azure Skyforged Chain");
-    await expect(mail.nth(26)).toContainText("Green Iron Hauberk");
-    await expect(mail.nth(27)).toContainText("Golden Scale Bracers");
-    await expect(mail.nth(28)).toContainText("Steel Breastplate");
+    await expect(mail.nth(26)).toContainText("Ironforge Breastplate");
+    await expect(mail.nth(27)).toContainText("Barbaric Iron Shoulders");
+    await expect(mail.nth(28)).toContainText("Green Iron Hauberk");
+    await expect(mail.nth(29)).toContainText("Golden Scale Bracers");
+    await expect(mail.nth(30)).toContainText("Steel Breastplate");
+  });
+
+  test("say so in red when only the Horde can do the quest for them", async ({ page }) => {
+    await page.goto("/?crafter=damien");
+    const shoulders = row(page, "Barbaric Iron Shoulders");
+    const mark = shoulders.getByText("Horde only", { exact: true });
+    await expect(mark).toBeVisible();
+    await expect(mark).toHaveCSS("color", "rgb(255, 32, 32)");
+
+    await shoulders.click();
+    const note = detail(page).getByRole("note");
+    await expect(note).toContainText("Source: Quest (Horde only) · On Iron Pauldrons.");
+    await expect(note.getByText("(Horde only)")).toHaveCSS("color", "rgb(255, 32, 32)");
+  });
+
+  test("say it too when the quest is the Alliance's, and nothing for other recipes", async ({ page }) => {
+    await page.goto("/?crafter=damien");
+    await expect(row(page, "Ironforge Breastplate").getByText("Alliance only", { exact: true })).toBeVisible();
+    await expect(row(page, "Green Iron Hauberk")).not.toContainText("only");
+    await expect(page.getByText(/(Horde|Alliance) only/)).toHaveCount(2);
   });
 
   test("say what they need and where they come from when opened", async ({ page }) => {
@@ -146,9 +168,9 @@ test.describe("recipes not learned yet", () => {
 test.describe("choosing whose recipes to see", () => {
   test("starts with everyone, including what nobody has learned yet", async ({ page }) => {
     await page.goto("/");
-    await expect(rows(page)).toHaveCount(69);
-    await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(7);
-    await expect(page.getByText("69 recipes · 7 not available yet")).toBeVisible();
+    await expect(rows(page)).toHaveCount(71);
+    await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(9);
+    await expect(page.getByText("71 recipes · 9 not available yet")).toBeVisible();
     await expect(crafterPicker(page)).toHaveValue("");
     await expect(professionPicker(page)).toHaveValue("");
   });
@@ -204,20 +226,20 @@ test.describe("choosing whose recipes to see", () => {
     await page.goto("/");
     await professionPicker(page).selectOption({ label: "Blacksmithing" });
 
-    await expect(rows(page)).toHaveCount(63);
+    await expect(rows(page)).toHaveCount(65);
     await expect(row(page, "Green Iron Hauberk")).toHaveAttribute("data-available", "false");
     await expect(row(page, "Linen Belt")).toHaveCount(0);
     await expect(page).toHaveURL(/prof=blacksmithing/);
 
     await professionPicker(page).selectOption({ label: "All professions" });
-    await expect(rows(page)).toHaveCount(69);
+    await expect(rows(page)).toHaveCount(71);
   });
 
   test("opens a pasted link on the same crafter and profession", async ({ page }) => {
     await page.goto("/?crafter=damien&prof=blacksmithing");
     await expect(crafterPicker(page)).toHaveValue("damien");
     await expect(professionPicker(page)).toHaveValue("blacksmithing");
-    await expect(rows(page)).toHaveCount(63);
+    await expect(rows(page)).toHaveCount(65);
     await expect(page.getByRole("region", { name: "Damien's profile" }).getByLabel("Damien: Blacksmithing 145")).toBeVisible();
   });
 
@@ -259,7 +281,7 @@ test.describe("choosing whose recipes to see", () => {
 
   test("shows everyone again for a link to a crafter who has left", async ({ page }) => {
     await page.goto("/?crafter=someone-gone");
-    await expect(rows(page)).toHaveCount(69);
+    await expect(rows(page)).toHaveCount(71);
     await expect(crafterPicker(page)).toHaveValue("");
   });
 });
@@ -270,7 +292,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("silver");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
-    await expect(page.getByText(/of 69 recipes/)).toBeVisible();
+    await expect(page.getByText(/of 71 recipes/)).toBeVisible();
   });
 
   test("finds recipes by a reagent they use", async ({ page }) => {
@@ -300,7 +322,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
-    await expect(rows(page)).toHaveCount(69);
+    await expect(rows(page)).toHaveCount(71);
   });
 });
 

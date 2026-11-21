@@ -1,5 +1,6 @@
 import { ARMOR_SUBCLASS_SHIELD, ITEM_CLASS_ARMOR, ITEM_CLASS_WEAPON } from "./constants";
 import { buildItem, indexGameData, type GameDataIndex } from "./items";
+import type { QuestFaction } from "./quest-factions";
 import { buildProfessions, buildRecipes } from "./recipes";
 import { requireTable, type Tables } from "./tables";
 import type { GameItem, GameProfession, GameRecipe } from "./types";
@@ -64,6 +65,7 @@ export function buildDataset(
   tables: Tables,
   build: string,
   unlockPagesBySlug: Record<string, UnlockPages> = {},
+  questFactions: Record<string, QuestFaction> = {},
 ): Dataset {
   const index = indexGameData(tables);
   const recipes = buildRecipes(tables, index);
@@ -97,6 +99,7 @@ export function buildDataset(
       itemNames,
       pages.wowForever ? parseWowForeverRecipes(pages.wowForever) : [],
       pages.wiki ? parseWikiRecipeTable(pages.wiki) : [],
+      questFactions,
     );
     for (const recipe of own) {
       const item = recipe.craftedItemId !== null ? items.get(recipe.craftedItemId) : undefined;

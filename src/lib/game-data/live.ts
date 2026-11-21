@@ -13,6 +13,6 @@ export async function loadLiveDataset(
   const build = await resolveLatestBuild(fetchFn);
   const tables = await fetchAllTables(build, fetchFn);
   const professions = buildProfessions(tables, buildRecipes(tables));
-  const { pages, warnings } = await fetchUnlockPages(professions, fetchFn);
-  return { dataset: buildDataset(tables, build, pages), warnings };
+  const { pages, questFactions, warnings } = await fetchUnlockPages(professions, fetchFn);
+  return { dataset: buildDataset(tables, build, pages, questFactions), warnings };
 }

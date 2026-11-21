@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyFilters, buildEntries, groupEntries } from "@/lib/craftables/filter";
-import { skillLabel, sourceLabel } from "@/lib/craftables/pending";
+import { factionNote, skillLabel, sourceLabel, sourceParts } from "@/lib/craftables/pending";
 import { DEFAULT_FILTERS, type Filters } from "@/lib/craftables/types";
 import { parseViewState, serializeViewState } from "@/lib/craftables/url-state";
 import { sampleDoc, sampleDocWithPending } from "../../helpers/craftables";
@@ -109,5 +109,45 @@ describe("the link to a view", () => {
 
   it("shows everything by default", () => {
     expect(parseViewState(new URLSearchParams("")).filters.availableOnly).toBe(false);
+  });
+});
+
+describe("sourceParts", () => {
+  it("splits the kind of source from the rest", () => {
+    expect(sourceParts({ acquisition: "quest", acquisitionText: "Quest · Trampled Under Foot" })).toEqual({
+      kind: "Quest",
+      detail: "Trampled Under Foot",
+    });
+    expect(
+      sourceParts({ acquisition: "quest vendor", acquisitionText: "Quest, Vendor · Saenorion (Darnassus) · Beasts of Thunder Ridge" }),
+    ).toEqual({ kind: "Quest, Vendor", detail: "Saenorion (Darnassus) · Beasts of Thunder Ridge" });
+  });
+
+  it("has no detail when only the kind is known", () => {
+    expect(sourceParts({ acquisition: "quest", acquisitionText: null })).toEqual({ kind: "Quest", detail: null });
+  });
+});
+
+describe("factionNote", () => {
+  it("says a recipe is for one faction only when its quest is the only way to get it", () => {
+    expect(factionNote({ acquisition: "quest", questFaction: "horde" })).toEqual({
+      faction: "horde",
+      sole: true,
+      text: "Horde only",
+    });
+    expect(factionNote({ acquisition: "quest", questFaction: "alliance" })?.text).toBe("Alliance only");
+  });
+
+  it("only speaks of the quest when there is another way to get the recipe", () => {
+    expect(factionNote({ acquisition: "quest vendor", questFaction: "alliance" })).toEqual({
+      faction: "alliance",
+      sole: false,
+      text: "Alliance-only quest",
+    });
+  });
+
+  it("says nothing when the quest is open to both, or not known", () => {
+    expect(factionNote({ acquisition: "quest" })).toBeNull();
+    expect(factionNote({ acquisition: "quest", questFaction: null })).toBeNull();
   });
 });

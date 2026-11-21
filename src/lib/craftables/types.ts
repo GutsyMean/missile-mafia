@@ -41,6 +41,8 @@ export interface CrafterView {
   skills: Record<string, number>;
 }
 
+export type Faction = "horde" | "alliance";
+
 export interface RecipeView {
   id: number;
   professionId: number;
@@ -67,6 +69,8 @@ export interface RecipeView {
   acquisition?: string;
   /** Where it comes from, in full, e.g. "Trainer · 10s". */
   acquisitionText?: string | null;
+  /** Set when the quest that hands the recipe out can only be done by one faction. */
+  questFaction?: Faction;
 }
 
 export interface ItemView {

@@ -283,6 +283,21 @@
   margin-left: 8px;
 }
 
+/* Admins only: which faction can do the quest a recipe comes from. */
+.factionPick {
+  display: inline-flex;
+  grid-column: 3;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+select.factionSelect {
+  --select-width: 172px;
+  max-width: 172px;
+  font-size: 12px;
+}
+
 .emptyList {
   margin: 0;
   padding: 24px;
@@ -497,7 +512,8 @@ select.wideSelect {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .unlock {
+  .unlock,
+  .factionPick {
     grid-column: 1 / -1;
     padding-left: 30px;
   }

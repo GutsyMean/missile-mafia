@@ -464,3 +464,17 @@ select.field option {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+/* A quest only one faction can do, in that faction's colour. */
+.faction {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.faction[data-faction="horde"] {
+  color: var(--red);
+}
+
+.faction[data-faction="alliance"] {
+  color: #7fa9ff;
+}

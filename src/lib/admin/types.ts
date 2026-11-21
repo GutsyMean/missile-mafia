@@ -1,3 +1,5 @@
+import type { Faction } from "@/lib/craftables/types";
+
 /** What `admin_catalog()` returns: every recipe in the game, compact. */
 export interface AdminCatalog {
   latestRunId: number | null;
@@ -13,6 +15,8 @@ export interface CatalogProfession {
   iconFileId: number;
   childSkillLineIds: number[];
 }
+
+export type QuestFactionChoice = Faction | "none";
 
 export type LearnStatus = "confirmed" | "single_source" | "disputed" | "unconfirmed" | "owner";
 
@@ -35,6 +39,10 @@ export interface CatalogRecipe {
   /** "trainer", "starter", "vendor", "drop", "quest", "unknown" or a combination. */
   acquisition: string;
   acquisitionText: string | null;
+  /** The faction the recipe's quest is limited to, as the Warcraft Wiki has it. */
+  questFactionWiki: Faction | null;
+  /** What a site admin set instead: a faction, or "none" for a quest open to both. */
+  questFactionOwner: QuestFactionChoice | null;
   trainingCost: number | null;
   skillYellow: number;
   skillGrey: number;

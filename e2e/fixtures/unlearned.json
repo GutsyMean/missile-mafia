@@ -29,6 +29,46 @@
     "acquisitionText": "Vendor · Vayn Moongaze (Zephras Isle)"
    },
    {
+    "id": 9811,
+    "professionId": 164,
+    "name": "Barbaric Iron Shoulders",
+    "iconFileId": 135054,
+    "craftedItemId": 7913,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      3575,
+      8
+     ],
+     [
+      5635,
+      4
+     ],
+     [
+      1210,
+      2
+     ],
+     [
+      3486,
+      2
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 135,
+    "skillYellow": 160,
+    "skillGreen": 172,
+    "skillGrey": 185,
+    "acquisition": "quest",
+    "acquisitionText": "Quest · On Iron Pauldrons",
+    "questFaction": "horde"
+   },
+   {
     "id": 7223,
     "professionId": 164,
     "name": "Golden Scale Bracers",
@@ -101,6 +141,42 @@
     "skillGrey": 205,
     "acquisition": "trainer",
     "acquisitionText": "Trainer · 75s"
+   },
+   {
+    "id": 8367,
+    "professionId": 164,
+    "name": "Ironforge Breastplate",
+    "iconFileId": 132740,
+    "craftedItemId": 6731,
+    "craftedCount": 1,
+    "effectText": null,
+    "category": "Mail Armor",
+    "categoryOrder": 103,
+    "reagents": [
+     [
+      2840,
+      16
+     ],
+     [
+      818,
+      2
+     ],
+     [
+      3470,
+      3
+     ]
+    ],
+    "crafterIds": [],
+    "pendingCrafterIds": [
+     "00000000-0000-4000-8000-000000000001"
+    ],
+    "learnSkill": 100,
+    "skillYellow": 115,
+    "skillGreen": 135,
+    "skillGrey": 155,
+    "acquisition": "quest",
+    "acquisitionText": "Quest · Gearing Redridge",
+    "questFaction": "alliance"
    },
    {
     "id": 9916,
@@ -182,6 +258,32 @@
    }
   ],
   "items": {
+   "818": {
+    "id": 818,
+    "name": "Tigerseye",
+    "quality": 2,
+    "iconFileId": 134118,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 15,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 100,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Tigerseye",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
    "1206": {
     "id": 1206,
     "name": "Moss Agate",
@@ -203,6 +305,32 @@
     "tooltip": [
      {
       "text": "Moss Agate",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "1210": {
+    "id": 1210,
+    "name": "Shadowgem",
+    "quality": 2,
+    "iconFileId": 134074,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 20,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 250,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Shadowgem",
       "color": "quality"
      }
     ],
@@ -255,6 +383,32 @@
     "tooltip": [
      {
       "text": "Copper Bar",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "3470": {
+    "id": 3470,
+    "name": "Rough Grinding Stone",
+    "quality": 1,
+    "iconFileId": 135243,
+    "classId": 7,
+    "subclassId": 7,
+    "inventoryType": 0,
+    "itemLevel": 10,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 5,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Rough Grinding Stone",
       "color": "quality"
      }
     ],
@@ -514,6 +668,32 @@
     ],
     "tooltipComplete": true
    },
+   "5635": {
+    "id": 5635,
+    "name": "Sharp Claw",
+    "quality": 1,
+    "iconFileId": 134296,
+    "classId": 7,
+    "subclassId": 11,
+    "inventoryType": 0,
+    "itemLevel": 15,
+    "requiredLevel": 0,
+    "bonding": 0,
+    "tradeable": true,
+    "sellPrice": 45,
+    "slotName": null,
+    "typeName": null,
+    "armor": null,
+    "damage": null,
+    "stats": [],
+    "tooltip": [
+     {
+      "text": "Sharp Claw",
+      "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
    "5966": {
     "id": 5966,
     "name": "Guardian Gloves",
@@ -664,6 +844,68 @@
     ],
     "tooltipComplete": true
    },
+   "6731": {
+    "id": 6731,
+    "name": "Ironforge Breastplate",
+    "quality": 2,
+    "iconFileId": 132740,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 5,
+    "itemLevel": 20,
+    "requiredLevel": 15,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 690,
+    "slotName": "Chest",
+    "typeName": "Mail",
+    "armor": 168,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 4,
+      "name": "Strength",
+      "value": 3
+     },
+     {
+      "stat": 7,
+      "name": "Stamina",
+      "value": 3
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Ironforge Breastplate",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Chest",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "168 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+3 Strength",
+      "color": "white"
+     },
+     {
+      "text": "+3 Stamina",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 15",
+      "color": "white"
+     }
+    ],
+    "tooltipComplete": false
+   },
    "7909": {
     "id": 7909,
     "name": "Aquamarine",
@@ -686,6 +928,68 @@
      {
       "text": "Aquamarine",
       "color": "quality"
+     }
+    ],
+    "tooltipComplete": true
+   },
+   "7913": {
+    "id": 7913,
+    "name": "Barbaric Iron Shoulders",
+    "quality": 2,
+    "iconFileId": 135054,
+    "classId": 4,
+    "subclassId": 3,
+    "inventoryType": 3,
+    "itemLevel": 32,
+    "requiredLevel": 27,
+    "bonding": 2,
+    "tradeable": true,
+    "sellPrice": 2500,
+    "slotName": "Shoulder",
+    "typeName": "Mail",
+    "armor": 153,
+    "damage": null,
+    "stats": [
+     {
+      "stat": 4,
+      "name": "Strength",
+      "value": 6
+     },
+     {
+      "stat": 3,
+      "name": "Agility",
+      "value": 6
+     }
+    ],
+    "tooltip": [
+     {
+      "text": "Barbaric Iron Shoulders",
+      "color": "quality"
+     },
+     {
+      "text": "Binds when equipped",
+      "color": "white"
+     },
+     {
+      "text": "Shoulder",
+      "right": "Mail",
+      "color": "white"
+     },
+     {
+      "text": "153 Armor",
+      "color": "white"
+     },
+     {
+      "text": "+6 Strength",
+      "color": "white"
+     },
+     {
+      "text": "+6 Agility",
+      "color": "white"
+     },
+     {
+      "text": "Requires Level 27",
+      "color": "white"
      }
     ],
     "tooltipComplete": true

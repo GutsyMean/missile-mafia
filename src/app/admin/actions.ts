@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
-import type { AdminCatalog, AdminDirectory, AdminSettings } from "@/lib/admin/types";
+import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -249,6 +249,29 @@ export async function correctUnlockLevel(recipeId: number, level: number | null)
   if (error) return fail(error.message);
   if (count === 0) return fail("That recipe could not be updated.");
   // The level shows on the public list, and a settled trainer level adds the recipe for crafters past it.
+  updateTag(CRAFTABLES_TAG);
+  return { ok: true, data: undefined };
+}
+
+/**
+ * Records which faction can do the quest a recipe comes from, as an admin saw
+ * it in the game: "none" for both. Passing null goes back to what the wiki says.
+ */
+export async function correctQuestFaction(
+  recipeId: number,
+  faction: QuestFactionChoice | null,
+): Promise<ActionResult> {
+  const session = await signedInAdmin();
+  if (!session) return fail("Only a site admin can say which faction a quest is for.");
+  if (!Number.isInteger(recipeId) || recipeId <= 0) return fail("Unknown recipe.");
+  if (faction !== null && !["horde", "alliance", "none"].includes(faction)) return fail("Unknown faction.");
+
+  const { error, count } = await session.supabase
+    .from("recipes")
+    .update({ quest_faction_owner: faction }, { count: "exact" })
+    .eq("id", recipeId);
+  if (error) return fail(error.message);
+  if (count === 0) return fail("That recipe could not be updated.");
   updateTag(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
 }

@@ -1,3 +1,4 @@
+import { questFactionOf, type Faction, type QuestFaction } from "./quest-factions";
 import type { GameRecipe } from "./types";
 
 /**
@@ -16,6 +17,8 @@ export interface WowForeverRow {
   /** "trainer", "starter", "vendor", "drop", "quest", "unknown" or a combination. */
   acquisition: string;
   acquisitionText: string | null;
+  /** The quests named as a source, when a quest is one of the ways to get the recipe. */
+  questNames: string[];
   /** Base training cost in copper. */
   trainingCost: number | null;
 }
@@ -35,6 +38,8 @@ export interface UnlockInfo {
   candidates: { wowForever: number | null; wiki: number | null; recipeItem: number | null };
   acquisition: string;
   acquisitionText: string | null;
+  /** Set when the quest that hands out the recipe is for one faction only. */
+  questFaction: Faction | null;
   trainingCost: number | null;
 }
 
@@ -88,14 +93,20 @@ export function parseWowForeverRecipes(html: string): WowForeverRow[] {
       .filter(Boolean);
     const acquisitionText = parts.length > 0 ? parts.join(" · ") : null;
     const cost = parts.length === 2 ? parseCoinText(parts[1]) : null;
+    const acquisition = decodeEntities(attribute("src")) || "unknown";
+    // After the label come prices, sellers ("Name (Zone)") and quest names, unmarked.
+    const questNames = acquisition.split(" ").includes("quest")
+      ? parts.slice(1).filter((part) => parseCoinText(part) === null && !/\(.+\)/.test(part))
+      : [];
 
     rows.push({
       name: textOf(linkInner),
       itemId: kind === "item" ? Number(id) : null,
       spellId: kind === "spell" ? Number(id) : null,
       learnSkill: Number(attribute("learn")),
-      acquisition: decodeEntities(attribute("src")) || "unknown",
+      acquisition,
       acquisitionText,
+      questNames,
       trainingCost: attribute("src") === "trainer" ? cost : null,
     });
   }
@@ -160,6 +171,7 @@ export function resolveUnlockLevels(
   itemNames: Map<number, string>,
   wowForeverRows: WowForeverRow[],
   wikiRows: WikiRow[],
+  questFactions: Record<string, QuestFaction> = {},
 ): Map<number, UnlockInfo> {
   const wowForeverByItem = new Map<number, WowForeverRow>();
   const wowForeverBySpell = new Map<number, WowForeverRow>();
@@ -199,6 +211,7 @@ export function resolveUnlockLevels(
       candidates,
       acquisition: site?.acquisition ?? wikiSource ?? "unknown",
       acquisitionText: site?.acquisitionText ?? null,
+      questFaction: questFactionOf(site?.questNames ?? [], questFactions),
       trainingCost: site?.trainingCost ?? null,
     });
   }

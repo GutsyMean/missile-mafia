@@ -131,6 +131,7 @@ export function recipeRow(recipe: DatasetRecipe): DbRow {
     learn_skill_candidates: recipe.unlock.candidates,
     acquisition: recipe.unlock.acquisition,
     acquisition_text: recipe.unlock.acquisitionText,
+    quest_faction: recipe.unlock.questFaction,
     training_cost: recipe.unlock.trainingCost,
     category: recipe.category,
     category_order: recipe.categoryOrder,

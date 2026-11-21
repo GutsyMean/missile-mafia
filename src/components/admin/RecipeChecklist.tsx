@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { planBulkSelect, type BulkSelectPlan } from "@/lib/admin/bulk-select";
-import type { AdminCatalog, CatalogRecipe } from "@/lib/admin/types";
-import { sourceLabel } from "@/lib/craftables/pending";
+import { hasQuestSource, questFactionChoices, shownQuestFaction } from "@/lib/admin/quest-faction";
+import type { AdminCatalog, CatalogRecipe, QuestFactionChoice } from "@/lib/admin/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
+import { SourceText } from "@/components/wow/SourceText";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./admin.module.css";
 
@@ -18,6 +19,8 @@ interface Props {
   isAdmin: boolean;
   onChange: (add: number[], remove: number[], source: "manual" | "bulk") => void;
   onCorrect: (recipeId: number, level: number | null) => void;
+  /** An admin says which faction can do the recipe's quest; null leaves it to the wiki. */
+  onCorrectFaction: (recipeId: number, faction: QuestFactionChoice | null) => void;
 }
 
 /** The unlock level as text. Unsettled levels say so instead of showing a guess. */
@@ -45,7 +48,7 @@ function unlockLabel(recipe: CatalogRecipe): { text: string; settled: boolean } 
   }
 }
 
-export function RecipeChecklist({ catalog, ticked, skills, isAdmin, onChange, onCorrect }: Props) {
+export function RecipeChecklist({ catalog, ticked, skills, isAdmin, onChange, onCorrect, onCorrectFaction }: Props) {
   const defaultProfession =
     catalog.professions.find((p) => skills[String(p.id)] !== undefined)?.id ?? catalog.professions[0]?.id ?? 0;
   const [professionId, setProfessionId] = useState(defaultProfession);
@@ -215,7 +218,9 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, onChange, on
                   <span className={styles.recipeName} data-quality={recipe.quality}>
                     {recipe.name}
                   </span>
-                  <span className={styles.recipeSub}>{sourceLabel(recipe)}</span>
+                  <span className={styles.recipeSub}>
+                    <SourceText recipe={{ ...recipe, questFaction: shownQuestFaction(recipe) }} />
+                  </span>
                 </span>
               </label>
               <span className={styles.badges}>
@@ -264,6 +269,25 @@ export function RecipeChecklist({ catalog, ticked, skills, isAdmin, onChange, on
                   )
                 ) : null}
               </span>
+              {isAdmin && hasQuestSource(recipe) ? (
+                <label className={styles.factionPick}>
+                  <span className={styles.unlockLabel}>Quest open to</span>
+                  <select
+                    className={`${wow.field} ${styles.factionSelect}`}
+                    aria-label={`Who can do the quest for ${recipe.name}`}
+                    value={recipe.questFactionOwner ?? ""}
+                    onChange={(event) =>
+                      onCorrectFaction(recipe.id, (event.target.value || null) as QuestFactionChoice | null)
+                    }
+                  >
+                    {questFactionChoices(recipe).map((choice) => (
+                      <option key={choice.value} value={choice.value}>
+                        {choice.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
             </li>
           );
         })}

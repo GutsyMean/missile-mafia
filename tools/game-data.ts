@@ -109,10 +109,10 @@ async function main() {
   const tables = await fetchAllTables(version, tableFetch(version));
 
   const professions = buildProfessions(tables, buildRecipes(tables));
-  const { pages, warnings } = await fetchUnlockPages(professions, cachingFetch(path.join(CACHE, "unlock")));
+  const { pages, questFactions, warnings } = await fetchUnlockPages(professions, cachingFetch(path.join(CACHE, "unlock")));
   for (const warning of warnings) console.log(`  warning: ${warning}`);
 
-  const dataset = buildDataset(tables, version, pages);
+  const dataset = buildDataset(tables, version, pages, questFactions);
   summarise(dataset);
   writeFileSync(path.join(CACHE, "dataset.json"), JSON.stringify(dataset));
   console.log(`\nWrote ${path.join(CACHE, "dataset.json")}`);

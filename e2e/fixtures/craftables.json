@@ -1,5 +1,5 @@
 {
- "build": "1.60.1.70938",
+ "build": "1.60.1.71037",
  "syncedAt": "2026-11-17T00:00:00.000Z",
  "professions": [
   {
@@ -46,7 +46,7 @@
  "unlearned": [
   {
    "professionId": 164,
-   "count": 5
+   "count": 7
   },
   {
    "professionId": 197,
@@ -2804,7 +2804,7 @@
    "inventoryType": 13,
    "itemLevel": 22,
    "requiredLevel": 17,
-   "bonding": 0,
+   "bonding": 2,
    "tradeable": true,
    "sellPrice": 898,
    "slotName": "One-Hand",
@@ -2827,6 +2827,10 @@
     {
      "text": "Bronze Mace",
      "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
     },
     {
      "text": "One-Hand",

@@ -22,6 +22,7 @@ describe("parseWowForeverRecipes", () => {
       learnSkill: 110,
       acquisition: "trainer",
       acquisitionText: "Trainer · 10s",
+      questNames: [],
       trainingCost: 1000,
     });
   });
@@ -59,6 +60,21 @@ describe("parseWowForeverRecipes", () => {
 
   it("reads rows that link a spell instead of an item", () => {
     expect(byName.get("Blacksmithing")).toMatchObject({ itemId: null, spellId: 9785 });
+  });
+
+  it("picks out the quests a recipe comes from", () => {
+    expect(byName.get("Barbaric Iron Boots")).toMatchObject({ acquisition: "quest", questNames: ["Trampled Under Foot"] });
+    expect(byName.get("Rough Copper Chain Boots")!.questNames).toEqual(["The Quarry's Smith", "This Is Spinal Axe"]);
+    expect(byName.get("Copper Chain Vest")).toMatchObject({
+      acquisition: "drop quest fished pickpocket",
+      questNames: ["Supplying the Front"],
+    });
+  });
+
+  it("does not mistake sellers or prices for quests", () => {
+    expect(byName.get("Iron Morningstar")).toMatchObject({ acquisition: "quest vendor", questNames: [] });
+    expect(byName.get("Veteran's Silvered Chain Helm")!.questNames).toEqual([]);
+    expect(byName.get("Silvered Bronze Gauntlets")!.questNames).toEqual([]);
   });
 });
 
@@ -98,6 +114,7 @@ describe("resolveUnlockLevels", () => {
       candidates: { wowForever: 110, wiki: 110, recipeItem: null },
       acquisition: "trainer",
       acquisitionText: "Trainer · 10s",
+      questFaction: null,
       trainingCost: 1000,
     });
   });
@@ -210,7 +227,23 @@ describe("resolveUnlockLevels", () => {
       candidates: { wowForever: null, wiki: null, recipeItem: null },
       acquisition: "unknown",
       acquisitionText: null,
+      questFaction: null,
       trainingCost: null,
     });
+  });
+
+  it("marks a recipe whose quest is for one faction only", () => {
+    const fromQuest = (name: string, questNames: string[]) =>
+      wowForever.map((row) => (row.name === name ? { ...row, acquisition: "quest", questNames } : row));
+    const factions = { "Trampled Under Foot": "horde", "The Quarry's Smith": "alliance" } as const;
+    const marked = (questNames: string[]) =>
+      resolveUnlockLevels(recipes, itemNames, fromQuest("Steel Breastplate", questNames), wiki, factions).get(
+        idByName.get("Steel Breastplate")!,
+      )!.questFaction;
+
+    expect(marked(["Trampled Under Foot"])).toBe("horde");
+    expect(marked(["The Quarry's Smith", "Trampled Under Foot"])).toBeNull();
+    expect(marked(["A quest the wiki has no page for"])).toBeNull();
+    expect(get("Steel Breastplate").questFaction).toBeNull();
   });
 });

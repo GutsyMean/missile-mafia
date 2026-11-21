@@ -2,9 +2,10 @@
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import type { EntryGroup } from "@/lib/craftables/filter";
-import { skillLabel } from "@/lib/craftables/pending";
+import { factionNote, skillLabel } from "@/lib/craftables/pending";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
+import wow from "@/components/wow/wow.module.css";
 import styles from "./window.module.css";
 
 /** The line under an item's name: where it is worn and what is needed to use it. */
@@ -88,6 +89,8 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
               const quality = entry.item?.quality ?? 1;
               const soulbound = entry.item ? !entry.item.tradeable : false;
               const skill = skillLabel(entry);
+              // Worth a mark in the list only when it shuts a faction out of a recipe nobody has yet.
+              const faction = entry.available ? null : factionNote(entry.recipe);
               return (
                 <li key={entry.recipe.id}>
                   <button
@@ -122,6 +125,11 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
                           <span className={styles.wideOnly}>{skill}</span>
                           {/* On a phone the profession's name would crowd out the item's own line. */}
                           <span className={styles.narrowOnly}>Skill {entry.recipe.learnSkill}</span>
+                        </span>
+                      ) : null}
+                      {faction?.sole ? (
+                        <span className={wow.faction} data-faction={faction.faction}>
+                          {faction.text}
                         </span>
                       ) : null}
                       {soulbound ? <span className={styles.soulbound}>Soulbound</span> : null}

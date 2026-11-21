@@ -18,6 +18,8 @@ const recipe = (over: Partial<CatalogRecipe> & { id: number }): CatalogRecipe =>
   learnCandidates: {},
   acquisition: "trainer",
   acquisitionText: null,
+  questFactionWiki: null,
+  questFactionOwner: null,
   trainingCost: null,
   skillYellow: 130,
   skillGrey: 160,
