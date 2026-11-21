@@ -144,13 +144,45 @@ test.describe("recipes not learned yet", () => {
 });
 
 test.describe("choosing whose recipes to see", () => {
-  test("starts with everyone, holding back what is still to learn", async ({ page }) => {
+  test("starts with everyone, including what nobody has learned yet", async ({ page }) => {
     await page.goto("/");
-    await expect(rows(page)).toHaveCount(62);
-    await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(0);
-    await expect(page.getByText(/62 recipes · choose a crafter or a profession/)).toBeVisible();
+    await expect(rows(page)).toHaveCount(69);
+    await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(7);
+    await expect(page.getByText("69 recipes · 7 not available yet")).toBeVisible();
     await expect(crafterPicker(page)).toHaveValue("");
     await expect(professionPicker(page)).toHaveValue("");
+  });
+
+  test("finds a recipe nobody has learned when searching across everyone", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("searchbox").fill("hauberk");
+    await expect(rows(page)).toHaveCount(1);
+    await expect(row(page, "Green Iron Hauberk")).toHaveAttribute("data-available", "false");
+
+    await page.getByRole("searchbox").fill("woolen boots");
+    await expect(row(page, "Woolen Boots")).toHaveAttribute("data-available", "false");
+  });
+
+  test("says it is still loading while those recipes are on their way", async ({ page }) => {
+    // Hold the recipes still to learn back for a moment, as a slow connection would.
+    let release = () => {};
+    const held = new Promise<void>((resolve) => (release = resolve));
+    await page.route("**/api/unlearned/*", async (route) => {
+      await held;
+      await route.continue();
+    });
+    await page.goto("/");
+    await expect(page.getByText(/Loading recipes not learned yet \(0 of 2 professions\)/)).toBeVisible();
+    await expect(rows(page)).toHaveCount(62);
+
+    // A search that only they can answer waits, visibly, instead of claiming nothing matches.
+    await page.getByRole("searchbox").fill("hauberk");
+    await expect(page.getByText("Looking through recipes not learned yet…")).toBeVisible();
+    await expect(page.getByText("Nothing matches these filters.")).toHaveCount(0);
+
+    release();
+    await expect(row(page, "Green Iron Hauberk")).toBeVisible();
+    await expect(page.getByText(/Loading recipes not learned yet/)).toHaveCount(0);
   });
 
   test("shows one crafter's own list and profile", async ({ page }) => {
@@ -178,7 +210,7 @@ test.describe("choosing whose recipes to see", () => {
     await expect(page).toHaveURL(/prof=blacksmithing/);
 
     await professionPicker(page).selectOption({ label: "All professions" });
-    await expect(rows(page)).toHaveCount(62);
+    await expect(rows(page)).toHaveCount(69);
   });
 
   test("opens a pasted link on the same crafter and profession", async ({ page }) => {
@@ -227,7 +259,7 @@ test.describe("choosing whose recipes to see", () => {
 
   test("shows everyone again for a link to a crafter who has left", async ({ page }) => {
     await page.goto("/?crafter=someone-gone");
-    await expect(rows(page)).toHaveCount(62);
+    await expect(rows(page)).toHaveCount(69);
     await expect(crafterPicker(page)).toHaveValue("");
   });
 });
@@ -238,7 +270,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("silver");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
-    await expect(page.getByText(/of 62 recipes/)).toBeVisible();
+    await expect(page.getByText(/of 69 recipes/)).toBeVisible();
   });
 
   test("finds recipes by a reagent they use", async ({ page }) => {
@@ -268,7 +300,7 @@ test.describe("search and filters", () => {
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
-    await expect(rows(page)).toHaveCount(62);
+    await expect(rows(page)).toHaveCount(69);
   });
 });
 

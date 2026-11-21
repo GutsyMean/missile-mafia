@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { applyFilters, buildEntries, mergeUnlearned, resolveFilters, unlearnedToLoad } from "@/lib/craftables/filter";
+import {
+  applyFilters,
+  buildEntries,
+  mergeUnlearned,
+  resolveFilters,
+  unlearnedToLoad,
+  unlearnedWithPage,
+} from "@/lib/craftables/filter";
 import { DEFAULT_FILTERS, type CraftablesDoc, type Filters, type RecipeView, type UnlearnedDoc } from "@/lib/craftables/types";
 import { parseViewState, serializeViewState } from "@/lib/craftables/url-state";
 
@@ -170,12 +177,9 @@ describe("unlearnedToLoad: which professions' not-yet-learned recipes to fetch",
     expect(unlearnedToLoad(doc, filters({ crafter: "stitches", profession: "tailoring" }))).toEqual([197]);
   });
 
-  it("fetches nothing for everyone and everything, to keep the page light", () => {
-    expect(unlearnedToLoad(doc, filters())).toEqual([]);
-  });
-
-  it("fetches it straight away when the guild has a single profession", () => {
-    expect(unlearnedToLoad({ ...doc, unlearned: [{ professionId: 164, count: 1 }] }, filters())).toEqual([164]);
+  it("fetches every profession when looking at everyone, so a search finds them all", () => {
+    expect(unlearnedToLoad(doc, filters())).toEqual([164, 197]);
+    expect(unlearnedToLoad(doc, filters({ search: "robe" }))).toEqual([164, 197]);
   });
 
   it("fetches nothing when only available recipes are wanted", () => {
@@ -197,5 +201,26 @@ describe("the link to a view", () => {
   it("means everyone and every profession when it names neither", () => {
     const { filters } = parseViewState(new URLSearchParams(""));
     expect([filters.crafter, filters.profession]).toEqual(["", ""]);
+  });
+});
+
+describe("unlearnedWithPage: what is worth sending with the page itself", () => {
+  it("is the not-yet-learned recipes of a guild with a single profession", () => {
+    expect(unlearnedWithPage({ ...doc, unlearned: [{ professionId: 164, count: 1 }] })).toEqual([164]);
+  });
+
+  it("is nothing once there are several: those are fetched after the page is up", () => {
+    expect(unlearnedWithPage(doc)).toEqual([]);
+    expect(unlearnedWithPage({ ...doc, unlearned: [] })).toEqual([]);
+  });
+});
+
+describe("search text", () => {
+  it("is worked out once per recipe, from its names and what it consumes", () => {
+    const [mace] = buildEntries(everything);
+    expect(mace.searchText).toBe("copper mace");
+    expect(applyFilters(buildEntries(everything), { ...DEFAULT_FILTERS, search: "IRON hau" }).map((e) => e.recipe.name)).toEqual([
+      "Green Iron Hauberk",
+    ]);
   });
 });

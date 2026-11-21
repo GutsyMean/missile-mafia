@@ -96,6 +96,8 @@ export interface Entry {
   recipe: RecipeView;
   item: ItemView | null;
   reagents: { item: ItemView | null; itemId: number; quantity: number }[];
+  /** Everything a search looks through, in lower case: the names of the recipe, its item and its reagents. */
+  searchText: string;
   /** Who can craft it now. */
   crafters: CrafterView[];
   /** Who has the profession but has not learned it yet. */

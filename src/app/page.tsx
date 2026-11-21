@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { ProfessionWindow } from "@/components/profession-window/ProfessionWindow";
 import wow from "@/components/wow/wow.module.css";
-import { unlearnedToLoad } from "@/lib/craftables/filter";
+import { unlearnedWithPage } from "@/lib/craftables/filter";
 import { loadCraftables, loadUnlearned } from "@/lib/craftables/load";
-import { DEFAULT_FILTERS, type UnlearnedDoc } from "@/lib/craftables/types";
+import type { UnlearnedDoc } from "@/lib/craftables/types";
 import styles from "./page.module.css";
 
 export default async function Home() {
   const doc = await loadCraftables();
   const synced = doc.syncedAt ? doc.syncedAt.slice(0, 10) : null;
-  // What the opening view shows of recipes still to learn comes with the page; the rest is fetched when asked for.
+  // A guild with one profession gets its recipes still to learn with the page; otherwise they are fetched once it is up.
   const unlearned: Record<number, UnlearnedDoc> = Object.fromEntries(
-    await Promise.all(unlearnedToLoad(doc, DEFAULT_FILTERS).map(async (id) => [id, await loadUnlearned(id)] as const)),
+    await Promise.all(unlearnedWithPage(doc).map(async (id) => [id, await loadUnlearned(id)] as const)),
   );
 
   return (

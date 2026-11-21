@@ -96,7 +96,8 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
         .catch(() => requested.current.delete(id));
     }
   }, [wanted]);
-  const loadingMore = wanted.some((id) => !(id in unlearned));
+  const stillLoading = wanted.filter((id) => !(id in unlearned)).length;
+  const loadingMore = stillLoading > 0;
 
   const crafter = useMemo(() => doc.crafters.find((c) => c.slug === filters.crafter) ?? null, [doc, filters.crafter]);
   const entries = useMemo(
@@ -217,8 +218,6 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
     doc.professions.find((p) => profiled && (profiled.skills[String(p.id)] ?? 0) > 0) ??
     doc.professions[0]
   )?.iconFileId;
-  const moreToLearn =
-    !filters.availableOnly && wanted.length === 0 && !crafter && !chosenProfession && (doc.unlearned ?? []).length > 0;
   const title = "Missile Mafia Crafting";
 
   return (
@@ -279,6 +278,11 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
                   All professions
                 </button>
               </div>
+            ) : visible.length === 0 && loadingMore ? (
+              // Nothing among what has arrived so far; the rest is still on its way.
+              <p className={styles.empty} role="status">
+                <span className={styles.spinner} aria-hidden="true" /> Looking through recipes not learned yet…
+              </p>
             ) : visible.length === 0 ? (
               <div className={styles.empty}>
                 <p>Nothing matches these filters.</p>
@@ -311,8 +315,13 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
               ? `${entries.length} recipes`
               : `${visible.length} of ${entries.length} recipes`}
             {notYet > 0 ? ` · ${notYet} not available yet` : ""}
-            {loadingMore ? " · loading what is still to learn…" : ""}
-            {moreToLearn ? " · choose a crafter or a profession to also see what is still to learn" : ""}
+            {loadingMore ? (
+              <span className={styles.loading} role="status">
+                <span className={styles.spinner} aria-hidden="true" />
+                Loading recipes not learned yet
+                {wanted.length > 1 ? ` (${wanted.length - stillLoading} of ${wanted.length} professions)` : ""}…
+              </span>
+            ) : null}
           </span>
           {isFiltered(filters) ? (
             <button

@@ -18,9 +18,9 @@ export function mergeUnlearned(doc: CraftablesDoc, extras: UnlearnedDoc[]): Craf
 }
 
 /**
- * Which professions' "not yet learned" recipes a view needs. With everyone and
- * every profession showing, nothing is fetched (it could be the whole game),
- * unless the guild has a single profession anyway.
+ * Which professions' "not yet learned" recipes a view needs: the chosen
+ * profession, the chosen crafter's professions, or all of them when looking
+ * at everyone, so that a search there finds everything.
  */
 export function unlearnedToLoad(doc: CraftablesDoc, filters: Filters): number[] {
   if (filters.availableOnly) return [];
@@ -32,6 +32,16 @@ export function unlearnedToLoad(doc: CraftablesDoc, filters: Filters): number[] 
     if (!crafter) return [];
     return withUnlearned.filter((id) => (crafter.skills[String(id)] ?? 0) > 0);
   }
+  return withUnlearned;
+}
+
+/**
+ * What of that is worth sending with the page itself rather than fetching once
+ * it is up: only the single profession of a guild that has just one. Several
+ * professions' worth would weigh the page down for everyone.
+ */
+export function unlearnedWithPage(doc: CraftablesDoc): number[] {
+  const withUnlearned = (doc.unlearned ?? []).map((entry) => entry.professionId);
   return withUnlearned.length === 1 ? withUnlearned : [];
 }
 
@@ -50,10 +60,17 @@ export function buildEntries(doc: CraftablesDoc, crafterId: string | null = null
     if (crafterId !== null && !recipe.crafterIds.includes(crafterId) && !pendingIds.includes(crafterId)) continue;
     const makers = recipe.crafterIds.flatMap((id) => crafters.get(id) ?? []);
     const profession = professions.get(recipe.professionId);
+    const item = itemOf(recipe.craftedItemId);
+    const reagents = recipe.reagents.map(([itemId, quantity]) => ({ item: itemOf(itemId), itemId, quantity }));
     entries.push({
       recipe,
-      item: itemOf(recipe.craftedItemId),
-      reagents: recipe.reagents.map(([itemId, quantity]) => ({ item: itemOf(itemId), itemId, quantity })),
+      item,
+      reagents,
+      // Worked out once here, not on every keystroke: the list can run to a couple of thousand recipes.
+      searchText: [recipe.name, item?.name, recipe.effectText, ...reagents.map((reagent) => reagent.item?.name)]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase(),
       crafters: makers,
       pending: (crafterId !== null ? pendingIds.filter((id) => id === crafterId) : pendingIds).flatMap(
         (id) => crafters.get(id) ?? [],
@@ -66,18 +83,10 @@ export function buildEntries(doc: CraftablesDoc, crafterId: string | null = null
   return entries;
 }
 
-function searchText(entry: Entry): string {
-  return [entry.recipe.name, entry.item?.name, entry.recipe.effectText, ...entry.reagents.map((r) => r.item?.name)]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-}
-
 function matches(entry: Entry, filters: Filters, words: string[]): boolean {
   const { item } = entry;
   if (words.length > 0) {
-    const text = searchText(entry);
-    if (!words.every((word) => text.includes(word))) return false;
+    if (!words.every((word) => entry.searchText.includes(word))) return false;
   }
   if (filters.slot && item?.slotName !== filters.slot) return false;
   if (filters.type && item?.typeName !== filters.type) return false;
