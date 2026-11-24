@@ -167,7 +167,8 @@ const gear: GearElsewhereDoc = {
 };
 writeFileSync(path.join(ROOT, "e2e/fixtures/gear.json"), JSON.stringify(gear, null, 1) + "\n");
 // Gear that is not crafted: three two-handers that beat anything Damien makes, a chest that edges out his best,
-// a cape from a boss, quest rewards for each faction, a robe for a caster, and a piece only a list names.
+// a cape from a boss, quest rewards for each faction, a robe for a caster, a piece only a list names,
+// and the reward of a class quest.
 const NOT_CRAFTED = [
   9459, // Thermaplugg's Left Arm
   7689, // Morbid Dawn
@@ -178,6 +179,7 @@ const NOT_CRAFTED = [
   4643, // Grimsteel Cape: a Horde quest
   14150, // Robe of Evocation
   2243, // Hand of Edward the Odd: on a best-in-slot list
+  277205, // Cloak of the Divine Storm: a Paladin class quest, Alliance side
 ];
 const gearSources: GearSourcesDoc = { items: {}, sources: {} };
 for (const id of NOT_CRAFTED) {

@@ -432,7 +432,7 @@ test.describe("comparing with gear that is not crafted", () => {
     // The best the guild could make is pointed out beside the best there is.
     await expect(chest.nth(1)).toContainText("Shining Silver Breastplate");
     await expect(chest.nth(1)).toContainText("Best craftable");
-    await expect(page.getByText(/Best for a level 31 Retribution Paladin: 34 pieces for 11 slots · 7 not crafted/)).toBeVisible();
+    await expect(page.getByText(/Best for a level 31 Retribution Paladin: 35 pieces for 11 slots · 8 not crafted/)).toBeVisible();
     await expect(page).toHaveURL(/all=1/);
   });
 
@@ -477,6 +477,29 @@ test.describe("comparing with gear that is not crafted", () => {
     await expect(detail(page).getByRole("region", { name: "Where it comes from" })).toContainText(
       "Reward of the quest The Defias Brotherhood in The Deadmines, from level 14 (Alliance only)",
     );
+  });
+
+  test("offers a class quest's reward to that class alone, once the quest opens", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    const cloak = row(page, "Cloak of the Divine Storm");
+    await expect(cloak).toContainText("Paladin class quests");
+    await expect(cloak).toContainText("Best");
+    await expect(cloak.getByText("Alliance only", { exact: true })).toBeVisible();
+    await cloak.click();
+    await expect(detail(page).getByRole("region", { name: "Where it comes from" })).toContainText(
+      "Reward of the quest Return to Delgren, one of the Paladin class quests, from level 22 (Alliance only)",
+    );
+    await expect(detail(page).getByRole("link", { name: "Return to Delgren" })).toHaveAttribute(
+      "href",
+      "https://wowforever.be/classes/paladin/leveling/#the-class-quests",
+    );
+
+    // Not before level 22, and never for another class, though anyone could wear a cloth cloak.
+    await page.getByLabel("Character level").fill("21");
+    await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
+    await page.goto("/?class=warrior&spec=arms&lvl=31&all=1");
+    await expect(row(page, "Cape of the Brotherhood")).toHaveCount(1);
+    await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
   });
 
   test("keeps a quest reward out of reach until its quest can be taken", async ({ page }) => {

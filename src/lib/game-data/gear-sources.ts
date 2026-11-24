@@ -5,13 +5,14 @@ import { USER_AGENT, type FetchLike } from "./wago";
  * Gear that is not crafted, and where it comes from. The game's own tables
  * list every item ever made, obtainable or not, and say nothing of where one
  * drops; so the only gear taken in is gear a published page names a source
- * for: the boss drops and quest rewards on wowforever.be's dungeon pages, and
- * the pieces on its pre-raid best-in-slot lists.
+ * for: the boss drops and quest rewards on wowforever.be's dungeon pages, the
+ * class-quest rewards on its leveling pages, and the pieces on its pre-raid
+ * best-in-slot lists.
  */
 export interface GearSource {
-  /** Dropped in a dungeon, rewarded by a dungeon quest, or named on a best-in-slot list. */
+  /** Dropped in a dungeon, rewarded by a quest, or named on a best-in-slot list. */
   kind: "drop" | "quest" | "list";
-  /** The dungeon, or the name of the list. */
+  /** The dungeon, a class's quests ("Paladin class quests"), or the name of the list. */
   place: string;
   /** The boss, the quest, or what the list says of the source. Null when the page names none. */
   from: string | null;
@@ -24,6 +25,8 @@ export interface GearSource {
    * of their own, so without this a level 60 quest reward would look wearable at 20.
    */
   level?: number;
+  /** Set when only one class can do the quest: that class's slug. */
+  forClass?: string;
   /** The page that says so. */
   url: string;
 }
@@ -44,6 +47,7 @@ const PAGES_AT_ONCE = 4;
 export const dungeonLootUrl = (slug: string) => `${DUNGEON_INDEX_URL}${slug}/`;
 export const dungeonQuestsUrl = (slug: string) => `${DUNGEON_INDEX_URL}${slug}/quests/`;
 export const bisListUrl = (slug: string) => `${BIS_INDEX_URL}${slug}/`;
+export const classLevelingUrl = (classSlug: string) => `${ORIGIN}/classes/${classSlug}/leveling/`;
 
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
 
@@ -164,6 +168,69 @@ export function parseBisList(html: string): { itemId: number; source: string | n
   return rows;
 }
 
+export interface ClassQuestReward {
+  itemId: number;
+  /** The quest, or how the page describes the way to it. Null when it names none. */
+  quest: string | null;
+  /** The side that gets this reward. Absent when both do. */
+  faction?: Faction;
+  /** The level the page lists the quest under. */
+  level: number | null;
+}
+
+/**
+ * Reads the table of class quests on a class's leveling page: Level, Reward,
+ * Alliance, Horde. A reward is named either in the Reward column, with each
+ * side's quest beside it, or in a side's own column when the two sides get
+ * different things.
+ */
+export function parseClassQuests(html: string): ClassQuestReward[] {
+  const rewards: ClassQuestReward[] = [];
+  for (const [table] of html.matchAll(/<table\b[\s\S]*?<\/table>/g)) {
+    const head = [...table.matchAll(/<th\b[^>]*>([\s\S]*?)<\/th>/g)].map((cell) => text(cell[1]).toLowerCase());
+    if (head.join("|") !== "level|reward|alliance|horde") continue;
+    for (const [, row] of table.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/g)) {
+      const cells = [...row.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((cell) => cell[1]);
+      if (cells.length !== 4) continue;
+      const [levelCell, reward, alliance, horde] = cells;
+      const levelNumber = Number(text(levelCell));
+      const level = Number.isInteger(levelNumber) && levelNumber > 0 ? levelNumber : null;
+      const allianceQuest = text(alliance);
+      const hordeQuest = text(horde);
+
+      for (const itemId of itemIds(reward, "/item=")) {
+        if (allianceQuest && hordeQuest && allianceQuest !== hordeQuest) {
+          rewards.push({ itemId, quest: allianceQuest, faction: "alliance", level });
+          rewards.push({ itemId, quest: hordeQuest, faction: "horde", level });
+        } else if (allianceQuest && hordeQuest) {
+          rewards.push({ itemId, quest: allianceQuest, level });
+        } else if (allianceQuest || hordeQuest) {
+          rewards.push({ itemId, quest: allianceQuest || hordeQuest, faction: allianceQuest ? "alliance" : "horde", level });
+        } else {
+          rewards.push({ itemId, quest: null, level });
+        }
+      }
+
+      const sides: [string, Faction][] = [[alliance, "alliance"], [horde, "horde"]];
+      for (const [cell, faction] of sides) {
+        for (const [, id, name] of cell.matchAll(/<a\b[^>]*\/item=(\d+)"[^>]*>([\s\S]*?)<\/a>/g)) {
+          // "Brutal Hauberk, from Brutal Hauberk": what is left once the item is taken out says where it comes from.
+          const way = text(cell).replace(text(name), "").replace(/^[\s,.;:]*(?:from\s+)?/i, "").trim();
+          rewards.push({ itemId: Number(id), quest: way === "" ? null : way, faction, level });
+        }
+      }
+    }
+  }
+  return rewards;
+}
+
+export interface ClassQuestPage {
+  /** The class's slug and name, as the game has them. */
+  slug: string;
+  name: string;
+  rewards: ClassQuestReward[];
+}
+
 export interface DungeonPages {
   slug: string;
   loot: DungeonLoot;
@@ -174,6 +241,7 @@ export interface DungeonPages {
 export function collectGearSources(
   dungeons: DungeonPages[],
   lists: { slug: string; rows: { itemId: number; source: string | null }[] }[],
+  classQuests: ClassQuestPage[] = [],
 ): GearSources {
   const sources: GearSources = {};
   const add = (itemId: number, source: GearSource) => {
@@ -206,6 +274,19 @@ export function collectGearSources(
         ...(quest?.faction ? { faction: quest.faction } : {}),
         ...(level ? { level } : {}),
         url: `${dungeonQuestsUrl(slug)}#quest-${reward.questId}`,
+      });
+    }
+  }
+  for (const { slug, name, rewards } of classQuests) {
+    for (const reward of rewards) {
+      add(reward.itemId, {
+        kind: "quest",
+        place: `${name} class quests`,
+        from: reward.quest,
+        ...(reward.faction ? { faction: reward.faction } : {}),
+        ...(reward.level ? { level: reward.level } : {}),
+        forClass: slug,
+        url: `${classLevelingUrl(slug)}#the-class-quests`,
       });
     }
   }
@@ -245,13 +326,14 @@ async function inTurn<T>(jobs: (() => Promise<T>)[]): Promise<T[]> {
 }
 
 /**
- * Downloads and reads every dungeon's loot and the best-in-slot lists.
- * Returns null, with the reason among the warnings, when any page could not be
- * read: a partial answer would make gear vanish from the site for a day, so
- * what the database already has is kept instead.
+ * Downloads and reads every dungeon's loot, each class's quests and the
+ * best-in-slot lists. Returns null, with the reason among the warnings, when
+ * any page could not be read: a partial answer would make gear vanish from the
+ * site for a day, so what the database already has is kept instead.
  */
 export async function fetchGearSources(
   fetchFn: FetchLike = fetch,
+  classes: { slug: string; name: string }[] = [],
 ): Promise<{ sources: GearSources | null; warnings: string[] }> {
   const failed: string[] = [];
   const fail = (what: string, result: { reason: string }) => failed.push(`${what}: ${result.reason}`);
@@ -289,6 +371,15 @@ export async function fetchGearSources(
     }),
   );
 
+  const classQuests = await inTurn(
+    classes.map(({ slug, name }) => async (): Promise<ClassQuestPage> => {
+      const levelingPage = await page(classLevelingUrl(slug), fetchFn);
+      // A class with no leveling page yet simply has no quests listed.
+      if (!levelingPage.ok && !levelingPage.missing) fail(`class quests of ${slug}`, levelingPage);
+      return { slug, name, rewards: levelingPage.ok ? parseClassQuests(levelingPage.html) : [] };
+    }),
+  );
+
   if (failed.length > 0) {
     return {
       sources: null,
@@ -298,6 +389,7 @@ export async function fetchGearSources(
   const sources = collectGearSources(
     dungeons.filter((dungeon): dungeon is DungeonPages => dungeon !== null),
     lists,
+    classQuests,
   );
   const found = Object.keys(sources).length;
   if (found < FEWEST_PLAUSIBLE_ITEMS) {

@@ -6,7 +6,9 @@ import { rankGear } from "@/lib/gear/rank";
 import { describeSource, ordinal, sourceKind, sourcePlace, sourcesFaction } from "@/lib/gear/sources";
 import { loadFixtureTables } from "../../helpers/fixtures";
 
-const paladin = buildClasses(loadFixtureTables()).find((c) => c.slug === "paladin")!;
+const classes = buildClasses(loadFixtureTables());
+const paladin = classes.find((c) => c.slug === "paladin")!;
+const warrior = classes.find((c) => c.slug === "warrior")!;
 const STRENGTH = 4;
 
 const item = (id: number, name: string, strength: number, over: Partial<ItemView> = {}): ItemView => ({
@@ -154,6 +156,16 @@ describe("rankGear, with gear that is not crafted", () => {
     expect(names(60)[0]).toBe("Phantom Armor");
   });
 
+  it("keeps a class quest's reward to its class", () => {
+    const classQuest = { ...allianceQuest, place: "Warrior class quests", forClass: "warrior", level: 20 };
+    const forWarriors = { ...gear, sources: { ...gear.sources, 12: [classQuest] } };
+    const all = withSourcedGear(entries, forWarriors);
+    const names = (gameClass: typeof paladin) =>
+      rankGear(all, gameClass, 31, ["strength"], 5)[0].ranked.map((ranked) => ranked.entry.recipe.name);
+    expect(names(paladin)).not.toContain("Phantom Armor");
+    expect(names(warrior)[0]).toBe("Phantom Armor");
+  });
+
   it("has nothing to point out when only crafted gear is ranked", () => {
     const [chest] = rankGear(entries, paladin, 31, ["strength"], 1);
     expect(chest.ranked[0].place).toBe(1);
@@ -179,6 +191,18 @@ describe("describing a source", () => {
     expect(describeSource(listed)).toEqual({ before: "Named on the ", link: "pre-raid best-in-slot list", after: ": World drop" });
     expect(describeSource({ ...listed, from: null }).after).toBe("; where it comes from is not listed yet");
     expect(describeSource({ ...hordeQuest, level: 18 }).after).toBe(" in Shadowfang Keep, from level 18");
+    expect(
+      describeSource({ ...allianceQuest, place: "Paladin class quests", from: "Return to Delgren", forClass: "paladin", level: 22 }),
+    ).toEqual({
+      before: "Reward of the quest ",
+      link: "Return to Delgren",
+      after: ", one of the Paladin class quests, from level 22",
+    });
+    expect(describeSource({ ...allianceQuest, place: "Paladin class quests", from: null, forClass: "paladin" })).toEqual({
+      before: "Reward of one of the ",
+      link: "Paladin class quests",
+      after: "",
+    });
     expect(describeSource({ ...drop, from: null, level: 44 })).toEqual({
       before: "Drops in ",
       link: "Razorfen Kraul",

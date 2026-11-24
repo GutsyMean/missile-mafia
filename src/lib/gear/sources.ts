@@ -32,6 +32,12 @@ export function describeSource(source: GearSource): { before: string; link: stri
         ? { before: "Drops from ", link: source.from, after: ` in ${source.place}${fromLevel}` }
         : { before: "Drops in ", link: source.place, after: fromLevel };
     case "quest":
+      // A class quest belongs to no dungeon: "…, one of the Paladin class quests".
+      if (source.forClass) {
+        return source.from
+          ? { before: "Reward of the quest ", link: source.from, after: `, one of the ${source.place}${fromLevel}` }
+          : { before: "Reward of one of the ", link: source.place, after: fromLevel };
+      }
       return {
         before: "Reward of the quest ",
         link: source.from ?? source.place,

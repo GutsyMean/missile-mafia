@@ -615,6 +615,64 @@
     }
    ],
    "tooltipComplete": true
+  },
+  "277205": {
+   "id": 277205,
+   "name": "Cloak of the Divine Storm",
+   "quality": 3,
+   "iconFileId": 133756,
+   "classId": 4,
+   "subclassId": 1,
+   "inventoryType": 16,
+   "itemLevel": 35,
+   "requiredLevel": 0,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 0,
+   "slotName": "Back",
+   "typeName": "Cloth",
+   "armor": 26,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 5
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Cloak of the Divine Storm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Back",
+     "right": "Cloth",
+     "color": "white"
+    },
+    {
+     "text": "26 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+5 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
   }
  },
  "sources": {
@@ -692,6 +750,17 @@
     "place": "Ragefire Chasm",
     "from": "Jergosh the Invoker",
     "url": "https://wowforever.be/guides/dungeons/ragefire-chasm/#jergosh-the-invoker"
+   }
+  ],
+  "277205": [
+   {
+    "kind": "quest",
+    "place": "Paladin class quests",
+    "from": "Return to Delgren",
+    "faction": "alliance",
+    "level": 22,
+    "forClass": "paladin",
+    "url": "https://wowforever.be/classes/paladin/leveling/#the-class-quests"
    }
   ]
  }

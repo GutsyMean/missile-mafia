@@ -1,3 +1,4 @@
+import { buildClasses } from "./classes";
 import { buildDataset, type Dataset } from "./dataset";
 import { buildProfessions, buildRecipes } from "./recipes";
 import { fetchGearSources } from "./gear-sources";
@@ -15,7 +16,7 @@ export async function loadLiveDataset(
   const tables = await fetchAllTables(build, fetchFn);
   const professions = buildProfessions(tables, buildRecipes(tables));
   const { pages, questFactions, warnings } = await fetchUnlockPages(professions, fetchFn);
-  const gear = await fetchGearSources(fetchFn);
+  const gear = await fetchGearSources(fetchFn, buildClasses(tables));
   return {
     dataset: buildDataset(tables, build, pages, questFactions, gear.sources),
     warnings: [...warnings, ...gear.warnings],

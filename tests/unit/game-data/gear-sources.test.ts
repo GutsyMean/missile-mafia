@@ -3,12 +3,14 @@ import {
   BIS_INDEX_URL,
   DUNGEON_INDEX_URL,
   bisListUrl,
+  classLevelingUrl,
   collectGearSources,
   dungeonLootUrl,
   dungeonQuestsUrl,
   fetchGearSources,
   parseBisIndex,
   parseBisList,
+  parseClassQuests,
   parseDungeonIndex,
   parseDungeonLoot,
   parseDungeonQuests,
@@ -21,6 +23,8 @@ const questsPage = readFixture("gear/deadmines-quests.html");
 const hubPage = readFixture("gear/hub.html");
 const bisIndex = readFixture("gear/bis-index.html");
 const bisList = readFixture("gear/bis-list.html");
+const paladinLeveling = readFixture("gear/paladin-leveling.html");
+const warriorLeveling = readFixture("gear/warrior-leveling.html");
 
 describe("parseDungeonIndex", () => {
   it("finds every dungeon the list links to, once", () => {
@@ -101,6 +105,49 @@ describe("the best-in-slot lists", () => {
   });
 });
 
+describe("parseClassQuests", () => {
+  it("reads each reward with its quest, its level and the side that gets it", () => {
+    const rewards = parseClassQuests(paladinLeveling);
+    expect(rewards.find((reward) => reward.itemId === 277205)).toEqual({
+      itemId: 277205,
+      quest: "Return to Delgren",
+      faction: "alliance",
+      level: 22,
+    });
+    expect(rewards.find((reward) => reward.itemId === 268484)).toEqual({
+      itemId: 268484,
+      quest: "The Moonsilver Blade",
+      faction: "horde",
+      level: 20,
+    });
+    // Spells a quest teaches are not gear, and only the table of class quests is read.
+    expect(rewards.map((reward) => reward.itemId).sort((a, b) => a - b)).toEqual([6953, 9607, 267369, 268484, 277205]);
+  });
+
+  it("reads a reward named in a side's own column, and one both sides share", () => {
+    const rewards = parseClassQuests(warriorLeveling);
+    expect(rewards.find((reward) => reward.itemId === 6972)).toEqual({
+      itemId: 6972,
+      quest: "the chain that starts with Fire Hardened Mail",
+      faction: "alliance",
+      level: 20,
+    });
+    expect(rewards.find((reward) => reward.itemId === 7133)).toEqual({
+      itemId: 7133,
+      quest: "Brutal Hauberk",
+      faction: "horde",
+      level: 20,
+    });
+    const whirlwind = rewards.filter((reward) => [6975, 6976, 6977].includes(reward.itemId));
+    expect(whirlwind).toHaveLength(3);
+    expect(whirlwind.every((reward) => reward.quest === "Whirlwind Weapon" && reward.faction === undefined && reward.level === 30)).toBe(true);
+  });
+
+  it("finds nothing on a page without such a table", () => {
+    expect(parseClassQuests(lootPage)).toEqual([]);
+  });
+});
+
 describe("collectGearSources", () => {
   const dungeon = { slug: "the-deadmines", loot: parseDungeonLoot(lootPage)!, quests: parseDungeonQuests(questsPage) };
   const lists = [{ slug: "paladin-protection", rows: [...parseBisList(bisList), { itemId: 872, source: "The Deadmines" }] }];
@@ -151,6 +198,22 @@ describe("collectGearSources", () => {
     expect(unlisted[2074][0].faction).toBeUndefined();
   });
 
+  it("keeps a class quest's reward to its class, and says where the page lists it", () => {
+    const paladin = { slug: "paladin", name: "Paladin", rewards: parseClassQuests(paladinLeveling) };
+    const withQuests = collectGearSources([dungeon], lists, [paladin]);
+    expect(withQuests[277205]).toEqual([
+      {
+        kind: "quest",
+        place: "Paladin class quests",
+        from: "Return to Delgren",
+        faction: "alliance",
+        level: 22,
+        forClass: "paladin",
+        url: "https://wowforever.be/classes/paladin/leveling/#the-class-quests",
+      },
+    ]);
+  });
+
   it("names a source once, however many times the pages repeat it", () => {
     const twice = collectGearSources([dungeon, dungeon], [...lists, ...lists]);
     expect(twice[872]).toHaveLength(1);
@@ -199,6 +262,28 @@ describe("fetchGearSources", () => {
     // The hub page has no quests to ask about, and the list announced but not written is a plain 404.
     expect(calls).not.toContain(dungeonQuestsUrl("blackrock-spire"));
     expect(calls).toContain(bisListUrl("paladin-retribution"));
+  });
+
+  it("reads each class's quests, and skips a class with no leveling page yet", async () => {
+    const { fetchFn, calls } = serve({
+      [dungeonLootUrl("the-deadmines")]: new Response(plenty(lootPage)),
+      [classLevelingUrl("paladin")]: new Response(paladinLeveling),
+    });
+    const classes = [{ slug: "paladin", name: "Paladin" }, { slug: "shaman", name: "Shaman" }];
+    const { sources, warnings } = await fetchGearSources(fetchFn, classes);
+    expect(warnings).toEqual([]);
+    expect(sources![277205][0]).toMatchObject({ kind: "quest", forClass: "paladin", level: 22 });
+    expect(calls).toContain(classLevelingUrl("shaman"));
+  });
+
+  it("keeps what is known when a class's page cannot be read", async () => {
+    const { fetchFn } = serve({
+      [dungeonLootUrl("the-deadmines")]: new Response(plenty(lootPage)),
+      [classLevelingUrl("paladin")]: new Response("oops", { status: 502 }),
+    });
+    const { sources, warnings } = await fetchGearSources(fetchFn, [{ slug: "paladin", name: "Paladin" }]);
+    expect(sources).toBeNull();
+    expect(warnings[0]).toMatch(/class quests of paladin: HTTP 502/);
   });
 
   it("keeps what is known when a page cannot be read, and says which", async () => {

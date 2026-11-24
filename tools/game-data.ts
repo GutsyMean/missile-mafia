@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { gunzipSync } from "node:zlib";
+import { buildClasses } from "../src/lib/game-data/classes";
 import { buildDataset, type Dataset } from "../src/lib/game-data/dataset";
 import { fetchGearSources } from "../src/lib/game-data/gear-sources";
 import { fetchUnlockPages } from "../src/lib/game-data/sources";
@@ -113,7 +114,7 @@ async function main() {
   const { pages, questFactions, warnings } = await fetchUnlockPages(professions, cachingFetch(path.join(CACHE, "unlock")));
   for (const warning of warnings) console.log(`  warning: ${warning}`);
 
-  const gear = await fetchGearSources(cachingFetch(path.join(CACHE, "gear")));
+  const gear = await fetchGearSources(cachingFetch(path.join(CACHE, "gear")), buildClasses(tables));
   for (const warning of gear.warnings) console.log(`  warning: ${warning}`);
 
   const dataset = buildDataset(tables, version, pages, questFactions, gear.sources);
