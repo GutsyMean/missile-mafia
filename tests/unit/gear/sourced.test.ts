@@ -144,6 +144,16 @@ describe("rankGear, with gear that is not crafted", () => {
     expect(chest.bestCrafted).toBeUndefined();
   });
 
+  it("leaves out a piece whose every source opens above the character's level", () => {
+    const late = { ...gear, sources: { ...gear.sources, 12: [{ ...listed, level: 60 }], 11: [{ ...hordeQuest, level: 48 }, { ...drop, level: 30 }] } };
+    const names = (level: number) =>
+      rankGear(withSourcedGear(entries, late), paladin, level, ["strength"], 5)[0].ranked.map((ranked) => ranked.entry.recipe.name);
+    // The list is for level 60; the chain has a quest from 48 but also drops from 30.
+    expect(names(31)).toEqual(["Martyr's Chain", "Avenger's Armor", "Shining Silver Breastplate", "Green Iron Hauberk"]);
+    expect(names(29)).toEqual(["Avenger's Armor", "Shining Silver Breastplate", "Green Iron Hauberk"]);
+    expect(names(60)[0]).toBe("Phantom Armor");
+  });
+
   it("has nothing to point out when only crafted gear is ranked", () => {
     const [chest] = rankGear(entries, paladin, 31, ["strength"], 1);
     expect(chest.ranked[0].place).toBe(1);
@@ -168,6 +178,12 @@ describe("describing a source", () => {
     });
     expect(describeSource(listed)).toEqual({ before: "Named on the ", link: "pre-raid best-in-slot list", after: ": World drop" });
     expect(describeSource({ ...listed, from: null }).after).toBe("; where it comes from is not listed yet");
+    expect(describeSource({ ...hordeQuest, level: 18 }).after).toBe(" in Shadowfang Keep, from level 18");
+    expect(describeSource({ ...drop, from: null, level: 44 })).toEqual({
+      before: "Drops in ",
+      link: "Razorfen Kraul",
+      after: ", from level 44",
+    });
   });
 
   it("limits a piece to one side only when every way to get it is a quest for that side", () => {

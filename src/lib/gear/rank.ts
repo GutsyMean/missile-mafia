@@ -73,6 +73,8 @@ export function rankGear(
   for (const entry of entries) {
     const { item } = entry;
     if (!item || !isGear(item) || !canUse(gameClass, level, item)) continue;
+    // Gear that is not crafted must also be within reach: a quest reward cannot be had before its quest.
+    if (!isCrafted(entry) && !(entry.sources ?? []).some((source) => (source.level ?? 0) <= level)) continue;
     for (const slot of slotsFor(item, dualWield)) {
       const { score, parts } = scoreItem(item, slot, order);
       if (score <= 0) continue;

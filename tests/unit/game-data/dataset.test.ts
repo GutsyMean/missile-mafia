@@ -74,6 +74,16 @@ describe("buildDataset — gear that is not crafted", () => {
     expect(Object.keys(withGear.gearSources ?? {})).toEqual(["273908"]);
   });
 
+  it("keeps the level a source opens at only where the item has none of its own, or the source is a quest", () => {
+    const drop = { ...source, level: 18 };
+    const quest = { kind: "quest" as const, place: "The Deadmines", from: "Red Silk Bandanas", level: 14, url: "https://wowforever.be/q" };
+    const list = { kind: "list" as const, place: "Pre-raid best-in-slot list", from: null, level: 60, url: "https://wowforever.be/l" };
+    // The leggings ask for a level themselves, so only the quest's level is kept.
+    const withGear = buildDataset(tables, "1.60.1.70938", {}, {}, { 273908: [drop, quest, list] });
+    expect(withGear.items.find((item) => item.id === 273908)?.requiredLevel).toBeGreaterThan(0);
+    expect(withGear.gearSources?.[273908]).toEqual([source, quest, { ...list, level: undefined }].map((s) => JSON.parse(JSON.stringify(s))));
+  });
+
   it("says so when the sources could not be read, rather than saying there are none", () => {
     expect(buildDataset(tables, "1.60.1.70938").gearSources).toBeNull();
     expect(buildDataset(tables, "1.60.1.70938", {}, {}, {}).gearSources).toEqual({});

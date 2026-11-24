@@ -640,6 +640,7 @@
     "place": "Scarlet Monastery: Graveyard",
     "from": "Vorrel's Revenge",
     "faction": "horde",
+    "level": 25,
     "url": "https://wowforever.be/guides/dungeons/scarlet-monastery-graveyard/quests/#quest-1051"
    }
   ],
@@ -657,6 +658,7 @@
     "place": "The Deadmines",
     "from": "The Defias Brotherhood",
     "faction": "alliance",
+    "level": 14,
     "url": "https://wowforever.be/guides/dungeons/the-deadmines/quests/#quest-166"
    }
   ],

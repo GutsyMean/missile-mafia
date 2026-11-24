@@ -468,8 +468,17 @@ test.describe("comparing with gear that is not crafted", () => {
     await expect(cape.getByText("Horde only", { exact: true })).toHaveCSS("color", "rgb(255, 32, 32)");
     await row(page, "Chausses of Westfall").click();
     await expect(detail(page).getByRole("region", { name: "Where it comes from" })).toContainText(
-      "Reward of the quest The Defias Brotherhood in The Deadmines (Alliance only)",
+      "Reward of the quest The Defias Brotherhood in The Deadmines, from level 14 (Alliance only)",
     );
+  });
+
+  test("keeps a quest reward out of reach until its quest can be taken", async ({ page }) => {
+    // The leggings ask for no level themselves; their quest opens at 14.
+    await page.goto("/?class=paladin&spec=retribution&lvl=13&all=1");
+    await expect(page.getByText(/Best for a level 13 Retribution Paladin/)).toBeVisible();
+    await expect(row(page, "Chausses of Westfall")).toHaveCount(0);
+    await page.getByLabel("Character level").fill("14");
+    await expect(row(page, "Chausses of Westfall")).toHaveCount(1);
   });
 
   test("only offers what the character can equip, like everything else", async ({ page }) => {

@@ -17,6 +17,13 @@ export interface GearSource {
   from: string | null;
   /** Set when only one faction can do the quest. */
   faction?: Faction;
+  /**
+   * The character level from which the source is open, when the page says:
+   * the level a quest can be taken at, the lower end of a dungeon's range, or
+   * the level a list is written for. Many rewards carry no level requirement
+   * of their own, so without this a level 60 quest reward would look wearable at 20.
+   */
+  level?: number;
   /** The page that says so. */
   url: string;
 }
@@ -27,6 +34,8 @@ const ORIGIN = "https://wowforever.be";
 export const DUNGEON_INDEX_URL = `${ORIGIN}/guides/dungeons/`;
 export const BIS_INDEX_URL = `${ORIGIN}/bis/forever/preraid/`;
 const BIS_LIST_NAME = "Pre-raid best-in-slot list";
+/** The pre-raid lists are written for characters at the level cap. */
+const BIS_LIST_LEVEL = 60;
 /** Fewer than this and the pages have most likely changed shape; better to keep what is known. */
 const FEWEST_PLAUSIBLE_ITEMS = 100;
 const MOST_SOURCES_PER_ITEM = 8;
@@ -74,6 +83,8 @@ export function parseBisIndex(html: string): string[] {
 
 export interface DungeonLoot {
   name: string;
+  /** The lower end of the dungeon's level range, when the page gives one. */
+  fromLevel: number | null;
   /** `boss` is null for drops from no boss in particular; `anchor` is where on the page they are. */
   drops: { itemId: number; boss: string | null; anchor: string }[];
   questRewards: { itemId: number; quest: string; questId: number }[];
@@ -82,6 +93,9 @@ export interface DungeonLoot {
 /** Reads a dungeon's loot page. Null for a page that lists no loot (a page about two wings, say). */
 export function parseDungeonLoot(html: string): DungeonLoot | null {
   const name = text(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "");
+  // Among the page's facts: <dt>Level</dt><dd>18–23</dd>.
+  const range = html.match(/<dt\b[^>]*>\s*Level\s*<\/dt>\s*<dd\b[^>]*>\s*(\d+)/)?.[1];
+  const fromLevel = range ? Number(range) : null;
   const questsAt = html.search(/<section\b[^>]*\bid="quest-rewards"/);
   const bossPart = questsAt === -1 ? html : html.slice(0, questsAt);
   const questPart = questsAt === -1 ? "" : html.slice(questsAt).split(/<section\b[^>]*wf-page__faq/)[0];
@@ -108,18 +122,32 @@ export function parseDungeonLoot(html: string): DungeonLoot | null {
   }
 
   if (!name || (drops.length === 0 && questRewards.length === 0)) return null;
-  return { name, drops, questRewards };
+  return { name, fromLevel, drops, questRewards };
 }
 
-/** Reads which side can do each quest from the table on a dungeon's quests page. Absent means both. */
-export function parseQuestSides(html: string): Map<number, Faction> {
-  const sides = new Map<number, Faction>();
+export interface DungeonQuest {
+  /** The side that can do it. Absent when both can. */
+  faction?: Faction;
+  /** The level it can be taken at. */
+  fromLevel?: number;
+}
+
+/**
+ * Reads the table on a dungeon's quests page: Quest, Level, From level, Side.
+ * A quest that is not in it is simply not known about.
+ */
+export function parseDungeonQuests(html: string): Map<number, DungeonQuest> {
+  const quests = new Map<number, DungeonQuest>();
   for (const [, questId, rest] of html.matchAll(/<tr\b[^>]*>\s*<td\b[^>]*>\s*<a href="#quest-(\d+)"[\s\S]*?<\/a>\s*<\/td>([\s\S]*?)<\/tr>/g)) {
     const cells = [...rest.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((cell) => text(cell[1]).toLowerCase());
     const side = cells[cells.length - 1];
-    if (side === "alliance" || side === "horde") sides.set(Number(questId), side);
+    const fromLevel = Number(cells[cells.length - 2]);
+    quests.set(Number(questId), {
+      ...(side === "alliance" || side === "horde" ? { faction: side } : {}),
+      ...(cells.length >= 3 && Number.isInteger(fromLevel) && fromLevel > 0 ? { fromLevel } : {}),
+    });
   }
-  return sides;
+  return quests;
 }
 
 /** Reads the items of a best-in-slot list with what the list says of their source. */
@@ -139,7 +167,7 @@ export function parseBisList(html: string): { itemId: number; source: string | n
 export interface DungeonPages {
   slug: string;
   loot: DungeonLoot;
-  sides: Map<number, Faction>;
+  quests: Map<number, DungeonQuest>;
 }
 
 /** Puts what the pages say together, item by item: drops first, then quests, then lists. */
@@ -157,17 +185,26 @@ export function collectGearSources(
 
   for (const { slug, loot } of dungeons) {
     for (const drop of loot.drops) {
-      add(drop.itemId, { kind: "drop", place: loot.name, from: drop.boss, url: `${dungeonLootUrl(slug)}#${drop.anchor}` });
+      add(drop.itemId, {
+        kind: "drop",
+        place: loot.name,
+        from: drop.boss,
+        ...(loot.fromLevel ? { level: loot.fromLevel } : {}),
+        url: `${dungeonLootUrl(slug)}#${drop.anchor}`,
+      });
     }
   }
-  for (const { slug, loot, sides } of dungeons) {
+  for (const { slug, loot, quests } of dungeons) {
     for (const reward of loot.questRewards) {
-      const faction = sides.get(reward.questId);
+      const quest = quests.get(reward.questId);
+      // A quest the table does not list is at least no earlier than its dungeon.
+      const level = quest?.fromLevel ?? loot.fromLevel;
       add(reward.itemId, {
         kind: "quest",
         place: loot.name,
         from: reward.quest,
-        ...(faction ? { faction } : {}),
+        ...(quest?.faction ? { faction: quest.faction } : {}),
+        ...(level ? { level } : {}),
         url: `${dungeonQuestsUrl(slug)}#quest-${reward.questId}`,
       });
     }
@@ -176,7 +213,7 @@ export function collectGearSources(
     for (const row of rows) {
       // A list adds nothing to an item whose drop or quest is already known.
       if (sources[row.itemId]?.some((source) => source.kind !== "list")) continue;
-      add(row.itemId, { kind: "list", place: BIS_LIST_NAME, from: row.source, url: bisListUrl(slug) });
+      add(row.itemId, { kind: "list", place: BIS_LIST_NAME, from: row.source, level: BIS_LIST_LEVEL, url: bisListUrl(slug) });
     }
   }
   return sources;
@@ -233,13 +270,13 @@ export async function fetchGearSources(
       }
       const loot = parseDungeonLoot(lootPage.html);
       if (!loot) return null;
-      let sides = new Map<number, Faction>();
+      let quests = new Map<number, DungeonQuest>();
       if (loot.questRewards.length > 0) {
         const questsPage = await page(dungeonQuestsUrl(slug), fetchFn);
-        if (questsPage.ok) sides = parseQuestSides(questsPage.html);
+        if (questsPage.ok) quests = parseDungeonQuests(questsPage.html);
         else fail(`quests of ${slug}`, questsPage);
       }
-      return { slug, loot, sides };
+      return { slug, loot, quests };
     }),
   );
 

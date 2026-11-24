@@ -25,13 +25,18 @@ export function sourcesFaction(sources: GearSource[]): Faction | null {
 
 /** A sentence about a source in three parts, the middle one being the link to the page that says so. */
 export function describeSource(source: GearSource): { before: string; link: string; after: string } {
+  const fromLevel = source.level ? `, from level ${source.level}` : "";
   switch (source.kind) {
     case "drop":
       return source.from
-        ? { before: "Drops from ", link: source.from, after: ` in ${source.place}` }
-        : { before: "Drops in ", link: source.place, after: "" };
+        ? { before: "Drops from ", link: source.from, after: ` in ${source.place}${fromLevel}` }
+        : { before: "Drops in ", link: source.place, after: fromLevel };
     case "quest":
-      return { before: "Reward of the quest ", link: source.from ?? source.place, after: ` in ${source.place}` };
+      return {
+        before: "Reward of the quest ",
+        link: source.from ?? source.place,
+        after: ` in ${source.place}${fromLevel}`,
+      };
     case "list":
       return {
         before: "Named on the ",

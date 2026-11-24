@@ -7,7 +7,7 @@ import {
   ITEM_CLASS_ARMOR,
   ITEM_CLASS_WEAPON,
 } from "./constants";
-import type { GearSources } from "./gear-sources";
+import type { GearSource, GearSources } from "./gear-sources";
 import { buildItem, indexGameData, type GameDataIndex } from "./items";
 import type { QuestFaction } from "./quest-factions";
 import { buildProfessions, buildRecipes } from "./recipes";
@@ -45,6 +45,12 @@ export interface Dataset {
 export interface UnlockPages {
   wowForever?: string;
   wiki?: string;
+}
+
+function withoutLevel(source: GearSource): GearSource {
+  const copy = { ...source };
+  delete copy.level;
+  return copy;
 }
 
 /** Something a character puts on or holds for its stats: not a shirt, a tabard or a costume. */
@@ -113,7 +119,13 @@ export function buildDataset(
     const itemId = Number(id);
     include(itemId);
     const item = items.get(itemId);
-    if (sourced && item && isWearable(item)) sourced[itemId] = sources;
+    if (!sourced || !item || !isWearable(item)) continue;
+    // An item's own level requirement says when it can be worn better than its dungeon's range or a
+    // list's audience does. A quest keeps its level: its reward cannot be had before the quest can.
+    sourced[itemId] =
+      item.requiredLevel > 0
+        ? sources.map((source) => (source.kind === "quest" ? source : withoutLevel(source)))
+        : sources;
   }
 
   const itemNames = new Map<number, string>();

@@ -11,7 +11,7 @@ import {
   parseBisList,
   parseDungeonIndex,
   parseDungeonLoot,
-  parseQuestSides,
+  parseDungeonQuests,
 } from "@/lib/game-data/gear-sources";
 import { readFixture } from "../../helpers/fixtures";
 
@@ -31,8 +31,10 @@ describe("parseDungeonIndex", () => {
 describe("parseDungeonLoot", () => {
   const loot = parseDungeonLoot(lootPage)!;
 
-  it("reads the dungeon's name", () => {
+  it("reads the dungeon's name, and the level its range starts at", () => {
     expect(loot.name).toBe("The Deadmines");
+    expect(loot.fromLevel).toBe(18);
+    expect(parseDungeonLoot(lootPage.replace(/<dl[\s\S]*?<\/dl>/, ""))?.fromLevel).toBeNull();
   });
 
   it("reads each boss's drops, with the boss's own name and its place on the page", () => {
@@ -70,17 +72,17 @@ describe("parseDungeonLoot", () => {
   });
 });
 
-describe("parseQuestSides", () => {
-  it("reads which side can do each quest", () => {
-    const sides = parseQuestSides(questsPage);
-    expect(sides.get(214)).toBe("alliance");
-    expect(sides.get(95036)).toBe("horde");
-    expect(sides.size).toBe(9);
+describe("parseDungeonQuests", () => {
+  it("reads which side can do each quest, and the level it can be taken at", () => {
+    const quests = parseDungeonQuests(questsPage);
+    expect(quests.get(214)).toEqual({ faction: "alliance", fromLevel: 14 });
+    expect(quests.get(95036)?.faction).toBe("horde");
+    expect(quests.size).toBe(9);
   });
 
-  it("leaves out quests both sides can do", () => {
+  it("names no side for a quest both can do", () => {
     const table = '<table><tr><td><a href="#quest-7">Open to All</a></td><td>20</td><td>15</td><td>Both</td></tr></table>';
-    expect(parseQuestSides(table).has(7)).toBe(false);
+    expect(parseDungeonQuests(table).get(7)).toEqual({ fromLevel: 15 });
   });
 });
 
@@ -100,28 +102,30 @@ describe("the best-in-slot lists", () => {
 });
 
 describe("collectGearSources", () => {
-  const dungeon = { slug: "the-deadmines", loot: parseDungeonLoot(lootPage)!, sides: parseQuestSides(questsPage) };
+  const dungeon = { slug: "the-deadmines", loot: parseDungeonLoot(lootPage)!, quests: parseDungeonQuests(questsPage) };
   const lists = [{ slug: "paladin-protection", rows: [...parseBisList(bisList), { itemId: 872, source: "The Deadmines" }] }];
   const sources = collectGearSources([dungeon], lists);
 
-  it("says where a drop comes from, with a link to the boss on the page", () => {
+  it("says where a drop comes from, with a link to the boss on the page and the level the dungeon starts at", () => {
     expect(sources[872]).toEqual([
       {
         kind: "drop",
         place: "The Deadmines",
         from: "Rhahk'Zor",
+        level: 18,
         url: "https://wowforever.be/guides/dungeons/the-deadmines/#rhahk-zor",
       },
     ]);
   });
 
-  it("says which quest rewards an item, and which side can do it", () => {
+  it("says which quest rewards an item, which side can do it, and from what level", () => {
     expect(sources[2074]).toEqual([
       {
         kind: "quest",
         place: "The Deadmines",
         from: "Red Silk Bandanas",
         faction: "alliance",
+        level: 14,
         url: "https://wowforever.be/guides/dungeons/the-deadmines/quests/#quest-214",
       },
     ]);
@@ -134,10 +138,17 @@ describe("collectGearSources", () => {
         kind: "list",
         place: "Pre-raid best-in-slot list",
         from: "World drop",
+        level: 60,
         url: "https://wowforever.be/bis/forever/preraid/paladin-protection/",
       },
     ]);
     expect(sources[279247][0].from).toBeNull();
+  });
+
+  it("takes a quest the table does not list to open no earlier than its dungeon", () => {
+    const unlisted = collectGearSources([{ ...dungeon, quests: new Map() }], []);
+    expect(unlisted[2074][0]).toMatchObject({ kind: "quest", level: 18 });
+    expect(unlisted[2074][0].faction).toBeUndefined();
   });
 
   it("names a source once, however many times the pages repeat it", () => {
