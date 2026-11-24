@@ -194,6 +194,10 @@ export async function runSync({ store, trigger, load, batchSize = 400 }: SyncOpt
       value: dataset.classes,
       content_hash: createHash("sha1").update(JSON.stringify(dataset.classes)).digest("hex"),
     };
+    const gearSources = dataset.gearSources && {
+      value: dataset.gearSources,
+      content_hash: createHash("sha1").update(JSON.stringify(dataset.gearSources)).digest("hex"),
+    };
     const knownProfessions = new Set(state.professions);
     const professionsChanged =
       recipes.length > 0 || dataset.professions.some((p) => !knownProfessions.has(p.id));
@@ -203,6 +207,10 @@ export async function runSync({ store, trigger, load, batchSize = 400 }: SyncOpt
       ...(dataset.classes.length > 0 && state.meta?.classes !== classes.content_hash ? [{ meta: { classes } }] : []),
       ...(professionsChanged ? [{ professions: dataset.professions.map(professionRow) }] : []),
       ...chunk(items, batchSize, "items"),
+      // After the items it refers to. Left alone when its pages could not be read this time.
+      ...(gearSources && state.meta?.gear_sources !== gearSources.content_hash
+        ? [{ meta: { gear_sources: gearSources } }]
+        : []),
       ...chunk(recipes, batchSize, "recipes"),
     ];
     for (const batch of batches) {

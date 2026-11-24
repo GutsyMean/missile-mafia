@@ -10,6 +10,9 @@ import {
 import type { GameProfession } from "./types";
 import { parseWowForeverRecipes } from "./unlock-levels";
 import { USER_AGENT, type FetchLike } from "./wago";
+import { WOWFOREVER_RECIPE_PAGES, wowForeverUrl } from "./wowforever";
+
+export { WOWFOREVER_RECIPE_PAGES, wowForeverUrl };
 
 /** Warcraft Wiki recipe list pages for WoW Forever, by profession slug. */
 export const WIKI_RECIPE_PAGES: Record<string, string> = {
@@ -22,23 +25,6 @@ export const WIKI_RECIPE_PAGES: Record<string, string> = {
   leatherworking: "Forever_leatherworking_patterns",
   tailoring: "Forever_tailoring_patterns",
 };
-
-/** Professions wowforever.be publishes a recipe table for. */
-export const WOWFOREVER_RECIPE_PAGES = new Set([
-  "alchemy",
-  "blacksmithing",
-  "cooking",
-  "enchanting",
-  "engineering",
-  "first-aid",
-  "leatherworking",
-  "mining",
-  "tailoring",
-]);
-
-export function wowForeverUrl(slug: string): string {
-  return `https://wowforever.be/tradeskills/forever/${slug}/recipes/`;
-}
 
 export function wikiUrl(pageTitle: string): string {
   return `https://warcraft.wiki.gg/api.php?action=parse&page=${pageTitle}&prop=wikitext&format=json&formatversion=2`;

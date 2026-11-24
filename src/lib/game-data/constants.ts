@@ -128,3 +128,9 @@ export const SPELL_EFFECT_ENCHANT_HELD_ITEM = 92;
 
 /** Skill line categories that hold professions (11 primary, 9 secondary). */
 export const PROFESSION_CATEGORIES = new Set([9, 11]);
+
+/** Armour worn for looks alone. */
+export const ARMOR_SUBCLASS_COSMETIC = 5;
+/** Inventory types that are worn but never for their stats. */
+export const INVENTORY_SHIRT = 4;
+export const INVENTORY_TABARD = 19;

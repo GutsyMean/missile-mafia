@@ -6,10 +6,12 @@ import {
   buildEntries,
   filterOptions,
   groupEntries,
+  isCrafted,
   mergeGearElsewhere,
   mergeUnlearned,
   resolveFilters,
   unlearnedToLoad,
+  withSourcedGear,
   type EntryGroup,
 } from "@/lib/craftables/filter";
 import {
@@ -18,6 +20,7 @@ import {
   type Entry,
   type Filters,
   type GearElsewhereDoc,
+  type GearSourcesDoc,
   type UnlearnedDoc,
 } from "@/lib/craftables/types";
 import {
@@ -35,6 +38,7 @@ import {
 } from "@/lib/gear/custom-orders";
 import { specPriority } from "@/lib/gear/priorities";
 import { rankGear, type Ranked } from "@/lib/gear/rank";
+import { ordinal } from "@/lib/gear/sources";
 import { Frame } from "@/components/wow/Frame";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
 import wow from "@/components/wow/wow.module.css";
@@ -51,6 +55,7 @@ const MAX_SKILL = 300;
 const PIECES_PER_SLOT = 3;
 const PIECES_FOR_ONE_SLOT = 25;
 const NO_GEAR_ELSEWHERE: GearElsewhereDoc = { professions: [], recipes: [], items: {} };
+const NO_SOURCED_GEAR: GearSourcesDoc = { items: {}, sources: {} };
 
 interface Hover {
   entry: Entry;
@@ -128,6 +133,23 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
     [doc, gameClass, elsewhere],
   );
 
+  // And, when asked for, gear that is not crafted at all: dungeon drops and quest rewards, to compare with.
+  const everySource = gameClass !== null && gear.everySource;
+  const [sourced, setSourced] = useState<GearSourcesDoc | null>(null);
+  const sourcedAsked = useRef(false);
+  useEffect(() => {
+    if (!everySource || sourcedAsked.current) return;
+    sourcedAsked.current = true;
+    fetch("/api/gear/sources")
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
+      .then((loaded: GearSourcesDoc) => setSourced(loaded))
+      .catch(() => {
+        // What is crafted is still ranked; asking again tries once more.
+        sourcedAsked.current = false;
+        setSourced(NO_SOURCED_GEAR);
+      });
+  }, [everySource]);
+
   // A link may name a crafter who has left or a profession the guild lacks; those fall back to everyone.
   const filters = useMemo(() => resolveFilters(withElsewhere, view.filters), [withElsewhere, view.filters]);
 
@@ -148,20 +170,23 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   }, [wanted]);
   const stillLoading = wanted.filter((id) => !(id in unlearned)).length;
   const loadingElsewhere = gameClass !== null && elsewhere === null;
-  const loadingMore = stillLoading > 0 || loadingElsewhere;
+  const loadingSourced = everySource && sourced === null;
+  const loadingMore = stillLoading > 0 || loadingElsewhere || loadingSourced;
 
   const crafter = useMemo(() => doc.crafters.find((c) => c.slug === filters.crafter) ?? null, [doc, filters.crafter]);
   const entries = useMemo(
     () => buildEntries(mergeUnlearned(withElsewhere, wanted.flatMap((id) => unlearned[id] ?? [])), crafter?.id ?? null),
     [withElsewhere, wanted, unlearned, crafter],
   );
-  const options = useMemo(() => filterOptions(entries), [entries]);
+  // Everything in the running: the recipes, and beside them gear that is not crafted when that is asked for.
+  const candidates = useMemo(() => (everySource ? withSourcedGear(entries, sourced) : entries), [everySource, entries, sourced]);
+  const options = useMemo(() => filterOptions(candidates), [candidates]);
   const [hover, setHover] = useState<Hover | null>(null);
   const sheet = useRef<HTMLDialogElement>(null);
   const tooltip = useRef<HTMLDivElement>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const matching = useMemo(() => applyFilters(entries, filters), [entries, filters]);
+  const matching = useMemo(() => applyFilters(candidates, filters), [candidates, filters]);
 
   // The order of stats gear is ranked by: the visitor's own for this talent tree, or the default.
   const customOrders = useSyncExternalStore(subscribeToCustomOrders, readCustomOrders, readCustomOrdersOnServer);
@@ -178,8 +203,10 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   // What a piece scores, by recipe, for the detail pane. A piece listed for two slots shows the first.
   const ranks = useMemo(() => {
     const byRecipe = new Map<number, Ranked>();
-    for (const ranked of sections?.flatMap((section) => section.ranked) ?? []) {
-      if (!byRecipe.has(ranked.entry.recipe.id)) byRecipe.set(ranked.entry.recipe.id, ranked);
+    for (const section of sections ?? []) {
+      for (const ranked of section.bestCrafted ? [...section.ranked, section.bestCrafted] : section.ranked) {
+        if (!byRecipe.has(ranked.entry.recipe.id)) byRecipe.set(ranked.entry.recipe.id, ranked);
+      }
     }
     return byRecipe;
   }, [sections]);
@@ -189,18 +216,25 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   const groups = useMemo<EntryGroup[]>(
     () =>
       sections
-        ? sections.map((section) => ({
-            category: section.slot,
-            entries: section.ranked.map((ranked) => ranked.entry),
-            ranked: true,
-          }))
+        ? sections.map((section) => {
+            const rows = section.bestCrafted ? [...section.ranked, section.bestCrafted] : section.ranked;
+            const notes: Record<number, string> = { [rows[0].entry.recipe.id]: "Best" };
+            // When the best piece is a drop or a quest reward, the best the guild could make is pointed out too.
+            const crafted = isCrafted(rows[0].entry) ? undefined : rows.find((ranked) => isCrafted(ranked.entry));
+            if (crafted) {
+              notes[crafted.entry.recipe.id] =
+                crafted === section.bestCrafted ? `Best craftable · ${ordinal(crafted.place)}` : "Best craftable";
+            }
+            return { category: section.slot, entries: rows.map((ranked) => ranked.entry), ranked: true, notes };
+          })
         : groupEntries(matching, filters.sort),
     [sections, matching, filters.sort],
   );
   const notYet = useMemo(() => visible.filter((entry) => !entry.available).length, [visible]);
+  const notCrafted = useMemo(() => visible.filter((entry) => !isCrafted(entry)).length, [visible]);
   const selected = useMemo(
-    () => entries.find((entry) => entry.recipe.id === recipeId) ?? null,
-    [entries, recipeId],
+    () => candidates.find((entry) => entry.recipe.id === recipeId) ?? null,
+    [candidates, recipeId],
   );
   // On a wide screen the pane always shows something, as the in-game window does.
   const shown = selected ?? visible[0] ?? null;
@@ -362,7 +396,9 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
             order={order}
             custom={tree in customOrders}
             guide={priority?.guide ?? null}
-            soulboundListed={sections !== null && visible.some((entry) => entry.item && !entry.item.tradeable)}
+            soulboundListed={
+              sections !== null && visible.some((entry) => isCrafted(entry) && entry.item && !entry.item.tradeable)
+            }
             onChange={setGear}
             onOrderChange={(next) => saveCustomOrder(tree, next)}
           />
@@ -446,6 +482,7 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
               : visible.length === entries.length
                 ? `${entries.length} recipes`
                 : `${visible.length} of ${entries.length} recipes`}
+            {notCrafted > 0 ? ` · ${notCrafted} not crafted` : ""}
             {notYet > 0 ? ` · ${notYet} not available yet` : ""}
             {stillLoading > 0 ? (
               <span className={styles.loading} role="status">
@@ -457,6 +494,11 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
               <span className={styles.loading} role="status">
                 <span className={styles.spinner} aria-hidden="true" />
                 Loading gear from other professions…
+              </span>
+            ) : loadingSourced ? (
+              <span className={styles.loading} role="status">
+                <span className={styles.spinner} aria-hidden="true" />
+                Loading drops and quest rewards…
               </span>
             ) : null}
           </span>

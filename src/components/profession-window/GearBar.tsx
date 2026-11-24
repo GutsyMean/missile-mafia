@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ClassView } from "@/lib/craftables/types";
-import type { GearChoice } from "@/lib/craftables/url-state";
+import { NO_GEAR, type GearChoice } from "@/lib/craftables/url-state";
 import { ALL_GEAR_STATS, GEAR_STATS, type GearStat } from "@/lib/gear/stats";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./window.module.css";
@@ -69,7 +69,7 @@ export function GearBar({
           value={gameClass?.slug ?? ""}
           onChange={(event) => {
             setEditing(false);
-            onChange({ classSlug: event.target.value, specSlug: "", level: gear.level });
+            onChange({ ...gear, classSlug: event.target.value, specSlug: "" });
           }}
         >
           <option value="">Choose a class</option>
@@ -105,12 +105,20 @@ export function GearBar({
                 onChange={(event) => onChange({ ...gear, level: levelValue(event.target.value) })}
               />
             </label>
+            <label className={wow.checkbox}>
+              <input
+                type="checkbox"
+                checked={gear.everySource}
+                onChange={(event) => onChange({ ...gear, everySource: event.target.checked })}
+              />
+              Include drops and quest rewards
+            </label>
             <button
               type="button"
               className={styles.linkButton}
               onClick={() => {
                 setEditing(false);
-                onChange({ classSlug: "", specSlug: "", level: null });
+                onChange(NO_GEAR);
               }}
             >
               Show everything
@@ -160,9 +168,20 @@ export function GearBar({
         </div>
       ) : null}
 
+      {gameClass && gear.everySource ? (
+        <p className={styles.gearHow}>
+          Drops and quest rewards are the ones{" "}
+          <a href="https://wowforever.be/guides/dungeons/" target="_blank" rel="noreferrer">
+            wowforever.be
+          </a>{" "}
+          names on its dungeon pages and pre-raid lists. World drops, zone quests and raid loot are not listed there
+          yet.
+        </p>
+      ) : null}
+
       {gameClass && soulboundListed ? (
         <p className={styles.gearHow}>
-          Soulbound pieces can only be worn by whoever crafts them. Tick Tradeable only to leave them out.
+          Soulbound crafted pieces can only be worn by whoever crafts them. Tick Tradeable only to leave them out.
         </p>
       ) : null}
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-import type { EntryGroup } from "@/lib/craftables/filter";
+import { isCrafted, type EntryGroup } from "@/lib/craftables/filter";
 import { factionNote, skillLabel } from "@/lib/craftables/pending";
+import { sourceKind, sourcePlace, sourcesFaction } from "@/lib/gear/sources";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import wow from "@/components/wow/wow.module.css";
@@ -85,12 +86,18 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
             </h2>
           ) : null}
           <ul className={styles.rows}>
-            {entries.map((entry, place) => {
+            {entries.map((entry) => {
               const quality = entry.item?.quality ?? 1;
-              const soulbound = entry.item ? !entry.item.tradeable : false;
-              const skill = skillLabel(entry);
+              const crafted = isCrafted(entry);
+              // A drop binds to whoever picks it up, which is its wearer; only a crafted piece is lost to them.
+              const soulbound = crafted && entry.item ? !entry.item.tradeable : false;
+              const skill = crafted ? skillLabel(entry) : null;
               // Worth a mark in the list only when it shuts a faction out of a recipe nobody has yet.
               const faction = entry.available ? null : factionNote(entry.recipe);
+              // For gear that is not crafted: the first place to look, and the side it is limited to, if any.
+              const source = crafted ? null : (entry.sources?.[0] ?? null);
+              const side = crafted ? null : sourcesFaction(entry.sources ?? []);
+              const note = group.notes?.[entry.recipe.id];
               return (
                 <li key={entry.recipe.id}>
                   <button
@@ -100,6 +107,7 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
                     data-shown={entry.recipe.id === shownId}
                     data-recipe={entry.recipe.id}
                     data-available={entry.available}
+                    data-crafted={crafted}
                     onClick={() => onSelect(entry)}
                     onPointerEnter={(event) => {
                       if (event.pointerType === "mouse") onHover(entry, event.currentTarget);
@@ -116,11 +124,21 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
                         {entry.item?.name ?? entry.recipe.name}
                       </span>
                       <span className={styles.rowSub}>
-                        {entry.available ? describeEntry(entry) : `Not available yet · ${describeEntry(entry)}`}
+                        {source
+                          ? `${sourcePlace(source)} · ${describeEntry(entry)}`
+                          : entry.available
+                            ? describeEntry(entry)
+                            : `Not available yet · ${describeEntry(entry)}`}
                       </span>
                     </span>
                     <span className={styles.rowTags}>
-                      {group.ranked && place === 0 ? <span className={styles.best}>Best</span> : null}
+                      {note ? <span className={styles.best}>{note}</span> : null}
+                      {source ? <span className={styles.sourceTag}>{sourceKind(source)}</span> : null}
+                      {side ? (
+                        <span className={wow.faction} data-faction={side}>
+                          {side === "horde" ? "Horde only" : "Alliance only"}
+                        </span>
+                      ) : null}
                       {skill ? (
                         <span className={styles.rowSkill}>
                           <span className={styles.wideOnly}>{skill}</span>

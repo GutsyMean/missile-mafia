@@ -1,4 +1,12 @@
-import type { CraftablesDoc, Entry, Filters, GearElsewhereDoc, SortMode, UnlearnedDoc } from "./types";
+import type {
+  CraftablesDoc,
+  Entry,
+  Filters,
+  GearElsewhereDoc,
+  GearSourcesDoc,
+  SortMode,
+  UnlearnedDoc,
+} from "./types";
 
 /** Adds lazily loaded "not yet learned" recipes to the main document. */
 export function mergeUnlearned(doc: CraftablesDoc, extras: UnlearnedDoc[]): CraftablesDoc {
@@ -92,6 +100,58 @@ export function buildEntries(doc: CraftablesDoc, crafterId: string | null = null
   return entries;
 }
 
+/** False for gear that is not crafted: a drop or a quest reward standing in the list beside the recipes. */
+export function isCrafted(entry: Entry): boolean {
+  return entry.recipe.id > 0;
+}
+
+/**
+ * Adds gear that is not crafted to the entries, for comparing the two. A piece
+ * that is crafted as well keeps its recipe and gains its other sources.
+ */
+export function withSourcedGear(entries: Entry[], gear: GearSourcesDoc | null): Entry[] {
+  if (!gear) return entries;
+  const crafted = new Set<number>();
+  const all = entries.map((entry) => {
+    if (!entry.item) return entry;
+    crafted.add(entry.item.id);
+    const sources = gear.sources[String(entry.item.id)];
+    return sources ? { ...entry, sources } : entry;
+  });
+  for (const [id, sources] of Object.entries(gear.sources)) {
+    const item = gear.items[id];
+    if (!item || crafted.has(item.id)) continue;
+    all.push({
+      recipe: {
+        id: -item.id,
+        professionId: 0,
+        name: item.name,
+        iconFileId: item.iconFileId,
+        craftedItemId: item.id,
+        craftedCount: 1,
+        effectText: null,
+        category: "Not crafted",
+        categoryOrder: 0,
+        reagents: [],
+        crafterIds: [],
+      },
+      item,
+      reagents: [],
+      searchText: [item.name, ...sources.flatMap((source) => [source.place, source.from])]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase(),
+      crafters: [],
+      pending: [],
+      available: true,
+      professionName: null,
+      professionSlug: null,
+      sources,
+    });
+  }
+  return all;
+}
+
 function matches(entry: Entry, filters: Filters, words: string[]): boolean {
   const { item } = entry;
   if (words.length > 0) {
@@ -103,7 +163,8 @@ function matches(entry: Entry, filters: Filters, words: string[]): boolean {
   if (filters.minLevel !== null && (item?.requiredLevel ?? 0) < filters.minLevel) return false;
   if (filters.maxLevel !== null && (item?.requiredLevel ?? 0) > filters.maxLevel) return false;
   // A recipe that makes no item (an enchant) is applied for the customer, so it counts as tradeable.
-  if (filters.tradeableOnly && item && !item.tradeable) return false;
+  // A drop that binds when picked up is picked up by its wearer, so the question does not arise.
+  if (filters.tradeableOnly && item && !item.tradeable && isCrafted(entry)) return false;
   if (filters.availableOnly && !entry.available) return false;
   return true;
 }
@@ -143,7 +204,9 @@ export function applyFilters(entries: Entry[], filters: Filters): Entry[] {
   return entries
     .filter(
       (entry) =>
-        (filters.profession === "" || entry.professionSlug === filters.profession) && matches(entry, filters, words),
+        // The profession narrows what is crafted; gear that is not stays to be compared with.
+        (filters.profession === "" || entry.professionSlug === filters.profession || !isCrafted(entry)) &&
+        matches(entry, filters, words),
     )
     .sort(COMPARATORS[filters.sort]);
 }
@@ -154,6 +217,8 @@ export interface EntryGroup {
   entries: Entry[];
   /** True when the entries are in order of merit, best first, rather than sorted. */
   ranked?: boolean;
+  /** A word for some rows, by recipe id: "Best", "Best craftable". */
+  notes?: Record<number, string>;
 }
 
 export function groupEntries(sorted: Entry[], sort: SortMode): EntryGroup[] {

@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { createPublicClient } from "@/lib/supabase/public";
-import type { CraftablesDoc, GearElsewhereDoc, UnlearnedDoc } from "./types";
+import type { CraftablesDoc, GearElsewhereDoc, GearSourcesDoc, UnlearnedDoc } from "./types";
 
 export const CRAFTABLES_TAG = "craftables";
 
@@ -80,4 +80,28 @@ export async function loadGearElsewhere(): Promise<GearElsewhereDoc> {
   const { data, error } = await supabase.rpc("guild_gear_elsewhere");
   if (error) throw new Error(`Could not load the gear of other professions: ${error.message}`);
   return (data as GearElsewhereDoc | null) ?? NO_GEAR_ELSEWHERE;
+}
+
+const NO_SOURCED_GEAR: GearSourcesDoc = { items: {}, sources: {} };
+
+/**
+ * Gear that is not crafted: dungeon drops, quest rewards and pieces named on a
+ * best-in-slot list, each with where it comes from. Only the gear finder asks
+ * for it, and only when a visitor wants gear from every source compared.
+ */
+export async function loadGearFromSources(): Promise<GearSourcesDoc> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CRAFTABLES_TAG);
+
+  if (process.env.CRAFTABLES_FIXTURE === "1") {
+    const fixture = await import("../../../e2e/fixtures/gear-sources.json");
+    return fixture.default as unknown as GearSourcesDoc;
+  }
+
+  const supabase = createPublicClient();
+  if (!supabase) return NO_SOURCED_GEAR;
+  const { data, error } = await supabase.rpc("gear_from_sources");
+  if (error) throw new Error(`Could not load gear from drops and quests: ${error.message}`);
+  return (data as GearSourcesDoc | null) ?? NO_SOURCED_GEAR;
 }

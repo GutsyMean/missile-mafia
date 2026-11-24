@@ -775,3 +775,53 @@ select test.is(
   (select array_agg((r ->> 'id')::int order by (r ->> 'id')::int) from jsonb_array_elements(public.guild_unlearned(202) -> 'recipes') r),
   array[702, 703], 'its recipes are now theirs to learn');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- Gear that is not crafted, for comparing with what the guild can make
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.is(
+  public.gear_from_sources(), '{"items": {}, "sources": {}}'::jsonb,
+  'before the sync has read any sources, there is no such gear');
+reset role;
+
+-- The sync brings a dungeon drop, and says where it comes from. One source is
+-- for an item the game tables no longer have.
+set role service_role;
+select public.sync_start('cli') as runs \gset
+select public.sync_apply(:runs, $json${
+  "items": [
+    {"id": 8001, "name": "Rockslicer", "quality": 3, "icon_file_id": 1, "class_id": 2, "subclass_id": 1,
+     "inventory_type": 17, "item_level": 23, "required_level": 18, "bonding": 1, "sell_price": 1, "slot_name": "Two-Hand",
+     "type_name": "Axe", "armor": null, "damage": {"min": 52, "max": 78, "speed": 3.3, "dps": 19.7}, "stats": [],
+     "class_mask": null, "tooltip": [{"text": "Rockslicer", "color": "quality"}], "tooltip_complete": true, "content_hash": "s8001"}
+  ],
+  "meta": {"gear_sources": {"content_hash": "s1", "value": {
+    "8001": [{"kind": "drop", "place": "The Deadmines", "from": "Rhahk'Zor", "url": "https://wowforever.be/guides/dungeons/the-deadmines/#rhahk-zor"}],
+    "7001": [{"kind": "quest", "place": "Scholomance", "from": "The Last Lesson", "faction": "alliance", "url": "https://wowforever.be/guides/dungeons/scholomance/quests/#quest-1"}],
+    "999999": [{"kind": "list", "place": "Pre-raid best-in-slot list", "from": null, "url": "https://wowforever.be/bis/forever/preraid/paladin-protection/"}]
+  }}}
+}$json$::jsonb);
+select test.is(public.sync_state() -> 'meta' ->> 'gear_sources', 's1', 'sync_state tells the sync which gear sources it holds');
+reset role;
+
+set role anon;
+select test.is(
+  public.gear_from_sources() -> 'sources' -> '8001' -> 0 ->> 'from', 'Rhahk''Zor',
+  'gear that is not crafted comes with where it drops');
+select test.is(public.gear_from_sources() -> 'items' -> '8001' ->> 'name', 'Rockslicer', 'and with the item itself');
+select test.is(
+  public.gear_from_sources() -> 'sources' -> '7001' -> 0 ->> 'faction', 'alliance',
+  'a quest reward says which side can do the quest');
+select test.is(
+  public.gear_from_sources() -> 'items' -> '7001' ->> 'classMask', '2',
+  'and an item limited to a class still says so');
+select test.is(
+  (public.gear_from_sources() -> 'sources') ? '999999' or (public.gear_from_sources() -> 'items') ? '999999', false,
+  'a source for an item the game no longer has is left out');
+select test.is(
+  (public.guild_craftables() -> 'items') ? '8001' or (public.guild_unlearned(164) -> 'items') ? '8001', false,
+  'none of it reaches the ordinary list');
+select test.throws(
+  $$update public.game_meta set value = '{}'::jsonb where key = 'gear_sources'$$, '42501', 'a visitor cannot rewrite the sources');
+reset role;

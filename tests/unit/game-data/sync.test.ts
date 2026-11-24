@@ -178,6 +178,32 @@ describe("runSync — later runs", () => {
     expect(store.applied.some((batch) => batch.meta?.classes)).toBe(true);
   });
 
+  it("stores where gear that is not crafted comes from, after the items it is about", async () => {
+    const source = { kind: "drop" as const, place: "The Deadmines", from: "Edwin VanCleef", url: "https://wowforever.be/x" };
+    const withGear = () => ({ ...freshDataset(), gearSources: { 3483: [source] } });
+    const store = new MemoryStore();
+    await runSync({ store, trigger: "manual", load: load(withGear()) });
+    const order = store.applied.map((batch) => Object.keys(batch)[0] + (batch.meta ? `:${Object.keys(batch.meta)[0]}` : ""));
+    expect(order.indexOf("meta:gear_sources")).toBeGreaterThan(order.lastIndexOf("items"));
+    expect(store.meta.get("gear_sources")?.value).toEqual({ 3483: [source] });
+
+    // Nothing new: nothing sent.
+    store.applied = [];
+    await runSync({ store, trigger: "manual", load: load(withGear()) });
+    expect(store.applied).toEqual([]);
+  });
+
+  it("keeps the gear sources it has when their pages could not be read", async () => {
+    const source = { kind: "drop" as const, place: "The Deadmines", from: "Edwin VanCleef", url: "https://wowforever.be/x" };
+    const store = new MemoryStore();
+    await runSync({ store, trigger: "manual", load: load({ ...freshDataset(), gearSources: { 3483: [source] } }) });
+    store.applied = [];
+
+    await runSync({ store, trigger: "manual", load: load({ ...freshDataset(), gearSources: null }) });
+    expect(store.applied).toEqual([]);
+    expect(store.meta.get("gear_sources")?.value).toEqual({ 3483: [source] });
+  });
+
   it("writes only the rows that changed", async () => {
     const store = new MemoryStore();
     await runSync({ store, trigger: "manual", load: load(freshDataset()) });

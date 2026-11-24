@@ -1,0 +1,696 @@
+{
+ "items": {
+  "1488": {
+   "id": 1488,
+   "name": "Avenger's Armor",
+   "quality": 3,
+   "iconFileId": 132624,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 5,
+   "itemLevel": 31,
+   "requiredLevel": 26,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 3557,
+   "slotName": "Chest",
+   "typeName": "Mail",
+   "armor": 221,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 15
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Avenger's Armor",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "221 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+15 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 26",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "2243": {
+   "id": 2243,
+   "name": "Hand of Edward the Odd",
+   "quality": 4,
+   "iconFileId": 133489,
+   "classId": 2,
+   "subclassId": 4,
+   "inventoryType": 13,
+   "itemLevel": 62,
+   "requiredLevel": 57,
+   "bonding": 2,
+   "tradeable": true,
+   "sellPrice": 70554,
+   "slotName": "One-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 50,
+    "max": 94,
+    "speed": 1.6,
+    "dps": 45
+   },
+   "stats": [
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 10
+    },
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 13
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Hand of Edward the Odd",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when equipped",
+     "color": "white"
+    },
+    {
+     "text": "Unique",
+     "color": "white"
+    },
+    {
+     "text": "One-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "50 - 94 Damage",
+     "right": "Speed 1.60",
+     "color": "white"
+    },
+    {
+     "text": "(45.0 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+13 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "+10 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 57",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  },
+  "4643": {
+   "id": 4643,
+   "name": "Grimsteel Cape",
+   "quality": 2,
+   "iconFileId": 133754,
+   "classId": 4,
+   "subclassId": 1,
+   "inventoryType": 16,
+   "itemLevel": 35,
+   "requiredLevel": 0,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 2604,
+   "slotName": "Back",
+   "typeName": "Cloth",
+   "armor": 23,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 7
+    },
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 2
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Grimsteel Cape",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Back",
+     "right": "Cloth",
+     "color": "white"
+    },
+    {
+     "text": "23 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+2 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+7 Stamina",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "5193": {
+   "id": 5193,
+   "name": "Cape of the Brotherhood",
+   "quality": 3,
+   "iconFileId": 133760,
+   "classId": 4,
+   "subclassId": 1,
+   "inventoryType": 16,
+   "itemLevel": 24,
+   "requiredLevel": 19,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 865,
+   "slotName": "Back",
+   "typeName": "Cloth",
+   "armor": 21,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 5
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 3
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Cape of the Brotherhood",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Back",
+     "right": "Cloth",
+     "color": "white"
+    },
+    {
+     "text": "21 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+5 Agility",
+     "color": "white"
+    },
+    {
+     "text": "+3 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 19",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "6087": {
+   "id": 6087,
+   "name": "Chausses of Westfall",
+   "quality": 3,
+   "iconFileId": 134583,
+   "classId": 4,
+   "subclassId": 3,
+   "inventoryType": 7,
+   "itemLevel": 24,
+   "requiredLevel": 0,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 1730,
+   "slotName": "Legs",
+   "typeName": "Mail",
+   "armor": 173,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 11
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Chausses of Westfall",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Legs",
+     "right": "Mail",
+     "color": "white"
+    },
+    {
+     "text": "173 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+11 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "7689": {
+   "id": 7689,
+   "name": "Morbid Dawn",
+   "quality": 3,
+   "iconFileId": 135302,
+   "classId": 2,
+   "subclassId": 8,
+   "inventoryType": 17,
+   "itemLevel": 35,
+   "requiredLevel": 30,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 10852,
+   "slotName": "Two-Hand",
+   "typeName": "Sword",
+   "armor": null,
+   "damage": {
+    "min": 70,
+    "max": 105,
+    "speed": 2.9,
+    "dps": 30.2
+   },
+   "stats": [
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 15
+    },
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 10
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Morbid Dawn",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Sword",
+     "color": "white"
+    },
+    {
+     "text": "70 - 105 Damage",
+     "right": "Speed 2.90",
+     "color": "white"
+    },
+    {
+     "text": "(30.2 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+10 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+15 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 30",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "9449": {
+   "id": 9449,
+   "name": "Manual Crowd Pummeler",
+   "quality": 3,
+   "iconFileId": 133489,
+   "classId": 2,
+   "subclassId": 5,
+   "inventoryType": 17,
+   "itemLevel": 34,
+   "requiredLevel": 29,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 9865,
+   "slotName": "Two-Hand",
+   "typeName": "Mace",
+   "armor": null,
+   "damage": {
+    "min": 46,
+    "max": 70,
+    "speed": 2,
+    "dps": 29
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 16
+    },
+    {
+     "stat": 3,
+     "name": "Agility",
+     "value": 5
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Manual Crowd Pummeler",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Unique",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Mace",
+     "color": "white"
+    },
+    {
+     "text": "46 - 70 Damage",
+     "right": "Speed 2.00",
+     "color": "white"
+    },
+    {
+     "text": "(29.0 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+16 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Agility",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 29",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": false
+  },
+  "9459": {
+   "id": 9459,
+   "name": "Thermaplugg's Left Arm",
+   "quality": 3,
+   "iconFileId": 132394,
+   "classId": 2,
+   "subclassId": 1,
+   "inventoryType": 17,
+   "itemLevel": 36,
+   "requiredLevel": 31,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 11937,
+   "slotName": "Two-Hand",
+   "typeName": "Axe",
+   "armor": null,
+   "damage": {
+    "min": 67,
+    "max": 102,
+    "speed": 2.7,
+    "dps": 31.3
+   },
+   "stats": [
+    {
+     "stat": 4,
+     "name": "Strength",
+     "value": 17
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 5
+    },
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Thermaplugg's Left Arm",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Two-Hand",
+     "right": "Axe",
+     "color": "white"
+    },
+    {
+     "text": "67 - 102 Damage",
+     "right": "Speed 2.70",
+     "color": "white"
+    },
+    {
+     "text": "(31.3 damage per second)",
+     "color": "white"
+    },
+    {
+     "text": "+17 Strength",
+     "color": "white"
+    },
+    {
+     "text": "+5 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+4 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 31",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  },
+  "14150": {
+   "id": 14150,
+   "name": "Robe of Evocation",
+   "quality": 3,
+   "iconFileId": 132665,
+   "classId": 4,
+   "subclassId": 1,
+   "inventoryType": 20,
+   "itemLevel": 18,
+   "requiredLevel": 13,
+   "bonding": 1,
+   "tradeable": false,
+   "sellPrice": 430,
+   "slotName": "Chest",
+   "typeName": "Cloth",
+   "armor": 35,
+   "damage": null,
+   "stats": [
+    {
+     "stat": 5,
+     "name": "Intellect",
+     "value": 4
+    },
+    {
+     "stat": 7,
+     "name": "Stamina",
+     "value": 6
+    },
+    {
+     "stat": 6,
+     "name": "Spirit",
+     "value": 4
+    }
+   ],
+   "tooltip": [
+    {
+     "text": "Robe of Evocation",
+     "color": "quality"
+    },
+    {
+     "text": "Binds when picked up",
+     "color": "white"
+    },
+    {
+     "text": "Chest",
+     "right": "Cloth",
+     "color": "white"
+    },
+    {
+     "text": "35 Armor",
+     "color": "white"
+    },
+    {
+     "text": "+6 Stamina",
+     "color": "white"
+    },
+    {
+     "text": "+4 Intellect",
+     "color": "white"
+    },
+    {
+     "text": "+4 Spirit",
+     "color": "white"
+    },
+    {
+     "text": "Requires Level 13",
+     "color": "white"
+    }
+   ],
+   "tooltipComplete": true
+  }
+ },
+ "sources": {
+  "1488": [
+   {
+    "kind": "drop",
+    "place": "Razorfen Kraul",
+    "from": null,
+    "url": "https://wowforever.be/guides/dungeons/razorfen-kraul/#other-drops"
+   }
+  ],
+  "2243": [
+   {
+    "kind": "list",
+    "place": "Pre-raid best-in-slot list",
+    "from": "World drop",
+    "url": "https://wowforever.be/bis/forever/preraid/druid-balance/"
+   }
+  ],
+  "4643": [
+   {
+    "kind": "quest",
+    "place": "Scarlet Monastery: Graveyard",
+    "from": "Vorrel's Revenge",
+    "faction": "horde",
+    "url": "https://wowforever.be/guides/dungeons/scarlet-monastery-graveyard/quests/#quest-1051"
+   }
+  ],
+  "5193": [
+   {
+    "kind": "drop",
+    "place": "The Deadmines",
+    "from": "Edwin VanCleef",
+    "url": "https://wowforever.be/guides/dungeons/the-deadmines/#edwin-vancleef"
+   }
+  ],
+  "6087": [
+   {
+    "kind": "quest",
+    "place": "The Deadmines",
+    "from": "The Defias Brotherhood",
+    "faction": "alliance",
+    "url": "https://wowforever.be/guides/dungeons/the-deadmines/quests/#quest-166"
+   }
+  ],
+  "7689": [
+   {
+    "kind": "drop",
+    "place": "Scarlet Monastery: Graveyard",
+    "from": "Fallen Champion",
+    "url": "https://wowforever.be/guides/dungeons/scarlet-monastery-graveyard/#fallen-champion"
+   }
+  ],
+  "9449": [
+   {
+    "kind": "drop",
+    "place": "Gnomeregan",
+    "from": "Crowd Pummeler 9-60",
+    "url": "https://wowforever.be/guides/dungeons/gnomeregan/#crowd-pummeler-9-60"
+   }
+  ],
+  "9459": [
+   {
+    "kind": "drop",
+    "place": "Gnomeregan",
+    "from": "Mekgineer Thermaplugg",
+    "url": "https://wowforever.be/guides/dungeons/gnomeregan/#mekgineer-thermaplugg"
+   }
+  ],
+  "14150": [
+   {
+    "kind": "drop",
+    "place": "Ragefire Chasm",
+    "from": "Jergosh the Invoker",
+    "url": "https://wowforever.be/guides/dungeons/ragefire-chasm/#jergosh-the-invoker"
+   }
+  ]
+ }
+}

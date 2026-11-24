@@ -399,11 +399,129 @@ test.describe("best gear for a character", () => {
 
   test("warns that soulbound pieces are for their crafter only", async ({ page }) => {
     await page.goto("/?class=paladin&spec=retribution&lvl=31");
-    const warning = page.getByText("Soulbound pieces can only be worn by whoever crafts them.");
+    const warning = page.getByText("Soulbound crafted pieces can only be worn by whoever crafts them.");
     await expect(warning).toBeVisible();
     await page.getByLabel("Tradeable only").check();
     await expect(warning).toHaveCount(0);
     await expect(section(page, "Head").nth(0)).toContainText("Green Iron Helm");
+  });
+});
+
+test.describe("comparing with gear that is not crafted", () => {
+  const section = (page: Page, slot: string) => page.getByRole("region", { name: slot, exact: true }).locator("[data-recipe]");
+  const everySource = (page: Page) => page.getByLabel("Include drops and quest rewards");
+
+  test("ranks drops and quest rewards beside what can be crafted, on request", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+
+    await everySource(page).check();
+    const chest = section(page, "Chest");
+    await expect(chest.nth(0)).toContainText("Avenger's Armor");
+    await expect(chest.nth(0)).toContainText("Razorfen Kraul");
+    await expect(chest.nth(0)).toContainText("Drop");
+    await expect(chest.nth(0)).toHaveAttribute("data-crafted", "false");
+    // The best the guild could make is pointed out beside the best there is.
+    await expect(chest.nth(1)).toContainText("Shining Silver Breastplate");
+    await expect(chest.nth(1)).toContainText("Best craftable");
+    await expect(page.getByText(/Best for a level 31 Retribution Paladin: 34 pieces for 11 slots · 7 not crafted/)).toBeVisible();
+    await expect(page).toHaveURL(/all=1/);
+  });
+
+  test("shows the best craftable piece even when gear from elsewhere fills the list", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    const twoHand = section(page, "Two-Hand");
+    await expect(twoHand).toHaveCount(4);
+    await expect(twoHand.nth(0)).toContainText("Thermaplugg's Left Arm");
+    await expect(twoHand.nth(2)).toContainText("Manual Crowd Pummeler");
+    await expect(twoHand.nth(3)).toContainText("Bronze Battle Axe");
+    await expect(twoHand.nth(3)).toContainText("Best craftable · 4th");
+  });
+
+  test("says where a piece comes from, with links to read up on it", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await row(page, "Thermaplugg's Left Arm").click();
+    const pane = detail(page);
+    await expect(pane).toContainText("Not crafted · Drop");
+    await expect(pane.getByRole("region", { name: "Where it comes from" })).toContainText(
+      "Drops from Mekgineer Thermaplugg in Gnomeregan",
+    );
+    await expect(pane.getByRole("link", { name: "Mekgineer Thermaplugg" })).toHaveAttribute(
+      "href",
+      "https://wowforever.be/guides/dungeons/gnomeregan/#mekgineer-thermaplugg",
+    );
+    await expect(pane.getByRole("link", { name: "Wowhead" })).toHaveAttribute(
+      "href",
+      "https://www.wowhead.com/forever/item=9459",
+    );
+    // No recipe, so nothing about reagents, crafters or learning it.
+    await expect(pane.getByRole("region", { name: "Reagents" })).toHaveCount(0);
+    await expect(pane).not.toContainText("Not available yet");
+    await expect(page).toHaveURL(/item=9459/);
+  });
+
+  test("marks a quest reward only one side can earn", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    const cape = row(page, "Grimsteel Cape");
+    await expect(cape).toContainText("Quest reward");
+    await expect(cape.getByText("Horde only", { exact: true })).toHaveCSS("color", "rgb(255, 32, 32)");
+    await row(page, "Chausses of Westfall").click();
+    await expect(detail(page).getByRole("region", { name: "Where it comes from" })).toContainText(
+      "Reward of the quest The Defias Brotherhood in The Deadmines (Alliance only)",
+    );
+  });
+
+  test("only offers what the character can equip, like everything else", async ({ page }) => {
+    await page.goto("/?class=mage&spec=frost&lvl=20&all=1");
+    await expect(section(page, "Chest").nth(0)).toContainText("Robe of Evocation");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+    // A mace is no use to a Mage at any level. A Priest can wield it, but not this one before level 57.
+    await page.getByLabel("Character level").fill("60");
+    await expect(row(page, "Hand of Edward the Odd")).toHaveCount(0);
+    await page.getByRole("combobox", { name: "Class", exact: true }).selectOption({ label: "Priest" });
+    await page.getByLabel("Character level").fill("56");
+    await expect(row(page, "Robe of Evocation")).toHaveCount(1);
+    await expect(row(page, "Hand of Edward the Odd")).toHaveCount(0);
+    await page.getByLabel("Character level").fill("57");
+    // It comes from a best-in-slot list, which says only this of its source.
+    await expect(row(page, "Hand of Edward the Odd")).toContainText("World drop");
+    await expect(row(page, "Hand of Edward the Odd")).toContainText("Listed");
+  });
+
+  test("opens a pasted link on the same piece", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1&item=6087");
+    await expect(everySource(page)).toBeChecked();
+    await expect(detail(page).getByRole("heading", { name: "Chausses of Westfall" })).toBeVisible();
+  });
+
+  test("never puts such gear in the ordinary list", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(1);
+    await everySource(page).uncheck();
+    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.getByRole("button", { name: "Show everything" }).click();
+    await expect(rows(page)).toHaveCount(71);
+    await page.getByRole("searchbox").fill("avenger");
+    await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
+    await expect(page).not.toHaveURL(/all=1/);
+  });
+});
+
+test.describe("reading up on an item", () => {
+  test("links a crafted item to its page and to where its recipe is listed", async ({ page }) => {
+    await page.goto("/");
+    await row(page, "Silvered Bronze Gauntlets").click();
+    const pane = detail(page);
+    await expect(pane.getByRole("link", { name: "Wowhead" })).toHaveAttribute(
+      "href",
+      "https://www.wowhead.com/forever/item=3483",
+    );
+    await expect(pane.getByRole("link", { name: "wowforever.be Blacksmithing recipes" })).toHaveAttribute(
+      "href",
+      "https://wowforever.be/tradeskills/forever/blacksmithing/recipes/",
+    );
   });
 });
 

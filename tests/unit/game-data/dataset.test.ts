@@ -55,3 +55,27 @@ describe("buildDataset", () => {
     expect(dataset.professions.map((p) => p.slug).sort()).toEqual(["blacksmithing", "enchanting"]);
   });
 });
+
+describe("buildDataset — gear that is not crafted", () => {
+  const source = { kind: "drop" as const, place: "The Deadmines", from: "Edwin VanCleef", url: "https://wowforever.be/x" };
+  const tables = loadFixtureTables();
+
+  it("takes in the gear a page names a source for, and builds its item", () => {
+    // 273908 is a pair of leggings no recipe in these tables makes.
+    const withGear = buildDataset(tables, "1.60.1.70938", {}, {}, { 273908: [source] });
+    expect(withGear.gearSources).toEqual({ 273908: [source] });
+    expect(withGear.items.find((item) => item.id === 273908)?.name).toBe("Justice Leggings");
+    expect(dataset.items.some((item) => item.id === 273908)).toBe(false);
+  });
+
+  it("leaves out what is not gear, and what the game tables do not have", () => {
+    // 2841 is a Bronze Bar; 999999 is not an item at all.
+    const withGear = buildDataset(tables, "1.60.1.70938", {}, {}, { 2841: [source], 999999: [source], 273908: [source] });
+    expect(Object.keys(withGear.gearSources ?? {})).toEqual(["273908"]);
+  });
+
+  it("says so when the sources could not be read, rather than saying there are none", () => {
+    expect(buildDataset(tables, "1.60.1.70938").gearSources).toBeNull();
+    expect(buildDataset(tables, "1.60.1.70938", {}, {}, {}).gearSources).toEqual({});
+  });
+});

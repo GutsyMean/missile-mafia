@@ -1,3 +1,4 @@
+import { isCrafted } from "@/lib/craftables/filter";
 import type { ClassView, Entry } from "@/lib/craftables/types";
 import { GEAR_SLOTS, slotsFor, type GearSlot } from "./slots";
 import { GEAR_STATS, rankWeight, slotWeight, type GearStat } from "./stats";
@@ -18,6 +19,8 @@ export interface Ranked {
   score: number;
   /** What the score is made of, biggest part first. */
   parts: ScorePart[];
+  /** Its place among everything in the running for the slot, counting from 1. */
+  place: number;
 }
 
 export interface GearSection {
@@ -26,6 +29,8 @@ export interface GearSection {
   ranked: Ranked[];
   /** How many pieces were in the running for this slot. */
   candidates: number;
+  /** The best crafted piece, when gear that is not crafted kept every crafted one out of the list above. */
+  bestCrafted?: Ranked;
 }
 
 type Item = NonNullable<Entry["item"]>;
@@ -64,14 +69,14 @@ export function rankGear(
   perSlot: number,
 ): GearSection[] {
   const dualWield = canDualWield(gameClass, level);
-  const bySlot = new Map<GearSlot, Map<number, Ranked>>();
+  const bySlot = new Map<GearSlot, Map<number, Omit<Ranked, "place">>>();
   for (const entry of entries) {
     const { item } = entry;
     if (!item || !isGear(item) || !canUse(gameClass, level, item)) continue;
     for (const slot of slotsFor(item, dualWield)) {
       const { score, parts } = scoreItem(item, slot, order);
       if (score <= 0) continue;
-      const pieces = bySlot.get(slot) ?? new Map<number, Ranked>();
+      const pieces = bySlot.get(slot) ?? new Map<number, Omit<Ranked, "place">>();
       bySlot.set(slot, pieces);
       // Two recipes can make the same item; the one somebody can craft stands for both.
       const known = pieces.get(item.id);
@@ -81,14 +86,21 @@ export function rankGear(
 
   const sections: GearSection[] = [];
   for (const slot of GEAR_SLOTS) {
-    const pieces = [...(bySlot.get(slot)?.values() ?? [])].sort(
-      (a, b) =>
-        b.score - a.score ||
-        Number(b.entry.available) - Number(a.entry.available) ||
-        (b.entry.item?.itemLevel ?? 0) - (a.entry.item?.itemLevel ?? 0) ||
-        a.entry.recipe.name.localeCompare(b.entry.recipe.name),
-    );
-    if (pieces.length > 0) sections.push({ slot, ranked: pieces.slice(0, perSlot), candidates: pieces.length });
+    const pieces: Ranked[] = [...(bySlot.get(slot)?.values() ?? [])]
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          Number(b.entry.available) - Number(a.entry.available) ||
+          (b.entry.item?.itemLevel ?? 0) - (a.entry.item?.itemLevel ?? 0) ||
+          a.entry.recipe.name.localeCompare(b.entry.recipe.name),
+      )
+      .map((piece, index) => ({ ...piece, place: index + 1 }));
+    if (pieces.length === 0) continue;
+    const ranked = pieces.slice(0, perSlot);
+    const bestCrafted = ranked.some((piece) => isCrafted(piece.entry))
+      ? undefined
+      : pieces.find((piece) => isCrafted(piece.entry));
+    sections.push({ slot, ranked, candidates: pieces.length, ...(bestCrafted ? { bestCrafted } : {}) });
   }
   return sections;
 }

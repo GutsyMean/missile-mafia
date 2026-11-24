@@ -7,10 +7,18 @@
  *   craftables.json   what they can make, and the playable classes
  *   unlearned.json    by profession, the sample recipes neither has learned
  *   gear.json         a little gear from two professions neither of them has
+ *   gear-sources.json a few pieces that are not crafted, with where they come from
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { CraftablesDoc, GearElsewhereDoc, ItemView, RecipeView, UnlearnedDoc } from "../src/lib/craftables/types";
+import type {
+  CraftablesDoc,
+  GearElsewhereDoc,
+  GearSourcesDoc,
+  ItemView,
+  RecipeView,
+  UnlearnedDoc,
+} from "../src/lib/craftables/types";
 import type { Dataset } from "../src/lib/game-data/dataset";
 
 const ROOT = path.resolve(__dirname, "..");
@@ -158,6 +166,28 @@ const gear: GearElsewhereDoc = {
   items: itemsOf(elsewhere),
 };
 writeFileSync(path.join(ROOT, "e2e/fixtures/gear.json"), JSON.stringify(gear, null, 1) + "\n");
+// Gear that is not crafted: three two-handers that beat anything Damien makes, a chest that edges out his best,
+// a cape from a boss, quest rewards for each faction, a robe for a caster, and a piece only a list names.
+const NOT_CRAFTED = [
+  9459, // Thermaplugg's Left Arm
+  7689, // Morbid Dawn
+  9449, // Manual Crowd Pummeler
+  1488, // Avenger's Armor
+  5193, // Cape of the Brotherhood
+  6087, // Chausses of Westfall: an Alliance quest
+  4643, // Grimsteel Cape: a Horde quest
+  14150, // Robe of Evocation
+  2243, // Hand of Edward the Odd: on a best-in-slot list
+];
+const gearSources: GearSourcesDoc = { items: {}, sources: {} };
+for (const id of NOT_CRAFTED) {
+  const sources = dataset.gearSources?.[id];
+  if (!sources) throw new Error(`No source in the dataset for item ${id}; run pnpm game-data first`);
+  gearSources.sources[String(id)] = sources;
+}
+gearSources.items = itemsOf(NOT_CRAFTED.map((id) => ({ craftedItemId: id, reagents: [] }) as unknown as GameRecipe));
+writeFileSync(path.join(ROOT, "e2e/fixtures/gear-sources.json"), JSON.stringify(gearSources, null, 1) + "\n");
+
 console.log(
   `Wrote e2e/fixtures: Damien ${smithLearned.length} learned, ${smithUnlearned.length} still to learn; ` +
     `Stitches ${tailorLearned.length} learned (${tailorLearned.map((r) => r.name).join(", ")}), ` +

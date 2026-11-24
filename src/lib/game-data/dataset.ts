@@ -1,5 +1,13 @@
 import { buildClasses } from "./classes";
-import { ARMOR_SUBCLASS_SHIELD, ITEM_CLASS_ARMOR, ITEM_CLASS_WEAPON } from "./constants";
+import {
+  ARMOR_SUBCLASS_COSMETIC,
+  ARMOR_SUBCLASS_SHIELD,
+  INVENTORY_SHIRT,
+  INVENTORY_TABARD,
+  ITEM_CLASS_ARMOR,
+  ITEM_CLASS_WEAPON,
+} from "./constants";
+import type { GearSources } from "./gear-sources";
 import { buildItem, indexGameData, type GameDataIndex } from "./items";
 import type { QuestFaction } from "./quest-factions";
 import { buildProfessions, buildRecipes } from "./recipes";
@@ -26,12 +34,24 @@ export interface Dataset {
   classes: GameClass[];
   items: GameItem[];
   recipes: DatasetRecipe[];
+  /**
+   * Gear that is not crafted, by item id, with where it comes from. Null when
+   * the pages that say so could not be read this time.
+   */
+  gearSources: GearSources | null;
 }
 
 /** Raw unlock-level pages for one profession, as downloaded. */
 export interface UnlockPages {
   wowForever?: string;
   wiki?: string;
+}
+
+/** Something a character puts on or holds for its stats: not a shirt, a tabard or a costume. */
+function isWearable(item: GameItem): boolean {
+  if (item.classId !== ITEM_CLASS_ARMOR && item.classId !== ITEM_CLASS_WEAPON) return false;
+  if (item.classId === ITEM_CLASS_ARMOR && item.subclassId === ARMOR_SUBCLASS_COSMETIC) return false;
+  return item.inventoryType > 0 && item.inventoryType !== INVENTORY_SHIRT && item.inventoryType !== INVENTORY_TABARD;
 }
 
 function categoryOf(
@@ -69,6 +89,7 @@ export function buildDataset(
   build: string,
   unlockPagesBySlug: Record<string, UnlockPages> = {},
   questFactions: Record<string, QuestFaction> = {},
+  gearSources: GearSources | null = null,
 ): Dataset {
   const index = indexGameData(tables);
   const recipes = buildRecipes(tables, index);
@@ -84,6 +105,15 @@ export function buildDataset(
     include(recipe.craftedItemId);
     include(recipe.recipeItemId);
     for (const reagent of recipe.reagents) include(reagent.itemId);
+  }
+
+  // Gear a page names a source for joins the items, when the game tables know it as something to wear or wield.
+  const sourced: GearSources | null = gearSources === null ? null : {};
+  for (const [id, sources] of Object.entries(gearSources ?? {})) {
+    const itemId = Number(id);
+    include(itemId);
+    const item = items.get(itemId);
+    if (sourced && item && isWearable(item)) sourced[itemId] = sources;
   }
 
   const itemNames = new Map<number, string>();
@@ -120,5 +150,6 @@ export function buildDataset(
     classes: buildClasses(tables),
     items: [...items.values()],
     recipes: datasetRecipes,
+    gearSources: sourced,
   };
 }

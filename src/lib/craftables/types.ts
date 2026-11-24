@@ -1,4 +1,7 @@
+import type { GearSource } from "@/lib/game-data/gear-sources";
 import type { GameClass, ItemStat, TooltipLine, WeaponDamage } from "@/lib/game-data/types";
+
+export type { GearSource };
 
 /** The document `guild_craftables()` returns: everything the public window shows. */
 export interface CraftablesDoc {
@@ -24,6 +27,15 @@ export type ClassView = GameClass;
 export interface UnlearnedDoc {
   recipes: RecipeView[];
   items: Record<string, ItemView>;
+}
+
+/**
+ * Gear that is not crafted (dungeon drops, quest rewards, pieces named on a
+ * best-in-slot list), by item id, with where each comes from.
+ */
+export interface GearSourcesDoc {
+  items: Record<string, ItemView>;
+  sources: Record<string, GearSource[]>;
 }
 
 /** Gear from professions nobody in the guild has, with those professions. */
@@ -107,7 +119,11 @@ export interface ItemView {
   tooltipComplete: boolean;
 }
 
-/** One row of the list: a recipe joined with what it makes and consumes. */
+/**
+ * One row of the list: a recipe joined with what it makes and consumes. When
+ * gear from every source is being compared, a piece that is not crafted is a
+ * row too: its "recipe" then has minus the item's id, and it has `sources`.
+ */
 export interface Entry {
   recipe: RecipeView;
   item: ItemView | null;
@@ -120,9 +136,12 @@ export interface Entry {
   pending: CrafterView[];
   /**
    * False when it cannot be made in this view: nobody has learned it, or the
-   * crafter being looked at has not. Shown greyed out.
+   * crafter being looked at has not. Shown greyed out. Gear that is not
+   * crafted is there for the taking, so it counts as available.
    */
   available: boolean;
+  /** Where the item comes from other than crafting, when a page says. */
+  sources?: GearSource[];
   professionName: string | null;
   professionSlug: string | null;
 }

@@ -489,6 +489,14 @@ select.picker {
   text-shadow: 1px 1px 0 #000;
 }
 
+/* What kind of source a piece that is not crafted has. */
+.sourceTag {
+  color: #d9c9a3;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
 /* The top piece for its slot, when gear is ranked. */
 .best {
   color: var(--gold);
@@ -763,13 +771,28 @@ select.picker {
   line-height: 1.45;
 }
 
-.external {
-  margin: 0;
-  font-size: 13px;
+/* Links to where an item or its recipe can be read up on. */
+.readUp {
+  margin: 4px 0 0;
+  color: #a39c8f;
+  font-size: 12px;
 }
 
-.external a {
-  color: #7fb6ff;
+.readUp a,
+.sources a {
+  color: var(--gold);
+}
+
+/* Where gear that is not crafted comes from. */
+.sources {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  color: #e9e2d4;
+  font-size: 13px;
+  line-height: 1.4;
+  list-style: none;
 }
 
 /* ---- Status strip and empty states ------------------------------------- */

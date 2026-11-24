@@ -1,5 +1,6 @@
 import { buildDataset, type Dataset } from "./dataset";
 import { buildProfessions, buildRecipes } from "./recipes";
+import { fetchGearSources } from "./gear-sources";
 import { fetchUnlockPages } from "./sources";
 import { fetchAllTables, resolveLatestBuild, type FetchLike } from "./wago";
 
@@ -14,5 +15,9 @@ export async function loadLiveDataset(
   const tables = await fetchAllTables(build, fetchFn);
   const professions = buildProfessions(tables, buildRecipes(tables));
   const { pages, questFactions, warnings } = await fetchUnlockPages(professions, fetchFn);
-  return { dataset: buildDataset(tables, build, pages, questFactions), warnings };
+  const gear = await fetchGearSources(fetchFn);
+  return {
+    dataset: buildDataset(tables, build, pages, questFactions, gear.sources),
+    warnings: [...warnings, ...gear.warnings],
+  };
 }
