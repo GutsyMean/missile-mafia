@@ -33,13 +33,22 @@ interface Props {
   shownId: number | null;
   onSelect: (entry: Entry) => void;
   onHover: (entry: Entry | null, element: HTMLElement | null) => void;
+  /** Opens a group up to show everything in it, or closes it again. Groups say whether they can be. */
+  onToggleGroup?: (category: string) => void;
 }
 
 /**
  * Remembered between renders: the window re-renders on every hover, and the
  * list can hold a couple of thousand rows that have not changed.
  */
-export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId, onSelect, onHover }: Props) {
+export const RecipeList = memo(function RecipeList({
+  groups,
+  selectedId,
+  shownId,
+  onSelect,
+  onHover,
+  onToggleGroup,
+}: Props) {
   // A long list is drawn a stretch at a time, more as the reader nears the end.
   // Drawing a couple of thousand rows at once makes every keystroke in the search wait.
   const total = useMemo(() => groups.reduce((count, group) => count + group.entries.length, 0), [groups]);
@@ -83,7 +92,23 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
           {group.category ? (
             <h2 className={styles.groupHeader}>
               <span>{group.category}</span>
-              <span className={styles.groupCount}>{group.entries.length}</span>
+              <span className={styles.groupTools}>
+                {group.toggle && onToggleGroup ? (
+                  <button
+                    type="button"
+                    className={styles.groupToggle}
+                    aria-expanded={group.toggle === "close"}
+                    onClick={() => onToggleGroup(group.category ?? "")}
+                  >
+                    {group.toggle === "open" ? `Show all ${group.total}` : "Show fewer"}
+                  </button>
+                ) : null}
+                <span className={styles.groupCount}>
+                  {group.total !== undefined && group.total > group.entries.length
+                    ? `${group.entries.length} of ${group.total}`
+                    : group.entries.length}
+                </span>
+              </span>
             </h2>
           ) : null}
           <ul className={styles.rows}>

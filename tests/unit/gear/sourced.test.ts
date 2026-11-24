@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { applyFilters, isCrafted, withSourcedGear } from "@/lib/craftables/filter";
 import { DEFAULT_FILTERS, type Entry, type GearSource, type GearSourcesDoc, type ItemView } from "@/lib/craftables/types";
 import { buildClasses } from "@/lib/game-data/classes";
-import { rankGear } from "@/lib/gear/rank";
+import { rankGear, showSection } from "@/lib/gear/rank";
 import { describeSource, ordinal, sourceKind, sourcePlace, sourcesFaction } from "@/lib/gear/sources";
 import { loadFixtureTables } from "../../helpers/fixtures";
 
@@ -128,28 +128,66 @@ describe("filters, with gear that is not crafted in the list", () => {
 describe("rankGear, with gear that is not crafted", () => {
   const all = withSourcedGear(entries, gear);
 
-  it("gives every piece its place, and points out the best crafted one when none made the cut", () => {
-    const [chest] = rankGear(all, paladin, 31, ["strength"], 3);
+  const [chest] = rankGear(all, paladin, 31, ["strength"]);
+  const shown = (view?: Parameters<typeof showSection>[1]) => {
+    const section = showSection(chest, view);
+    return section.rows.map((ranked) => [ranked.entry.recipe.name, section.notes[ranked.entry.recipe.id] ?? ""]);
+  };
+
+  it("gives every piece in the running its place", () => {
     expect(chest.ranked.map((ranked) => [ranked.place, ranked.entry.recipe.name])).toEqual([
       [1, "Phantom Armor"],
       [2, "Martyr's Chain"],
       [3, "Avenger's Armor"],
+      [4, "Shining Silver Breastplate"],
+      [5, "Green Iron Hauberk"],
     ]);
-    expect(chest.bestCrafted).toMatchObject({ place: 4 });
-    expect(chest.bestCrafted?.entry.recipe.name).toBe("Shining Silver Breastplate");
-    expect(chest.candidates).toBe(5);
   });
 
-  it("does not repeat a crafted piece that made the cut", () => {
-    const [chest] = rankGear(all, paladin, 31, ["strength"], 4);
-    expect(chest.ranked[3].entry.recipe.name).toBe("Shining Silver Breastplate");
-    expect(chest.bestCrafted).toBeUndefined();
+  it("shows the top three, and the best crafted piece too when none of them is crafted", () => {
+    expect(shown()).toEqual([
+      ["Phantom Armor", "Best"],
+      ["Martyr's Chain", ""],
+      ["Avenger's Armor", ""],
+      ["Shining Silver Breastplate", "Best craftable · 4th"],
+    ]);
+    expect(showSection(chest).total).toBe(5);
+  });
+
+  it("does not repeat a crafted piece that made the top three", () => {
+    const fewer = { ...gear, sources: { 10: [drop] } };
+    const [section] = rankGear(withSourcedGear(entries, fewer), paladin, 31, ["strength"]);
+    const { rows, notes } = showSection(section);
+    expect(rows.map((ranked) => [ranked.entry.recipe.name, notes[ranked.entry.recipe.id] ?? ""])).toEqual([
+      ["Avenger's Armor", "Best"],
+      ["Shining Silver Breastplate", "Best craftable"],
+      ["Green Iron Hauberk", ""],
+    ]);
+  });
+
+  it("shows everything once the slot is opened, each piece past the third with its place", () => {
+    expect(shown({ open: true })).toEqual([
+      ["Phantom Armor", "Best"],
+      ["Martyr's Chain", ""],
+      ["Avenger's Armor", ""],
+      ["Shining Silver Breastplate", "Best craftable · 4th"],
+      ["Green Iron Hauberk", "5th"],
+    ]);
+  });
+
+  it("shows what a search finds wherever it stands, with its true place", () => {
+    const named = (name: string) => ({ only: (entry: { recipe: { name: string } }) => entry.recipe.name === name });
+    expect(shown(named("Green Iron Hauberk"))).toEqual([["Green Iron Hauberk", "5th"]]);
+    expect(shown(named("Martyr's Chain"))).toEqual([["Martyr's Chain", "2nd"]]);
+    expect(shown(named("Phantom Armor"))).toEqual([["Phantom Armor", "Best"]]);
+    expect(shown(named("Shining Silver Breastplate"))).toEqual([["Shining Silver Breastplate", "Best craftable · 4th"]]);
+    expect(shown(named("Thunderfury"))).toEqual([]);
   });
 
   it("leaves out a piece whose every source opens above the character's level", () => {
     const late = { ...gear, sources: { ...gear.sources, 12: [{ ...listed, level: 60 }], 11: [{ ...hordeQuest, level: 48 }, { ...drop, level: 30 }] } };
     const names = (level: number) =>
-      rankGear(withSourcedGear(entries, late), paladin, level, ["strength"], 5)[0].ranked.map((ranked) => ranked.entry.recipe.name);
+      rankGear(withSourcedGear(entries, late), paladin, level, ["strength"])[0].ranked.map((ranked) => ranked.entry.recipe.name);
     // The list is for level 60; the chain has a quest from 48 but also drops from 30.
     expect(names(31)).toEqual(["Martyr's Chain", "Avenger's Armor", "Shining Silver Breastplate", "Green Iron Hauberk"]);
     expect(names(29)).toEqual(["Avenger's Armor", "Shining Silver Breastplate", "Green Iron Hauberk"]);
@@ -161,15 +199,14 @@ describe("rankGear, with gear that is not crafted", () => {
     const forWarriors = { ...gear, sources: { ...gear.sources, 12: [classQuest] } };
     const all = withSourcedGear(entries, forWarriors);
     const names = (gameClass: typeof paladin) =>
-      rankGear(all, gameClass, 31, ["strength"], 5)[0].ranked.map((ranked) => ranked.entry.recipe.name);
+      rankGear(all, gameClass, 31, ["strength"])[0].ranked.map((ranked) => ranked.entry.recipe.name);
     expect(names(paladin)).not.toContain("Phantom Armor");
     expect(names(warrior)[0]).toBe("Phantom Armor");
   });
 
-  it("has nothing to point out when only crafted gear is ranked", () => {
-    const [chest] = rankGear(entries, paladin, 31, ["strength"], 1);
-    expect(chest.ranked[0].place).toBe(1);
-    expect(chest.bestCrafted).toBeUndefined();
+  it("points out no best craftable piece when only crafted gear is ranked", () => {
+    const [crafted] = rankGear(entries, paladin, 31, ["strength"]);
+    expect(showSection(crafted).notes).toEqual({ [crafted.ranked[0].entry.recipe.id]: "Best" });
   });
 });
 

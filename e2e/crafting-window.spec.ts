@@ -366,6 +366,43 @@ test.describe("best gear for a character", () => {
     await expect(row(page, "Woolen Boots")).not.toContainText("Wearer needs");
   });
 
+  test("opens a slot up to everything in the running, each piece with its place", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    const feet = section(page, "Feet");
+    await expect(feet).toHaveCount(3);
+    const header = page.getByRole("region", { name: "Feet", exact: true }).getByRole("heading");
+    await expect(header).toContainText("3 of 7");
+    await header.getByRole("button", { name: "Show all 7" }).click();
+    await expect(feet).toHaveCount(7);
+    await expect(feet.nth(0)).toContainText("Best");
+    await expect(feet.nth(3)).toContainText("4th");
+    await expect(feet.nth(6)).toContainText("7th");
+    // The other slots stay as they were, and one that already shows everything offers nothing to open.
+    await expect(section(page, "Chest")).toHaveCount(3);
+    await expect(page.getByRole("region", { name: "Back", exact: true }).getByRole("button")).toHaveCount(1);
+    await expect(page.getByRole("region", { name: "Back", exact: true }).getByRole("button", { name: /Show/ })).toHaveCount(0);
+
+    await header.getByRole("button", { name: "Show fewer" }).click();
+    await expect(feet).toHaveCount(3);
+  });
+
+  test("finds a piece by name wherever it stands, with its true place", async ({ page }) => {
+    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    // Fourth of the chest pieces, so not among the three shown.
+    await expect(row(page, "Rough Bronze Cuirass")).toHaveCount(0);
+    await page.getByRole("searchbox").fill("rough bronze cuirass");
+    await expect(rows(page)).toHaveCount(1);
+    const found = row(page, "Rough Bronze Cuirass");
+    await expect(found).toContainText("4th");
+    await expect(found).not.toContainText("Best");
+    await found.click();
+    await expect(detail(page).getByTestId("rank")).toContainText("Chest for a level 31 Retribution Paladin.");
+
+    // A search for the top piece still says it is the best.
+    await page.getByRole("searchbox").fill("shining silver");
+    await expect(row(page, "Shining Silver Breastplate")).toContainText("Best");
+  });
+
   test("shows the whole ranking for one slot when that slot is picked", async ({ page }) => {
     await page.goto("/?class=paladin&spec=retribution&lvl=31");
     await page.getByLabel("Slot").selectOption("Feet");

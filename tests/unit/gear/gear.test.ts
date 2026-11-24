@@ -256,7 +256,7 @@ describe("rankGear", () => {
   ];
   entries[entries.length - 1].item = null;
 
-  const sections = rankGear(entries, paladin, 31, order, 3);
+  const sections = rankGear(entries, paladin, 31, order);
   const names = (slot: string) => sections.find((s) => s.slot === slot)?.ranked.map((r) => r.entry.recipe.name);
 
   it("lists the slots in the order of the character sheet", () => {
@@ -265,7 +265,7 @@ describe("rankGear", () => {
 
   it("ranks what the character can equip, best first, leaving out what offers nothing", () => {
     expect(names("Chest")).toEqual(["Shining Silver Breastplate", "Green Iron Hauberk", "Robe of Power"]);
-    expect(sections.find((s) => s.slot === "Chest")?.candidates).toBe(3);
+    expect(sections.find((s) => s.slot === "Chest")?.ranked.map((ranked) => ranked.place)).toEqual([1, 2, 3]);
   });
 
   it("leaves out plate before 40, weapons the class cannot use, and shirts", () => {
@@ -275,29 +275,23 @@ describe("rankGear", () => {
   });
 
   it("opens up more as the character levels", () => {
-    const later = rankGear(entries, paladin, 40, order, 3);
+    const later = rankGear(entries, paladin, 40, order);
     expect(later.find((s) => s.slot === "Chest")?.ranked[0].entry.recipe.name).toBe("Steel Breastplate");
-  });
-
-  it("cuts each slot to the number asked for, and says how many were in the running", () => {
-    const one = rankGear(entries, paladin, 31, order, 1);
-    const chest = one.find((s) => s.slot === "Chest")!;
-    expect(chest.ranked).toHaveLength(1);
-    expect(chest.candidates).toBe(3);
   });
 
   it("shows an item once when two recipes make it, preferring the one somebody can craft", () => {
     const gauntlets = item({ inventoryType: 10, stats: [[STAT.strength, 9]], requiredLevel: 30 });
     const twice = [entry("Golden Scale Gauntlets", gauntlets), { ...entry("Golden Scale Gauntlets", gauntlets, true), recipe: { ...entry("x", gauntlets).recipe, id: 4242, name: "Golden Scale Gauntlets" } }];
-    const hands = rankGear(twice, paladin, 31, order, 3).find((s) => s.slot === "Hands")!;
+    const hands = rankGear(twice, paladin, 31, order).find((s) => s.slot === "Hands")!;
     expect(hands.ranked).toHaveLength(1);
     expect(hands.ranked[0].entry.available).toBe(true);
     expect(hands.ranked[0].entry.recipe.id).toBe(4242);
   });
 
   it("ranks by item level for a talent tree with no order", () => {
-    const plain = rankGear(entries, paladin, 31, null, 3);
-    expect(plain.find((s) => s.slot === "Chest")?.ranked.map((r) => r.entry.recipe.name)).toHaveLength(3);
+    const plain = rankGear(entries, paladin, 31, null);
+    // Every wearable chest piece is in the running then, the plain vest included.
+    expect(plain.find((s) => s.slot === "Chest")?.ranked.map((r) => r.entry.recipe.name)).toHaveLength(4);
     expect(plain.find((s) => s.slot === "Chest")?.ranked.every((r) => r.score === 30)).toBe(true);
   });
 });

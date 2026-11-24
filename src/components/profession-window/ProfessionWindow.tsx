@@ -37,8 +37,7 @@ import {
   subscribeToCustomOrders,
 } from "@/lib/gear/custom-orders";
 import { specPriority } from "@/lib/gear/priorities";
-import { rankGear, type Ranked } from "@/lib/gear/rank";
-import { ordinal } from "@/lib/gear/sources";
+import { rankGear, showSection, type Ranked } from "@/lib/gear/rank";
 import { Frame } from "@/components/wow/Frame";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
 import wow from "@/components/wow/wow.module.css";
@@ -51,9 +50,6 @@ import styles from "./window.module.css";
 /** Below this width the detail pane becomes a full-screen sheet. Matches the CSS. */
 const SHEET_QUERY = "(max-width: 820px)";
 const MAX_SKILL = 300;
-/** How many pieces a slot shows when gear is being chosen: a short list, or a long one once a slot is picked. */
-const PIECES_PER_SLOT = 3;
-const PIECES_FOR_ONE_SLOT = 25;
 const NO_GEAR_ELSEWHERE: GearElsewhereDoc = { professions: [], recipes: [], items: {} };
 const NO_SOURCED_GEAR: GearSourcesDoc = { items: {}, sources: {} };
 
@@ -193,20 +189,49 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   const tree = gameClass && spec ? `${gameClass.slug}/${spec.slug}` : "";
   const priority = gameClass && spec ? specPriority(gameClass.slug, spec.slug) : null;
   const order = customOrders[tree] ?? priority?.order ?? null;
+  // A search does not change who is in the running, only which of them are shown: a piece
+  // looked up by name keeps its true place in the ranking.
+  const searchless = useMemo(() => ({ ...filters, search: "" }), [filters]);
+  const ranking = useMemo(
+    () => (gameClass ? rankGear(applyFilters(candidates, searchless), gameClass, level, order) : null),
+    [candidates, searchless, gameClass, level, order],
+  );
+  const found = useMemo(
+    () => (filters.search.trim() ? new Set(matching.map((entry) => entry.recipe.id)) : null),
+    [filters.search, matching],
+  );
+  // Slots show their top few until opened up; choosing a slot in the filters opens it too.
+  const [opened, setOpened] = useState<ReadonlySet<string>>(new Set());
+  const toggleSlot = useCallback(
+    (slot: string) =>
+      setOpened((current) => {
+        const next = new Set(current);
+        if (!next.delete(slot)) next.add(slot);
+        return next;
+      }),
+    [],
+  );
   const sections = useMemo(
     () =>
-      gameClass
-        ? rankGear(matching, gameClass, level, order, filters.slot ? PIECES_FOR_ONE_SLOT : PIECES_PER_SLOT)
-        : null,
-    [matching, gameClass, level, order, filters.slot],
+      ranking
+        ?.map((section) => {
+          const shown = showSection(section, {
+            open: filters.slot !== "" || opened.has(section.slot),
+            only: found ? (entry) => found.has(entry.recipe.id) : undefined,
+          });
+          // Nothing to open while a search or a chosen slot decides what is shown, or when the short list is all there is.
+          const canOpen = !found && filters.slot === "" && showSection(section).rows.length < section.ranked.length;
+          const toggle = opened.has(section.slot) ? ("close" as const) : ("open" as const);
+          return { ...shown, toggle: canOpen ? toggle : undefined };
+        })
+        .filter((section) => section.rows.length > 0) ?? null,
+    [ranking, filters.slot, opened, found],
   );
   // What a piece scores, by recipe, for the detail pane. A piece listed for two slots shows the first.
   const ranks = useMemo(() => {
     const byRecipe = new Map<number, Ranked>();
-    for (const section of sections ?? []) {
-      for (const ranked of section.bestCrafted ? [...section.ranked, section.bestCrafted] : section.ranked) {
-        if (!byRecipe.has(ranked.entry.recipe.id)) byRecipe.set(ranked.entry.recipe.id, ranked);
-      }
+    for (const ranked of sections?.flatMap((section) => section.rows) ?? []) {
+      if (!byRecipe.has(ranked.entry.recipe.id)) byRecipe.set(ranked.entry.recipe.id, ranked);
     }
     return byRecipe;
   }, [sections]);
@@ -216,17 +241,14 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   const groups = useMemo<EntryGroup[]>(
     () =>
       sections
-        ? sections.map((section) => {
-            const rows = section.bestCrafted ? [...section.ranked, section.bestCrafted] : section.ranked;
-            const notes: Record<number, string> = { [rows[0].entry.recipe.id]: "Best" };
-            // When the best piece is a drop or a quest reward, the best the guild could make is pointed out too.
-            const crafted = isCrafted(rows[0].entry) ? undefined : rows.find((ranked) => isCrafted(ranked.entry));
-            if (crafted) {
-              notes[crafted.entry.recipe.id] =
-                crafted === section.bestCrafted ? `Best craftable · ${ordinal(crafted.place)}` : "Best craftable";
-            }
-            return { category: section.slot, entries: rows.map((ranked) => ranked.entry), ranked: true, notes };
-          })
+        ? sections.map((section) => ({
+            category: section.slot,
+            entries: section.rows.map((ranked) => ranked.entry),
+            ranked: true,
+            notes: section.notes,
+            total: section.total,
+            toggle: section.toggle,
+          }))
         : groupEntries(matching, filters.sort),
     [sections, matching, filters.sort],
   );
@@ -460,6 +482,7 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
                 shownId={shown?.recipe.id ?? null}
                 onSelect={select}
                 onHover={onHover}
+                onToggleGroup={toggleSlot}
               />
             )}
           </div>

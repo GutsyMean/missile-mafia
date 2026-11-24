@@ -353,6 +353,30 @@ select.picker {
   text-shadow: 1px 1px 0 #000;
 }
 
+.groupTools {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Opens a slot's ranking up to everything in the running. */
+.groupToggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+
+.groupToggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
 .groupCount {
   color: #fff;
   font-size: 12px;

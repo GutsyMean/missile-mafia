@@ -217,8 +217,12 @@ export interface EntryGroup {
   entries: Entry[];
   /** True when the entries are in order of merit, best first, rather than sorted. */
   ranked?: boolean;
-  /** A word for some rows, by recipe id: "Best", "Best craftable". */
+  /** A word for some rows, by recipe id: "Best", "Best craftable", "11th". */
   notes?: Record<number, string>;
+  /** How many entries there are in all, when the group shows only some of them. */
+  total?: number;
+  /** Offered when the group can be opened up to show everything, or closed again. */
+  toggle?: "open" | "close";
 }
 
 export function groupEntries(sorted: Entry[], sort: SortMode): EntryGroup[] {

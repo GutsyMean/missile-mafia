@@ -1,6 +1,7 @@
 import { isCrafted } from "@/lib/craftables/filter";
 import type { ClassView, Entry } from "@/lib/craftables/types";
 import { GEAR_SLOTS, slotsFor, type GearSlot } from "./slots";
+import { ordinal } from "./sources";
 import { GEAR_STATS, rankWeight, slotWeight, type GearStat } from "./stats";
 import { canDualWield, canUse, isGear } from "./usable";
 
@@ -25,12 +26,54 @@ export interface Ranked {
 
 export interface GearSection {
   slot: GearSlot;
-  /** The best pieces, best first, cut to the number asked for. */
+  /** Every piece in the running for the slot, best first. */
   ranked: Ranked[];
-  /** How many pieces were in the running for this slot. */
-  candidates: number;
-  /** The best crafted piece, when gear that is not crafted kept every crafted one out of the list above. */
-  bestCrafted?: Ranked;
+}
+
+/** How many pieces a slot shows until it is opened up. */
+export const SHORT_LIST = 3;
+
+/** What a slot shows of its ranking: some of the pieces, and a word for the ones worth pointing out. */
+export interface ShownSection {
+  slot: GearSlot;
+  rows: Ranked[];
+  /** By recipe id: "Best", "Best craftable", or a place further down such as "11th". */
+  notes: Record<number, string>;
+  /** How many pieces are in the running in all. */
+  total: number;
+}
+
+/**
+ * Chooses what to show of a slot's ranking. Closed, it is the top few, with
+ * the best crafted piece added when gear that is not crafted kept every
+ * crafted one out of them. Open, it is everything. With `only`, it is the
+ * pieces a search found, wherever they stand: each keeps its true place.
+ */
+export function showSection(
+  section: GearSection,
+  view: { open?: boolean; only?: (entry: Entry) => boolean } = {},
+): ShownSection {
+  const { slot, ranked } = section;
+  const bestCrafted = ranked.length > 0 && !isCrafted(ranked[0].entry) ? ranked.find((piece) => isCrafted(piece.entry)) : undefined;
+  let rows: Ranked[];
+  if (view.only) {
+    rows = ranked.filter((piece) => view.only!(piece.entry));
+  } else if (view.open) {
+    rows = ranked;
+  } else {
+    rows = ranked.slice(0, SHORT_LIST);
+    if (bestCrafted && !rows.includes(bestCrafted)) rows = [...rows, bestCrafted];
+  }
+
+  const notes: Record<number, string> = {};
+  for (const piece of rows) {
+    // In the short list the first three places speak for themselves; anywhere else a place is worth stating.
+    const place = piece.place > SHORT_LIST || (view.only && piece.place > 1) ? ordinal(piece.place) : null;
+    if (piece.place === 1) notes[piece.entry.recipe.id] = "Best";
+    else if (piece === bestCrafted) notes[piece.entry.recipe.id] = place ? `Best craftable · ${place}` : "Best craftable";
+    else if (place) notes[piece.entry.recipe.id] = place;
+  }
+  return { slot, rows, notes, total: ranked.length };
 }
 
 type Item = NonNullable<Entry["item"]>;
@@ -57,16 +100,15 @@ export function scoreItem(item: Item, slot: GearSlot, order: GearStat[] | null):
 }
 
 /**
- * The best craftable pieces for each slot, for a character of this class and
- * level. Only what they can equip is considered, and only pieces that offer
- * something the order asks for.
+ * Ranks the pieces for each slot, best first, for a character of this class
+ * and level. Only what they can equip is considered, and only pieces that
+ * offer something the order asks for.
  */
 export function rankGear(
   entries: Entry[],
   gameClass: ClassView,
   level: number,
   order: GearStat[] | null,
-  perSlot: number,
 ): GearSection[] {
   const dualWield = canDualWield(gameClass, level);
   const bySlot = new Map<GearSlot, Map<number, Omit<Ranked, "place">>>();
@@ -101,12 +143,7 @@ export function rankGear(
           a.entry.recipe.name.localeCompare(b.entry.recipe.name),
       )
       .map((piece, index) => ({ ...piece, place: index + 1 }));
-    if (pieces.length === 0) continue;
-    const ranked = pieces.slice(0, perSlot);
-    const bestCrafted = ranked.some((piece) => isCrafted(piece.entry))
-      ? undefined
-      : pieces.find((piece) => isCrafted(piece.entry));
-    sections.push({ slot, ranked, candidates: pieces.length, ...(bestCrafted ? { bestCrafted } : {}) });
+    if (pieces.length > 0) sections.push({ slot, ranked: pieces });
   }
   return sections;
 }
