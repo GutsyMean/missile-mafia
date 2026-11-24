@@ -396,9 +396,6 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
             order={order}
             custom={tree in customOrders}
             guide={priority?.guide ?? null}
-            soulboundListed={
-              sections !== null && visible.some((entry) => isCrafted(entry) && entry.item && !entry.item.tradeable)
-            }
             onChange={setGear}
             onOrderChange={(next) => saveCustomOrder(tree, next)}
           />

@@ -23,8 +23,6 @@ interface Props {
   custom: boolean;
   /** The guide the default order follows; null when it is our own reading. */
   guide: string | null;
-  /** True when the list holds pieces that bind to whoever crafts them. */
-  soulboundListed: boolean;
   onChange: (gear: GearChoice) => void;
   /** Sets the visitor's own order; null goes back to the default. */
   onOrderChange: (order: GearStat[] | null) => void;
@@ -44,7 +42,6 @@ export function GearBar({
   order,
   custom,
   guide,
-  soulboundListed,
   onChange,
   onOrderChange,
 }: Props) {
@@ -58,6 +55,12 @@ export function GearBar({
     onOrderChange(next);
   };
   const unused = ALL_GEAR_STATS.filter((stat) => !order?.includes(stat));
+  // Said only when the order is not simply the one a guide gives.
+  const sourceNote = custom
+    ? "Your own order, kept in this browser."
+    : order && !guide
+      ? "wowforever.be has no order for this talent tree yet, so this one is our own."
+      : null;
 
   return (
     <section className={styles.gear} aria-label="Best gear for a character" data-editing={editing}>
@@ -150,21 +153,7 @@ export function GearBar({
           >
             {editing ? "Done" : "Change"}
           </button>
-          <span className={styles.gearSource}>
-            {custom ? (
-              "Your own order, kept in this browser."
-            ) : guide ? (
-              <>
-                Order from the{" "}
-                <a href={guide} target="_blank" rel="noreferrer">
-                  wowforever.be {spec.name} guide
-                </a>
-                ; how much each stat counts is our own judgement.
-              </>
-            ) : order ? (
-              "wowforever.be has no order for this talent tree yet, so this one is our own."
-            ) : null}
-          </span>
+          {sourceNote ? <span className={styles.gearSource}>{sourceNote}</span> : null}
         </div>
       ) : null}
 
@@ -179,11 +168,6 @@ export function GearBar({
         </p>
       ) : null}
 
-      {gameClass && soulboundListed ? (
-        <p className={styles.gearHow}>
-          Soulbound crafted pieces can only be worn by whoever crafts them. Tick Tradeable only to leave them out.
-        </p>
-      ) : null}
 
       {gameClass && spec && editing ? (
         <div id="gear-order-editor" className={styles.gearEditor} role="group" aria-label="Change the order of stats">

@@ -309,15 +309,13 @@ test.describe("best gear for a character", () => {
     await expect(page).toHaveURL(/class=paladin&spec=retribution&lvl=31/);
   });
 
-  test("says which order of stats it ranks by, and where that comes from", async ({ page }) => {
+  test("says which order of stats it ranks by, and owns up to an order that is its own", async ({ page }) => {
     await page.goto("/?class=paladin&spec=retribution&lvl=31");
     const order = page.getByRole("list", { name: "Order of stats" }).getByRole("listitem");
     await expect(order.first()).toHaveText("Weapon damage");
     await expect(order.nth(1)).toHaveText("Hit");
-    await expect(page.getByRole("link", { name: "wowforever.be Retribution guide" })).toHaveAttribute(
-      "href",
-      "https://wowforever.be/classes/paladin/retribution/",
-    );
+    // An order taken from a guide needs no note; the bar stays short.
+    await expect(page.getByText(/Order from the|our own/)).toHaveCount(0);
 
     await page.getByRole("combobox", { name: "Talent tree" }).selectOption({ label: "Protection" });
     await expect(page.getByText("wowforever.be has no order for this talent tree yet, so this one is our own.")).toBeVisible();
@@ -393,7 +391,7 @@ test.describe("best gear for a character", () => {
     await page.getByRole("button", { name: "Change" }).click();
     await page.getByRole("button", { name: "Back to the default order" }).click();
     await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
-    await expect(page.getByRole("link", { name: "wowforever.be Retribution guide" })).toBeVisible();
+    await expect(page.getByText("Your own order, kept in this browser.")).toHaveCount(0);
   });
 
   test("goes back to the full list with Show everything", async ({ page }) => {
@@ -406,13 +404,13 @@ test.describe("best gear for a character", () => {
     await expect(page).not.toHaveURL(/class=/);
   });
 
-  test("warns that soulbound pieces are for their crafter only", async ({ page }) => {
+  test("leaves soulbound crafted pieces out of the ranking with Tradeable only", async ({ page }) => {
     await page.goto("/?class=paladin&spec=retribution&lvl=31");
-    const warning = page.getByText("Soulbound crafted pieces can only be worn by whoever crafts them.");
-    await expect(warning).toBeVisible();
+    await expect(section(page, "Head").nth(0)).toContainText("Defender's Leather Helm");
+    await expect(section(page, "Head").nth(0)).toContainText("Soulbound");
     await page.getByLabel("Tradeable only").check();
-    await expect(warning).toHaveCount(0);
     await expect(section(page, "Head").nth(0)).toContainText("Green Iron Helm");
+    await expect(page.getByText(/Soulbound/)).toHaveCount(0);
   });
 });
 
