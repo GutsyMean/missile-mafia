@@ -84,6 +84,15 @@ describe("buildDataset — gear that is not crafted", () => {
     expect(withGear.gearSources?.[273908]).toEqual([source, quest, { ...list, level: undefined }].map((s) => JSON.parse(JSON.stringify(s))));
   });
 
+  it("keeps every source's level for an item that only nominally requires level 1", () => {
+    const list = { kind: "list" as const, place: "Pre-raid best-in-slot list", from: null, level: 60, url: "https://wowforever.be/l" };
+    const nominal = {
+      ...tables,
+      ItemSparse: tables.ItemSparse.map((row) => (row.ID === "273908" ? { ...row, RequiredLevel: "1" } : row)),
+    };
+    expect(buildDataset(nominal, "1.60.1.70938", {}, {}, { 273908: [list] }).gearSources?.[273908]).toEqual([list]);
+  });
+
   it("says so when the sources could not be read, rather than saying there are none", () => {
     expect(buildDataset(tables, "1.60.1.70938").gearSources).toBeNull();
     expect(buildDataset(tables, "1.60.1.70938", {}, {}, {}).gearSources).toEqual({});

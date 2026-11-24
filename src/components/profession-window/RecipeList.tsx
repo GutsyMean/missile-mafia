@@ -4,6 +4,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { isCrafted, type EntryGroup } from "@/lib/craftables/filter";
 import { factionNote, skillLabel } from "@/lib/craftables/pending";
 import { sourceKind, sourcePlace, sourcesFaction } from "@/lib/gear/sources";
+import { skillToWear } from "@/lib/gear/usable";
 import type { Entry } from "@/lib/craftables/types";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import wow from "@/components/wow/wow.module.css";
@@ -98,6 +99,8 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
               const source = crafted ? null : (entry.sources?.[0] ?? null);
               const side = crafted ? null : sourcesFaction(entry.sources ?? []);
               const note = group.notes?.[entry.recipe.id];
+              // When gear is ranked: a piece only someone with a profession can wear says so.
+              const needs = group.ranked && entry.item ? skillToWear(entry.item) : null;
               return (
                 <li key={entry.recipe.id}>
                   <button
@@ -134,6 +137,7 @@ export const RecipeList = memo(function RecipeList({ groups, selectedId, shownId
                     <span className={styles.rowTags}>
                       {note ? <span className={styles.best}>{note}</span> : null}
                       {source ? <span className={styles.sourceTag}>{sourceKind(source)}</span> : null}
+                      {needs ? <span className={styles.needsSkill}>Wearer needs {needs}</span> : null}
                       {side ? (
                         <span className={wow.faction} data-faction={side}>
                           {side === "horde" ? "Horde only" : "Alliance only"}

@@ -86,3 +86,16 @@ export function canUse(gameClass: ClassView, level: number, item: Wearable): boo
   // Rings, trinkets, relics and the like need no skill; their class limit, checked above, is all there is.
   return skill === undefined || hasSkill(gameClass, level, skill);
 }
+
+/**
+ * The profession skill a character must have themselves to wear the item, as
+ * its tooltip states it ("Engineering 150" for most goggles). Null for the
+ * great majority, which anyone of the right class and level can wear.
+ */
+export function skillToWear(item: Pick<ItemView, "tooltip">): string | null {
+  for (const line of item.tooltip) {
+    const match = line.text.match(/^Requires (?!Level\b)(.+) \((\d+)\)$/);
+    if (match) return `${match[1]} ${match[2]}`;
+  }
+  return null;
+}

@@ -5,7 +5,7 @@ import { SPEC_PRIORITIES, specPriority } from "@/lib/gear/priorities";
 import { rankGear, scoreItem } from "@/lib/gear/rank";
 import { slotsFor } from "@/lib/gear/slots";
 import { ALL_GEAR_STATS, GEAR_STATS } from "@/lib/gear/stats";
-import { canDualWield, canUse, isGear } from "@/lib/gear/usable";
+import { canDualWield, canUse, isGear, skillToWear } from "@/lib/gear/usable";
 import { loadFixtureTables } from "../../helpers/fixtures";
 
 // The classes exactly as the sync builds them from the game tables.
@@ -158,6 +158,20 @@ describe("canUse", () => {
     expect(canDualWield(rogue, 9)).toBe(false);
     expect(canDualWield(rogue, 10)).toBe(true);
     expect(canDualWield(paladin, 60)).toBe(false);
+  });
+});
+
+describe("skillToWear", () => {
+  const line = (text: string) => ({ text, color: "white" as const });
+
+  it("reads the profession a wearer must have from the tooltip", () => {
+    const goggles = item({ tooltip: [line("Flying Tiger Goggles"), line("Requires Level 10"), line("Requires Engineering (100)")] });
+    expect(skillToWear(goggles)).toBe("Engineering 100");
+  });
+
+  it("is nothing for gear that only asks for a level", () => {
+    expect(skillToWear(item({ tooltip: [line("Requires Level 24")] }))).toBeNull();
+    expect(skillToWear(item())).toBeNull();
   });
 });
 

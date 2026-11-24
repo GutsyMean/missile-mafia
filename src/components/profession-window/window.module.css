@@ -497,6 +497,14 @@ select.picker {
   white-space: nowrap;
 }
 
+/* A piece only someone with a profession can wear. */
+.needsSkill {
+  color: #ffb648;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
 /* The top piece for its slot, when gear is ranked. */
 .best {
   color: var(--gold);

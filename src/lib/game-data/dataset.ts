@@ -122,8 +122,9 @@ export function buildDataset(
     if (!sourced || !item || !isWearable(item)) continue;
     // An item's own level requirement says when it can be worn better than its dungeon's range or a
     // list's audience does. A quest keeps its level: its reward cannot be had before the quest can.
+    // "Requires level 1" is no requirement at all: the game puts it on rewards meant for level 60.
     sourced[itemId] =
-      item.requiredLevel > 0
+      item.requiredLevel > 1
         ? sources.map((source) => (source.kind === "quest" ? source : withoutLevel(source)))
         : sources;
   }

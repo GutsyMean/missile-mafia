@@ -359,6 +359,15 @@ test.describe("best gear for a character", () => {
     await expect(section(page, "Main Hand").nth(0)).toContainText("Bronze Shortsword");
   });
 
+  test("says so when a piece can only be worn by someone with a profession", async ({ page }) => {
+    await page.goto("/?class=mage&spec=frost&lvl=20");
+    const goggles = row(page, "Flying Tiger Goggles");
+    await expect(goggles).toContainText("Wearer needs Engineering 100");
+    await goggles.click();
+    await expect(detail(page).getByTestId("rank")).toContainText("Only a character with Engineering 100 can wear it.");
+    await expect(row(page, "Woolen Boots")).not.toContainText("Wearer needs");
+  });
+
   test("shows the whole ranking for one slot when that slot is picked", async ({ page }) => {
     await page.goto("/?class=paladin&spec=retribution&lvl=31");
     await page.getByLabel("Slot").selectOption("Feet");

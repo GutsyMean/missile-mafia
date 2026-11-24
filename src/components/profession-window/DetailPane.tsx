@@ -4,6 +4,7 @@ import type { Entry } from "@/lib/craftables/types";
 import { WOWFOREVER_RECIPE_PAGES, wowForeverUrl } from "@/lib/game-data/wowforever";
 import type { Ranked } from "@/lib/gear/rank";
 import { describeSource, sourceKind } from "@/lib/gear/sources";
+import { skillToWear } from "@/lib/gear/usable";
 import wow from "@/components/wow/wow.module.css";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
@@ -112,6 +113,7 @@ export function DetailPane({ entry, rank, character }: Props) {
           ) : (
             "Ranked by item level."
           )}
+          {item && skillToWear(item) ? ` Only a character with ${skillToWear(item)} can wear it.` : ""}
         </p>
       ) : null}
 
