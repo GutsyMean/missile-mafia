@@ -41,10 +41,15 @@
   caret-color: var(--gold);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1120px) {
   :root {
     /* The bar is two rows there: the name, then the sections. */
     --header-h: 104px;
+  }
+}
+
+@media (max-width: 860px) {
+  :root {
     --page-gutter: 6px;
   }
 }

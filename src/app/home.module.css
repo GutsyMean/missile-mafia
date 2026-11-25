@@ -213,7 +213,7 @@
   align-items: center;
 }
 
-.actions > a:first-child {
+.actions > a:first-child:not(.more) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

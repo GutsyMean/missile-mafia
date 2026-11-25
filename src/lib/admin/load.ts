@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseSecretKey } from "@/lib/supabase/env";
 import { createServerSupabase } from "@/lib/supabase/server";
+import type { GuildEvent } from "@/lib/events";
 import type { AdminCatalog, AdminDirectory, AdminSettings } from "./types";
 
 export interface AdminCrafter {
@@ -41,6 +42,10 @@ export interface AdminData {
   directory: AdminDirectory | null;
   /** The automatic-approval rule. Null unless the account is a site admin. */
   settings: AdminSettings | null;
+  /** The guild's calendar, newest first. Null unless the account is a site admin. */
+  events: GuildEvent[] | null;
+  /** When this was read, in milliseconds since 1970. */
+  loadedAt: number;
   /** Whether members can sign up by themselves, and whether Discord confirmed this account. */
   signup: { open: boolean; verified: boolean };
   /** Characters already on the list that this account asked for and is waiting to be handed. */
@@ -76,12 +81,24 @@ export async function loadAdminData(): Promise<AdminData | null> {
 
   let directory: AdminDirectory | null = null;
   let settings: AdminSettings | null = null;
+  let events: GuildEvent[] | null = null;
   if (adminRow.data) {
-    const [people, rule] = await Promise.all([supabase.rpc("admin_directory"), supabase.rpc("admin_settings")]);
+    const [people, rule, calendar] = await Promise.all([
+      supabase.rpc("admin_directory"),
+      supabase.rpc("admin_settings"),
+      supabase.from("guild_events").select("id, title, starts_at, details").order("starts_at", { ascending: false }).limit(300),
+    ]);
     if (people.error) throw new Error(people.error.message);
     if (rule.error) throw new Error(rule.error.message);
+    if (calendar.error) throw new Error(calendar.error.message);
     directory = people.data as AdminDirectory;
     settings = rule.data as AdminSettings;
+    events = (calendar.data ?? []).map((row) => ({
+      id: row.id as string,
+      title: row.title as string,
+      startsAt: new Date(row.starts_at as string).toISOString(),
+      details: (row.details as string | null) ?? null,
+    }));
   }
 
   const crafters: AdminCrafter[] = [];
@@ -131,6 +148,8 @@ export async function loadAdminData(): Promise<AdminData | null> {
     crafters,
     directory,
     settings,
+    events,
+    loadedAt: Date.now(),
     signup: { open: Boolean(signupRow.data?.auto_approve), verified: Boolean(verifiedRow.data) },
     waitingFor: [...new Set((claimRows.data ?? []).map((row) => row.character_name as string))],
     catalog: catalog.data as AdminCatalog,

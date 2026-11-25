@@ -455,6 +455,21 @@ select.wideSelect {
   padding: 0;
   list-style: none;
 }
+/* A run of events under its heading. */
+.eventList {
+  display: grid;
+  gap: 10px;
+}
+
+/* The form an event is typed into: its fields run the width of the card. */
+.eventForm {
+  justify-items: stretch;
+}
+
+.eventForm > .row {
+  justify-self: start;
+}
+
 /* A long tick-box label that may break over two lines on a narrow screen. */
 .wrapLabel {
   white-space: normal;

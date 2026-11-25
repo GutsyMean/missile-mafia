@@ -1,0 +1,63 @@
+/* The events page: what is coming up beside what has been. */
+
+.page {
+  padding-top: 10px;
+}
+
+.window {
+  width: min(1320px, var(--page-width));
+  min-height: calc(100dvh - var(--header-h) - 110px);
+  margin: 0 auto;
+}
+
+.lead {
+  max-width: 90ch;
+  margin: 6px 8px 14px;
+  color: #d8cfbf;
+  font-size: 15px;
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.columns[data-single="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pane {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  padding: 16px 18px 20px;
+  border: 6px solid transparent;
+  border-image: url("/ui/inset.png") 6 / 6px stretch;
+  background:
+    linear-gradient(rgb(8 6 5 / 0.72), rgb(8 6 5 / 0.8)),
+    url("/ui/inset-bg.png") padding-box;
+}
+
+.heading {
+  margin: 0;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 400;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.note {
+  margin: 0;
+  color: #c8c1b3;
+  font-size: 15px;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

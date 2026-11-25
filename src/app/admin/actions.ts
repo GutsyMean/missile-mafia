@@ -3,6 +3,7 @@
 import { updateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
+import { EVENTS_TAG, type GuildEvent } from "@/lib/events";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
 import { LEDGER_LINES, type GuildImportMember, type GuildImportPlayer, type GuildImportTally, type GuildyBank } from "@/lib/guildy";
@@ -579,6 +580,70 @@ export async function importGuildBank(bank: GuildyBank): Promise<ActionResult> {
   const { error } = await session.supabase.rpc("admin_set_guild_bank", { p_bank: checked });
   if (error) return fail(error.code === "42501" ? NOT_ADMIN : error.message);
   return { ok: true, data: undefined };
+}
+
+export interface EventInput {
+  /** The event to change, or null for a new one. */
+  id: string | null;
+  title: string;
+  /** When it starts, as an instant the browser worked out from the date and time typed. */
+  startsAt: string;
+  details: string;
+}
+
+/** The calendar as it stands, newest first, for the admin's own list. */
+async function eventsAfterChange(session: AdminSession): Promise<ActionResult<GuildEvent[]>> {
+  const { data, error } = await session.supabase
+    .from("guild_events")
+    .select("id, title, starts_at, details")
+    .order("starts_at", { ascending: false })
+    .limit(300);
+  if (error) return fail(error.message);
+  updateTag(EVENTS_TAG);
+  return {
+    ok: true,
+    data: (data ?? []).map((row) => ({
+      id: row.id as string,
+      title: row.title as string,
+      startsAt: new Date(row.starts_at as string).toISOString(),
+      details: (row.details as string | null) ?? null,
+    })),
+  };
+}
+
+/** Adds an event to the guild's calendar, or changes one. Site admins only; the database checks that again. */
+export async function saveEvent(input: EventInput): Promise<ActionResult<GuildEvent[]>> {
+  const session = await signedInAdmin();
+  if (!session) return fail("Only a site admin can change the calendar.");
+  const title = typeof input?.title === "string" ? input.title.trim() : "";
+  if (title.length < 1 || title.length > 80) return fail("Give the event a name of up to 80 characters.");
+  const details = String(input.details ?? "").trim();
+  if (details.length > 1000) return fail("Keep the details under 1000 characters.");
+  const startsAt = new Date(String(input.startsAt ?? ""));
+  if (Number.isNaN(startsAt.getTime()) || startsAt.getFullYear() < 2020 || startsAt.getFullYear() > 2100) {
+    return fail("Choose the day and the time the event starts.");
+  }
+  if (input.id !== null && !UUID.test(String(input.id))) return fail("That event is not known.");
+
+  const { error } = await session.supabase.rpc("admin_save_event", {
+    p_id: input.id,
+    p_title: title,
+    p_starts_at: startsAt.toISOString(),
+    p_details: details,
+  });
+  if (error) return fail(error.code === "42501" ? "Only a site admin can change the calendar." : error.message);
+  return eventsAfterChange(session);
+}
+
+/** Takes an event off the guild's calendar. Site admins only. */
+export async function deleteEvent(id: string): Promise<ActionResult<GuildEvent[]>> {
+  const session = await signedInAdmin();
+  if (!session) return fail("Only a site admin can change the calendar.");
+  if (!UUID.test(String(id))) return fail("That event is not known.");
+
+  const { error } = await session.supabase.rpc("admin_delete_event", { p_id: id });
+  if (error) return fail(error.code === "42501" ? "Only a site admin can change the calendar." : error.message);
+  return eventsAfterChange(session);
 }
 
 /** Sets who is approved automatically: members of a Discord server, optionally with a role. */

@@ -1088,3 +1088,52 @@ select test.is((public.guild_bank() ->> 'money')::bigint, 0::bigint, 'a member D
 reset role;
 select test.is(has_function_privilege('anon', 'public.guild_bank()', 'execute'), false, 'visitors have no execute right on the bank');
 select test.is(has_table_privilege('authenticated', 'public.guild_bank', 'select'), false, 'the bank is not readable through the API');
+
+-- ---------------------------------------------------------------------------
+-- The guild's calendar: read by anyone, written by site admins
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.login(null);
+select test.is((select count(*)::int from public.guild_events), 0, 'a visitor can read the calendar, empty at first');
+select test.throws($$select public.admin_save_event(null, 'Sneaky raid', now(), null)$$, '42501', 'but cannot add an event');
+select test.throws($$insert into public.guild_events (title, starts_at) values ('Sneaky raid', now())$$, '42501', 'nor write the table itself');
+reset role;
+
+set role authenticated;
+select test.login(:'member');
+select test.throws($$select public.admin_save_event(null, 'Member raid', now(), null)$$, '42501', 'a member cannot add an event');
+
+select test.login(:'owner');
+select public.admin_save_event(null, '  Molten Core  ', '2026-12-05 19:30+00', '  Bring fire resistance.  ') as raid \gset
+select test.is(
+  (select row(title, starts_at, details)::text from public.guild_events where id = :'raid'),
+  row('Molten Core', '2026-12-05 19:30+00'::timestamptz, 'Bring fire resistance.')::text,
+  'an admin adds an event, tidied up');
+select test.is(public.admin_save_event(:'raid', 'Molten Core, first half', '2026-12-06 19:00+00', ''), :'raid'::uuid, 'and changes it');
+select test.is(
+  (select row(title, starts_at, details is null)::text from public.guild_events where id = :'raid'),
+  row('Molten Core, first half', '2026-12-06 19:00+00'::timestamptz, true)::text,
+  'with the new name and time, and no details when they are emptied');
+select test.throws($$select public.admin_save_event(null, '   ', now(), null)$$, '22023', 'an event needs a name');
+select test.throws($$select public.admin_save_event(null, 'No time', null, null)$$, '22023', 'and a time');
+select test.throws(format('select public.admin_save_event(null, %L, now(), null)', repeat('x', 81)), '22023', 'and a name that fits');
+select test.throws(format('select public.admin_save_event(null, %L, now(), %L)', 'Long', repeat('x', 1001)), '22023', 'and details that fit');
+select test.throws($$select public.admin_save_event('99999999-9999-9999-9999-999999999999', 'Ghost', now(), null)$$, 'P0002', 'changing an event that is gone is an error');
+
+select test.login(:'member');
+select test.throws(format('select public.admin_delete_event(%L)', :'raid'), '42501', 'a member cannot remove an event');
+select test.throws(format($$update public.guild_events set title = 'Hijacked' where id = %L$$, :'raid'), '42501', 'nor change one around the functions');
+reset role;
+
+set role anon;
+select test.is((select title from public.guild_events), 'Molten Core, first half', 'visitors see what was planned');
+select test.throws($$select created_by from public.guild_events$$, '42501', 'but not which account planned it');
+reset role;
+
+set role authenticated;
+select test.login(:'owner');
+select public.admin_delete_event(:'raid');
+select test.is((select count(*)::int from public.guild_events), 0, 'an admin removes an event');
+select test.throws(format('select public.admin_delete_event(%L)', :'raid'), 'P0002', 'removing it twice is an error');
+reset role;
+select test.is(has_function_privilege('anon', 'public.admin_save_event(uuid, text, timestamptz, text)', 'execute'), false, 'visitors have no execute right on adding events');

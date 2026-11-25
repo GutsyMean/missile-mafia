@@ -4,6 +4,7 @@ export const SECTIONS: { href: string; label: string }[] = [
   { href: "/crafting", label: "Crafting" },
   { href: "/gear", label: "Best gear" },
   { href: "/roster", label: "Roster" },
+  { href: "/events", label: "Events" },
   { href: "/bank", label: "Guild bank" },
 ];
 

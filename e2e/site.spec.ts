@@ -7,7 +7,7 @@ test.describe("the site", () => {
     await page.goto("/");
     await expect(page).toHaveTitle("Missile Mafia HQ");
     await expect(page.getByRole("heading", { level: 1, name: "What do you need made?" })).toBeVisible();
-    await expect(sections(page).getByRole("link")).toHaveText(["Home", "Crafting", "Best gear", "Roster", "Guild bank"]);
+    await expect(sections(page).getByRole("link")).toHaveText(["Home", "Crafting", "Best gear", "Roster", "Events", "Guild bank"]);
     await expect(sections(page).getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("62 recipes from 2 crafters across 2 professions.")).toBeVisible();
   });
@@ -100,12 +100,39 @@ test.describe("the site", () => {
 
 test.describe("on a phone @phone", () => {
   test("keeps the sections within reach and nothing wider than the screen", async ({ page }) => {
-    for (const path of ["/", "/crafting", "/gear", "/roster", "/bank"]) {
+    for (const path of ["/", "/crafting", "/gear", "/roster", "/events", "/bank"]) {
       await page.goto(path);
       await expect(sections(page).getByRole("link", { name: "Home" })).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBe(0);
     }
+  });
+});
+
+test.describe("the calendar", () => {
+  test.use({ timezoneId: "Europe/Berlin" });
+
+  test("lists what is coming up by day, in the reader's own time zone, and what has been", async ({ page }) => {
+    await page.goto("/events");
+    await expect(page.getByRole("heading", { level: 1, name: "Events" })).toBeVisible();
+    await expect(page.getByText(/Times are in your own time zone \((CET|CEST)\)\./)).toBeVisible();
+
+    const upcoming = page.getByRole("region", { name: "Coming up" });
+    await expect(upcoming.getByRole("listitem").filter({ hasText: "Molten Core" }).last()).toContainText("Bring fire resistance and two flasks.");
+    // The sample raid starts at 19:30 UTC: half past eight in Berlin in winter, half past nine in summer.
+    await expect(upcoming.getByRole("listitem").filter({ hasText: "Molten Core" }).last().getByRole("time")).toHaveText(/^2[01]:30$/);
+    await expect(upcoming.getByText("Guild meeting")).toBeVisible();
+    await expect(upcoming.getByText("Scarlet Monastery run")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Earlier" })).toContainText("Scarlet Monastery run");
+  });
+
+  test("shows the next events on the home page, with a way to the rest", async ({ page }) => {
+    await page.goto("/");
+    const next = page.getByRole("region", { name: "Coming up" });
+    await expect(next).toContainText("Molten Core");
+    await expect(next).not.toContainText("Bring fire resistance");
+    await next.getByRole("link", { name: "The calendar" }).click();
+    await expect(page).toHaveURL(/\/events$/);
   });
 });
 

@@ -28,6 +28,7 @@ import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { listNames } from "@/lib/admin/directory";
 import { CraftersPanel } from "./CraftersPanel";
+import { EventsPanel } from "./EventsPanel";
 import { GuildImportPanel } from "./GuildImportPanel";
 import { SaveQueue } from "@/lib/admin/save-queue";
 import { EMPTY_PROFILE, ProfileForm } from "./ProfileForm";
@@ -35,7 +36,7 @@ import { heldNotice } from "./SignupForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
-type Tab = "recipes" | "import" | "profile" | "add" | "crafters" | "guild" | "data";
+type Tab = "recipes" | "import" | "profile" | "add" | "crafters" | "guild" | "events" | "data";
 
 const IMPORT_ERRORS: Record<GuildonErrorReason, string> = {
   format: "is not an export line. Copy the whole text from /gnc export.",
@@ -129,6 +130,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
   const canAddCharacter = data.isAdmin || (data.signup.open && data.signup.verified);
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
   const [directory, setDirectory] = useState<AdminDirectory | null>(data.directory);
+  const [events, setEvents] = useState(data.events);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   /** A character just asked for that turned out to be listed already. */
   const [held, setHeld] = useState<string | null>(null);
@@ -197,6 +199,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
       ? ([
           ["crafters", "Crafters"],
           ["guild", "Import guild"],
+          ["events", "Events"],
           ["data", "Game data"],
         ] as [Tab, string][])
       : []),
@@ -383,6 +386,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             }}
           />
         ) : null}
+        {tab === "events" && events ? <EventsPanel events={events} loadedAt={data.loadedAt} onChange={setEvents} /> : null}
         {tab === "data" ? <GameDataPanel runs={data.runs} configured={data.syncConfigured} /> : null}
       </div>
     </Frame>

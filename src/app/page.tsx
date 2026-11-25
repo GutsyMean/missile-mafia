@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { EventList } from "@/components/events/EventList";
 import { Frame } from "@/components/wow/Frame";
 import { ItemIcon } from "@/components/wow/ItemIcon";
 import wow from "@/components/wow/wow.module.css";
 import { loadCraftables } from "@/lib/craftables/load";
+import { loadEvents } from "@/lib/events-load";
 import { craftableNow, professionCoverage } from "@/lib/guild-summary";
 import styles from "./home.module.css";
 
@@ -10,7 +12,7 @@ const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? on
 
 /** The front page: where a guild member starts, whatever they came for. */
 export default async function Home() {
-  const doc = await loadCraftables();
+  const [doc, { upcoming }] = await Promise.all([loadCraftables(), loadEvents()]);
   const coverage = professionCoverage(doc);
   const classes = doc.classes ?? [];
 
@@ -94,6 +96,18 @@ export default async function Home() {
         </Frame>
 
         <div className={styles.side}>
+          {upcoming.length > 0 ? (
+            <Frame title="Coming up" heading="h2">
+              <div className={styles.pane}>
+                <EventList events={upcoming.slice(0, 3)} brief />
+                <div className={styles.actions}>
+                  <Link href="/events" className={styles.more}>
+                    {upcoming.length > 3 ? `All ${upcoming.length} events` : "The calendar"}
+                  </Link>
+                </div>
+              </div>
+            </Frame>
+          ) : null}
           {classes.length > 0 ? (
             <Frame title="Best gear" heading="h2">
               <div className={styles.pane}>
