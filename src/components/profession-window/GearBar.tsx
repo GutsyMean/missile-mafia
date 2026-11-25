@@ -157,17 +157,6 @@ export function GearBar({
         </div>
       ) : null}
 
-      {gameClass && gear.everySource ? (
-        <p className={styles.gearHow}>
-          Drops and quest rewards are the ones{" "}
-          <a href="https://wowforever.be/guides/dungeons/" target="_blank" rel="noreferrer">
-            wowforever.be
-          </a>{" "}
-          names on its dungeon pages and pre-raid lists. World drops, zone quests and raid loot are not listed there
-          yet.
-        </p>
-      ) : null}
-
 
       {gameClass && spec && editing ? (
         <div id="gear-order-editor" className={styles.gearEditor} role="group" aria-label="Change the order of stats">
