@@ -50,6 +50,9 @@ export interface ProfessionView {
   iconFileId: number;
 }
 
+/** As far as a profession goes: the top of every skill bar. */
+export const MAX_SKILL = 300;
+
 export interface CrafterView {
   id: string;
   slug: string;

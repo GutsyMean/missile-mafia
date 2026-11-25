@@ -478,3 +478,34 @@ select.field option {
 .faction[data-faction="alliance"] {
   color: #7fa9ff;
 }
+
+/* The profession skill bar, as the game draws it: blue, filled from the left, its figure written across it. */
+.skillBar {
+  position: relative;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid #5d4a2c;
+  border-radius: 3px;
+  background: rgb(0 0 60 / 0.55);
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+.skillBarFill {
+  height: 100%;
+  background:
+    linear-gradient(rgb(40 60 255 / 0.75), rgb(40 60 255 / 0.75)),
+    url("/ui/skill-bar.png") 0 0 / 100% 100%;
+  background-blend-mode: multiply;
+}
+
+.skillBarText {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}

@@ -40,6 +40,7 @@ import { specPriority } from "@/lib/gear/priorities";
 import { rankGear, showSection, type Ranked } from "@/lib/gear/rank";
 import { Frame } from "@/components/wow/Frame";
 import { ItemTooltip } from "@/components/wow/ItemTooltip";
+import { SkillBar } from "@/components/wow/SkillBar";
 import wow from "@/components/wow/wow.module.css";
 import { DetailPane } from "./DetailPane";
 import { FilterBar } from "./FilterBar";
@@ -49,7 +50,6 @@ import styles from "./window.module.css";
 
 /** Below this width the detail pane becomes a full-screen sheet. Matches the CSS. */
 const SHEET_QUERY = "(max-width: 820px)";
-const MAX_SKILL = 300;
 const NO_GEAR_ELSEWHERE: GearElsewhereDoc = { professions: [], recipes: [], items: {} };
 const NO_SOURCED_GEAR: GearSourcesDoc = { items: {}, sources: {} };
 
@@ -410,12 +410,14 @@ export function ProfessionWindow({ doc, initialUnlearned = {}, view: page = "cra
                 .map((p) => {
                   const skill = profiled.skills[String(p.id)];
                   return (
-                    <div key={p.id} className={styles.skill} aria-label={`${profiled.characterName}: ${p.name} ${skill}`}>
-                      <div className={styles.skillFill} style={{ width: `${Math.min(100, (skill / MAX_SKILL) * 100)}%` }} />
-                      <span className={styles.skillText}>
-                        {p.name} {skill}
-                      </span>
-                    </div>
+                    <SkillBar
+                      key={p.id}
+                      className={styles.skill}
+                      skill={skill}
+                      label={`${profiled.characterName}: ${p.name} ${skill}`}
+                    >
+                      {p.name} {skill}
+                    </SkillBar>
                   );
                 })}
             </section>

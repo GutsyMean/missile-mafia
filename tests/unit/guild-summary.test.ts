@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CraftablesDoc, RecipeView } from "@/lib/craftables/types";
-import { craftableNow, professionCoverage, roster } from "@/lib/guild-summary";
+import { craftableNow, professionCoverage } from "@/lib/guild-summary";
 
 const recipe = (id: number, professionId: number, crafterIds: string[]): RecipeView => ({
   id,
@@ -67,28 +67,6 @@ describe("professionCoverage", () => {
       ["Bram", 215],
       ["Cole", 42],
     ]);
-  });
-});
-
-describe("roster", () => {
-  it("has a column for each profession anybody has", () => {
-    expect(roster(doc).professions.map((p) => p.name)).toEqual(["Blacksmithing", "Tailoring"]);
-  });
-
-  it("gives each crafter their skills in column order and the size of their list", () => {
-    expect(roster(doc).rows.map((row) => [row.crafter.characterName, row.skills, row.recipes])).toEqual([
-      ["Ada", [215, 170], 2],
-      ["Bram", [215, 0], 2],
-      ["Cole", [42, 0], 0],
-    ]);
-  });
-
-  it("knows the highest skill in each profession", () => {
-    expect(roster(doc).best).toEqual([215, 170]);
-  });
-
-  it("is empty for a guild with no crafters", () => {
-    expect(roster({ ...doc, crafters: [] })).toEqual({ professions: [], rows: [], best: [] });
   });
 });
 

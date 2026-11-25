@@ -1,81 +1,65 @@
 import Link from "next/link";
 import { Frame } from "@/components/wow/Frame";
 import { ItemIcon } from "@/components/wow/ItemIcon";
+import { SkillBar } from "@/components/wow/SkillBar";
 import { loadCraftables } from "@/lib/craftables/load";
-import { roster } from "@/lib/guild-summary";
+import { MAX_SKILL } from "@/lib/craftables/types";
+import { professionCoverage } from "@/lib/guild-summary";
 import styles from "./roster.module.css";
 
 export const metadata = {
   title: "Roster",
-  description: "Missile Mafia's crafters: who has which profession and at what skill.",
+  description: "Missile Mafia's crafters by profession: who has which, and how far along.",
 };
 
-/** Every crafter against every profession: who has what, and how far along. */
+const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/** The guild by profession: under each, everyone who has it, with their skill as a bar. */
 export default async function RosterPage() {
   const doc = await loadCraftables();
-  const { professions, rows, best } = roster(doc);
+  const professions = professionCoverage(doc).filter((coverage) => coverage.crafters.length > 0);
 
   return (
     <main className={styles.page}>
       <Frame title="Roster" className={styles.window}>
         <p className={styles.lead}>
-          {rows.length === 0
+          {professions.length === 0
             ? "No crafter has signed up yet."
-            : `${rows.length} ${rows.length === 1 ? "crafter" : "crafters"} and the skill each has. A number opens what that character makes with the profession; the best in each is in gold.`}
+            : `${count(doc.crafters.length, "crafter")} across ${count(professions.length, "profession")}, the most skilled first. Each bar is a character's skill out of ${MAX_SKILL}; a name opens what they make.`}
         </p>
-        {rows.length > 0 ? (
-          <div className={styles.pane}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th scope="col" className={styles.who}>
-                    Character
-                  </th>
-                  <th scope="col" className={styles.count}>
-                    Recipes
-                  </th>
-                  {professions.map((profession) => (
-                    <th key={profession.id} scope="col" className={styles.profession}>
-                      <Link href={`/crafting?prof=${profession.slug}`}>
-                        <ItemIcon fileId={profession.iconFileId} size={30} />
-                        <span>{profession.name}</span>
-                      </Link>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(({ crafter, recipes, skills }) => {
-                  const about = [crafter.level ? `Level ${crafter.level}` : null, crafter.class].filter(Boolean).join(" ");
-                  return (
-                    <tr key={crafter.id}>
-                      <th scope="row" className={styles.who}>
-                        <Link href={`/crafting?crafter=${crafter.slug}`} className={styles.name}>
-                          {crafter.characterName}
-                        </Link>
-                        {about ? <span className={styles.about}>{about}</span> : null}
-                      </th>
-                      <td className={styles.count}>{recipes}</td>
-                      {skills.map((skill, column) => (
-                        <td key={professions[column].id} className={styles.skill}>
-                          {skill > 0 ? (
-                            <Link
-                              href={`/crafting?crafter=${crafter.slug}&prof=${professions[column].slug}`}
-                              data-best={skill === best[column] ? "" : undefined}
-                              aria-label={`${crafter.characterName}: ${professions[column].name} ${skill}`}
-                            >
-                              {skill}
-                            </Link>
-                          ) : null}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
+        <div className={styles.professions}>
+          {professions.map(({ profession, crafters }) => (
+            <section key={profession.id} className={styles.profession} aria-labelledby={`roster-${profession.slug}`}>
+              <h2 id={`roster-${profession.slug}`} className={styles.heading}>
+                <Link href={`/crafting?prof=${profession.slug}`} className={styles.name}>
+                  <ItemIcon fileId={profession.iconFileId} size={32} />
+                  <span>{profession.name}</span>
+                </Link>
+                <span className={styles.count}>{count(crafters.length, "crafter")}</span>
+              </h2>
+              <ol className={styles.crafters}>
+                {crafters.map(({ crafter, skill }) => (
+                  <li key={crafter.id} className={styles.crafter}>
+                    <Link
+                      href={`/crafting?crafter=${crafter.slug}&prof=${profession.slug}`}
+                      className={styles.who}
+                      title={crafter.characterName}
+                    >
+                      {crafter.characterName}
+                    </Link>
+                    <SkillBar
+                      className={styles.bar}
+                      skill={skill}
+                      label={`${crafter.characterName}: ${profession.name} ${skill} of ${MAX_SKILL}`}
+                    >
+                      {skill} / {MAX_SKILL}
+                    </SkillBar>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+        </div>
       </Frame>
     </main>
   );

@@ -55,13 +55,23 @@ test.describe("the site", () => {
     await expect(page.getByRole("region", { name: "Chest", exact: true })).toBeVisible();
   });
 
-  test("lists every crafter against every profession on the roster", async ({ page }) => {
+  test("sets the roster out by profession, each crafter with a bar for their skill out of 300", async ({ page }) => {
     await page.goto("/roster");
-    await expect(page.getByRole("columnheader")).toHaveText(["Character", "Recipes", "Blacksmithing", "Tailoring"]);
-    const damien = page.getByRole("row", { name: /^Damien/ });
-    await expect(damien).toContainText("Level 24 Paladin");
-    await expect(damien.getByRole("cell")).toHaveText(["58", "145", ""]);
-    await page.getByRole("link", { name: "Stitches: Tailoring 60" }).click();
+    await expect(page.getByText("2 crafters across 2 professions")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2 })).toHaveText(["Blacksmithing1 crafter", "Tailoring1 crafter"]);
+
+    const blacksmithing = page.getByRole("region", { name: /^Blacksmithing/ });
+    const bar = blacksmithing.getByRole("meter", { name: "Damien: Blacksmithing 145 of 300" });
+    await expect(bar).toHaveText("145 / 300");
+    await expect(bar).toHaveAttribute("aria-valuenow", "145");
+    await expect(bar).toHaveAttribute("aria-valuemax", "300");
+    // The bar is filled as far as the skill goes: 145 of 300 is a little under half.
+    const [whole, filled] = await Promise.all([bar.boundingBox(), bar.locator("div").first().boundingBox()]);
+    expect(filled!.width / whole!.width).toBeGreaterThan(0.46);
+    expect(filled!.width / whole!.width).toBeLessThan(0.5);
+    await expect(blacksmithing.getByText("Stitches")).toHaveCount(0);
+
+    await page.getByRole("region", { name: /^Tailoring/ }).getByRole("link", { name: "Stitches" }).click();
     await expect(page).toHaveURL(/\/crafting\?crafter=stitches&prof=tailoring$/);
     await expect(page.getByRole("combobox", { name: "Profession", exact: true })).toHaveValue("tailoring");
   });
@@ -170,6 +180,6 @@ test.describe("going back", () => {
     await sections(page).getByRole("link", { name: "Roster" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Roster" })).toBeVisible();
     await expect(page.locator("#main")).toHaveCount(1);
-    await expect(page.locator("#main")).toContainText("Level 24 Paladin");
+    await expect(page.locator("#main")).toContainText("145 / 300");
   });
 });
