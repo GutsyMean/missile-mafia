@@ -275,7 +275,7 @@ select test.throws($$select private.admin_directory()$$, '42501', 'nor by callin
 select test.throws($$select public.admin_create_crafter('Me', '33333333-3333-3333-3333-333333333333')$$, '42501', 'a member cannot make themselves a crafter');
 select test.throws($$select public.admin_link_crafter('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '33333333-3333-3333-3333-333333333333')$$, '42501', 'a member cannot take over someone else''s crafter');
 select test.throws($$select public.admin_set_crafter_listed('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', true)$$, '42501', 'a member cannot change who is listed');
-select test.is((select count(*)::int from public.crafters where user_id = (select auth.uid())), 0, 'signing in alone does not make anyone a crafter');
+select test.is(jsonb_array_length(public.my_crafters()), 0, 'signing in alone does not make anyone a crafter');
 
 select test.login(:'owner');
 select test.is(jsonb_array_length(public.admin_directory() -> 'accounts'), 3, 'an admin sees every account that has signed in');
@@ -293,19 +293,19 @@ select test.is(
   'each crafter comes with the size of their list');
 
 select public.admin_create_crafter('  New Member ', :'member') as new_id \gset
-select test.is((select user_id from public.crafters where id = :'new_id'), :'member'::uuid, 'an admin can make a signed-in member a crafter');
+select test.is(test.manager_of(:'new_id'), :'member'::uuid, 'an admin can make a signed-in member a crafter');
 select test.is((select character_name from public.crafters where id = :'new_id'), 'New Member', 'the name is trimmed');
 select test.is((select slug from public.crafters where id = :'new_id'), 'new-member', 'the new crafter gets an address from the name');
 select test.is((select is_listed from public.crafters where id = :'new_id'), true, 'a new crafter is listed');
 
 select public.admin_create_crafter('New Member', null) as alt_id \gset
 select test.is((select slug from public.crafters where id = :'alt_id'), 'new-member-2', 'a repeated name still gets its own address');
-select test.is((select user_id is null from public.crafters where id = :'alt_id'), true, 'a crafter can be added before the member signs in');
+select test.is(test.manager_of(:'alt_id') is null, true, 'a crafter can be added before the member signs in');
 
 select public.admin_link_crafter(:'alt_id', :'member');
-select test.is((select user_id from public.crafters where id = :'alt_id'), :'member'::uuid, 'an admin can link an account to an existing crafter');
+select test.is(test.manager_of(:'alt_id'), :'member'::uuid, 'an admin can link an account to an existing crafter');
 select public.admin_link_crafter(:'alt_id', null);
-select test.is((select user_id is null from public.crafters where id = :'alt_id'), true, 'an admin can unlink a crafter');
+select test.is(test.manager_of(:'alt_id') is null, true, 'an admin can unlink a crafter');
 select public.admin_set_crafter_listed(:'alt_id', false);
 select test.is(
   (select (c ->> 'isListed')::boolean from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' = :'alt_id'), false,
@@ -397,12 +397,12 @@ select test.login(:'joiner');
 select test.is((select count(*)::int from public.verified_members), 1, 'a member can see their own verification');
 select test.throws($$select public.signup_crafter('  ')$$, '22023', 'signing up needs a character name');
 select public.signup_crafter(' Joiner ') as joiner_crafter \gset
-select test.is((select user_id from public.crafters where id = :'joiner_crafter'), :'joiner'::uuid, 'a verified member creates their own crafter');
+select test.is(test.manager_of(:'joiner_crafter'), :'joiner'::uuid, 'a verified member creates their own crafter');
 select test.is((select character_name from public.crafters where id = :'joiner_crafter'), 'Joiner', 'under the name they gave');
 select test.is((select is_listed from public.crafters where id = :'joiner_crafter'), true, 'and is listed straight away');
 select public.signup_crafter('Joiner Alt') as joiner_alt \gset
-select test.is((select user_id from public.crafters where id = :'joiner_alt'), :'joiner'::uuid, 'a member can add another character under the same login');
-select test.is((select count(*)::int from public.crafters where user_id = (select auth.uid())), 2, 'each character is its own crafter');
+select test.is(test.manager_of(:'joiner_alt'), :'joiner'::uuid, 'a member can add another character under the same login');
+select test.is(jsonb_array_length(public.my_crafters()), 2, 'each character is its own crafter');
 select test.is(
   test.affected(format('insert into public.crafter_professions (crafter_id, profession_id, skill) values (%L, 164, 75)', :'joiner_alt')), 1,
   'with its own professions');
@@ -431,7 +431,7 @@ select test.is(
   'and who it did not');
 select public.admin_save_settings(false, '123456789012345678', null);
 select public.signup_crafter('Damien Alt') as owner_alt \gset
-select test.is((select user_id from public.crafters where id = :'owner_alt'), :'owner'::uuid, 'an admin can add a character of their own without being verified');
+select test.is(test.manager_of(:'owner_alt'), :'owner'::uuid, 'an admin can add a character of their own without being verified');
 reset role;
 
 set role service_role;
@@ -1137,3 +1137,51 @@ select test.is((select count(*)::int from public.guild_events), 0, 'an admin rem
 select test.throws(format('select public.admin_delete_event(%L)', :'raid'), 'P0002', 'removing it twice is an error');
 reset role;
 select test.is(has_function_privilege('anon', 'public.admin_save_event(uuid, text, timestamptz, text)', 'execute'), false, 'visitors have no execute right on adding events');
+
+-- ---------------------------------------------------------------------------
+-- Which account manages a crafter is not for visitors, nor for other members
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.login(null);
+select test.throws($$select user_id from public.crafters$$, '42501', 'a visitor cannot read which account manages a crafter');
+select test.throws($$select * from public.crafters$$, '42501', 'nor take the whole row, which would hold it');
+select test.throws($$select count(*) from public.crafters where user_id is not null$$, '42501', 'nor ask about it sideways');
+select test.is((select count(*)::int from public.crafters where character_name is not null) > 0, true, 'a visitor still reads the listed crafters themselves');
+select test.is(jsonb_array_length(public.guild_craftables() -> 'crafters') > 0, true, 'and the crafting list still names its crafters');
+select test.is(public.guild_craftables()::text like '%user%', false, 'without a word about accounts');
+select test.is(jsonb_typeof(public.guild_unlearned(164) -> 'recipes'), 'array', 'what nobody has learned still loads');
+select test.is(jsonb_typeof(public.guild_gear_elsewhere() -> 'recipes'), 'array', 'and so does gear from professions nobody has');
+select test.throws($$select public.my_crafters()$$, '42501', 'a visitor has no crafters to ask for');
+reset role;
+
+set role authenticated;
+select test.login(:'outsider');
+select test.throws($$select user_id from public.crafters$$, '42501', 'someone signed in cannot read it either');
+select test.is(public.my_crafters(), '[]'::jsonb, 'and manages nothing');
+select test.throws(
+  format('insert into public.crafter_professions (crafter_id, profession_id, skill) values (%L, 164, 300)', :'crafter_owner'), '42501',
+  'nor can they give themselves a say in someone else''s crafter');
+select test.throws(format('select public.set_crafter_recipes(%L, array[3333], %L)', :'crafter_owner', '{}'), '42501', 'or tick recipes for it');
+
+select test.login(:'owner');
+select test.is(
+  (select array_agg(c ->> 'characterName' order by c ->> 'characterName') from jsonb_array_elements(public.my_crafters()) c),
+  (select array_agg(character_name order by character_name) from public.crafters where test.manager_of(id) = :'owner'),
+  'a member is given the crafters they manage, by name');
+select test.is(public.my_crafters()::text like '%user%', false, 'again without the account in it');
+select test.is(
+  test.affected(format('update public.crafters set note = %L where id = %L', 'Still mine', :'crafter_owner')), 1,
+  'a member still edits their own crafter');
+select test.is(
+  test.affected(format('update public.crafters set note = %L where id = %L', 'Not mine', :'tessa_id')), 0,
+  'and still not anyone else''s');
+select test.is(
+  test.affected(format('update public.crafter_professions set skill = skill where crafter_id = %L', :'crafter_owner')) > 0, true,
+  'they still change their own professions');
+select test.is(
+  public.set_crafter_recipes(:'crafter_owner', array[505], array[505]) ->> 'added', '1',
+  'and tick their own recipes');
+reset role;
+select test.is(has_column_privilege('anon', 'public.crafters', 'user_id', 'select'), false, 'visitors hold no right to the account column');
+select test.is(has_column_privilege('authenticated', 'public.crafters', 'user_id', 'select'), false, 'nor do signed-in users');
+select test.is(has_column_privilege('anon', 'public.crafters', 'character_name', 'select'), true, 'the rest of a listed crafter stays public');

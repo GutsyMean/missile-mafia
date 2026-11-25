@@ -61,3 +61,12 @@ $$;
 
 create function test.login(p_user uuid) returns void
 language sql as $$ select set_config('request.jwt.claim.sub', coalesce(p_user::text, ''), false) $$;
+
+-- Which account manages a crafter, read past the grants: the tests need to check it, the roles they act as may not.
+create function test.manager_of(p_crafter_id uuid) returns uuid
+language plpgsql security definer as $$
+begin
+  -- Looked up when called: the table does not exist yet when this file is read.
+  return (select c.user_id from public.crafters c where c.id = p_crafter_id);
+end;
+$$;

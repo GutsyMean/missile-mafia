@@ -58,6 +58,18 @@ export interface AdminData {
 
 const PAGE = 1000;
 
+/** One of the caller's own crafters, as `my_crafters()` returns it. */
+interface OwnCrafterRow {
+  id: string;
+  slug: string;
+  characterName: string;
+  realm: string | null;
+  faction: string | null;
+  class: string | null;
+  level: number | null;
+  note: string | null;
+}
+
 /** Everything the crafter's page needs, read as the signed-in user. Null when signed out. */
 export async function loadAdminData(): Promise<AdminData | null> {
   const supabase = await createServerSupabase();
@@ -66,7 +78,8 @@ export async function loadAdminData(): Promise<AdminData | null> {
   if (!claims?.sub) return null;
 
   const [crafterRows, adminRow, catalog, runRows, signupRow, verifiedRow, claimRows] = await Promise.all([
-    supabase.from("crafters").select("*").eq("user_id", claims.sub).order("character_name"),
+    // Which account manages a crafter is not readable through the API; the database hands over the caller's own.
+    supabase.rpc("my_crafters"),
     supabase.from("app_admins").select("user_id").maybeSingle(),
     supabase.rpc("admin_catalog"),
     supabase.from("sync_runs").select("*").order("id", { ascending: false }).limit(8),
@@ -102,7 +115,7 @@ export async function loadAdminData(): Promise<AdminData | null> {
   }
 
   const crafters: AdminCrafter[] = [];
-  for (const row of crafterRows.data ?? []) {
+  for (const row of (crafterRows.data ?? []) as OwnCrafterRow[]) {
     const { data: skillRows } = await supabase
       .from("crafter_professions")
       .select("profession_id, skill")
@@ -125,7 +138,7 @@ export async function loadAdminData(): Promise<AdminData | null> {
     crafters.push({
       id: row.id,
       slug: row.slug,
-      characterName: row.character_name,
+      characterName: row.characterName,
       realm: row.realm,
       faction: row.faction,
       className: row.class,
