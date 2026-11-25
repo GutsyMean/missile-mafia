@@ -33,6 +33,44 @@ export interface GuildyMember {
   professions: GuildyProfession[];
 }
 
+/** One line of the guild bank's ledger. */
+export interface BankEntry {
+  /** What happened, as the game names it: "deposit", "withdraw", "move", "repair", "buyTab" and so on. "gap" where entries may be missing. */
+  kind: string;
+  who: string | null;
+  /** The item moved, for a line about an item. */
+  id: number | null;
+  name: string | null;
+  count: number | null;
+  /** The bank tab it concerns, and the tab an item was moved to. */
+  tab: number | null;
+  toTab: number | null;
+  /** The money moved, in copper, for a line about money. */
+  copper: number | null;
+  /** When it happened, in seconds since 1970. */
+  at: number;
+}
+
+export interface BankTab {
+  n: number;
+  name: string;
+  slots: { slot: number; id: number | null; name: string; count: number }[];
+}
+
+/** The guild bank as the addon last read it at a guild banker. */
+export interface GuildyBank {
+  /** When it was read, in seconds since 1970, and by which character. */
+  at: number;
+  by: string | null;
+  /** The gold in the bank, in copper. */
+  money: number;
+  /** What the next tab costs, in copper. Null when the addon did not read it; zero when there is none to buy. */
+  nextTabCost: number | null;
+  tabs: BankTab[];
+  /** The newest lines of the money log and of every tab's log together, newest first. */
+  ledger: BankEntry[];
+}
+
 export interface GuildyGuild {
   /** As the file names it: "Guild@Realm". */
   key: string;
@@ -41,6 +79,8 @@ export interface GuildyGuild {
   members: GuildyMember[];
   /** Characters the addon knows to be one player's, by name. Only players with more than one. */
   players: string[][];
+  /** Null when nobody running the addon has opened the bank at a guild banker. */
+  bank: GuildyBank | null;
 }
 
 export type GuildyFileProblem = "not_saved_data" | "not_guildy" | "no_guild";
@@ -99,6 +139,73 @@ function playersOf(families: LuaTable | null): string[][] {
     .sort((a, b) => a[0].localeCompare(b[0]));
 }
 
+/** How much of the ledger is taken along: the site shows what happened lately, not the bank's whole history. */
+export const LEDGER_LINES = 300;
+
+const text = (value: unknown, limit: number): string | null =>
+  typeof value === "string" && value.trim() !== "" ? value.trim().slice(0, limit) : null;
+
+/**
+ * The bank as the addon keeps it (its Core/Bank.lua):
+ *   bank = { at, by, money, cost, tabs = { [n] = { name, slots = { [slot] = { id, nm, n } } } },
+ *            logs = { money = { Entry }, ["1"] = { Entry }, ... } }
+ *   Entry = { k = kind, w = who, id, nm, n = count, a = tab, b = tab moved to, c = copper, ts }
+ * What a character may itself take out (`mine`) is theirs alone and is left behind.
+ */
+function bankOf(bank: LuaTable | null): GuildyBank | null {
+  if (!bank) return null;
+  const at = wholeNumber(bank.get("at"), 1, 99_999_999_999);
+  const money = wholeNumber(bank.get("money"), 0, Number.MAX_SAFE_INTEGER);
+  if (at === null || money === null) return null;
+
+  const tabs: BankTab[] = [];
+  for (const [key, tab] of tableAt(bank, "tabs") ?? []) {
+    const n = wholeNumber(key, 1, 99);
+    if (n === null || !isLuaTable(tab)) continue;
+    const slots: BankTab["slots"] = [];
+    for (const [slotKey, held] of tableAt(tab, "slots") ?? []) {
+      const slot = wholeNumber(slotKey, 1, 999);
+      if (slot === null || !isLuaTable(held)) continue;
+      const id = wholeNumber(held.get("id"), 1, 2_000_000_000);
+      slots.push({ slot, id, name: text(held.get("nm"), 80) ?? (id ? `Item ${id}` : "Unknown item"), count: wholeNumber(held.get("n"), 1, 1_000_000) ?? 1 });
+    }
+    tabs.push({ n, name: text(tab.get("name"), 40) ?? `Tab ${n}`, slots: slots.sort((a, b) => a.slot - b.slot) });
+  }
+
+  const ledger: BankEntry[] = [];
+  for (const [logKey, log] of tableAt(bank, "logs") ?? []) {
+    if (!isLuaTable(log)) continue;
+    const logTab = wholeNumber(Number(logKey), 1, 99);
+    for (const entry of listOf(log)) {
+      if (!isLuaTable(entry)) continue;
+      const kind = text(entry.get("k"), 24);
+      const when = wholeNumber(entry.get("ts"), 1, 99_999_999_999);
+      if (!kind || when === null) continue;
+      ledger.push({
+        kind,
+        who: text(entry.get("w"), 40),
+        id: wholeNumber(entry.get("id"), 1, 2_000_000_000),
+        name: text(entry.get("nm"), 80),
+        count: wholeNumber(entry.get("n"), 1, 1_000_000),
+        tab: wholeNumber(entry.get("a"), 1, 99) ?? logTab,
+        toTab: wholeNumber(entry.get("b"), 1, 99),
+        copper: wholeNumber(entry.get("c"), 0, Number.MAX_SAFE_INTEGER),
+        at: when,
+      });
+    }
+  }
+  ledger.sort((a, b) => b.at - a.at);
+
+  return {
+    at,
+    by: text(bank.get("by"), 40),
+    money,
+    nextTabCost: wholeNumber(bank.get("cost"), 0, Number.MAX_SAFE_INTEGER),
+    tabs: tabs.sort((a, b) => a.n - b.n),
+    ledger: ledger.slice(0, LEDGER_LINES),
+  };
+}
+
 /** What a Guildy saved-data file holds, per guild. */
 export function readGuildyFile(text: string): GuildyFile {
   let variables;
@@ -130,6 +237,7 @@ export function readGuildyFile(text: string): GuildyFile {
       realm: split > 0 ? key.slice(split + 1) || null : null,
       members,
       players: playersOf(tableAt(guild, "families")),
+      bank: bankOf(tableAt(guild, "bank")),
     });
   }
   if (guilds.length === 0) return { ok: false, problem: "no_guild" };

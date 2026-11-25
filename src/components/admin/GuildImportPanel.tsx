@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { applyGuildImport, previewGuildImport, type GuildImportResult } from "@/app/admin/actions";
+import { applyGuildImport, importGuildBank, previewGuildImport, type GuildImportResult } from "@/app/admin/actions";
+import { Money } from "@/components/wow/Money";
+import { bankContents } from "@/lib/guild-bank";
 import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
 import { listNames } from "@/lib/admin/directory";
 import {
@@ -24,7 +26,7 @@ interface Props {
   directory: AdminDirectory;
   onImported: (result: GuildImportResult) => void;
   /** How the server is asked. Only given a stand-in where there is no server to ask. */
-  actions?: { preview: typeof previewGuildImport; apply: typeof applyGuildImport };
+  actions?: { preview: typeof previewGuildImport; apply: typeof applyGuildImport; bank: typeof importGuildBank };
 }
 
 /** What the admin chose for one member: whether to import them, and into which crafter ("" for a new one). */
@@ -43,7 +45,7 @@ const PROBLEMS: Record<GuildyFileProblem, string> = {
 /** Guildy's file for a large guild runs to a few megabytes; anything far beyond that is something else. */
 const MAX_FILE_BYTES = 40_000_000;
 
-const SERVER = { preview: previewGuildImport, apply: applyGuildImport };
+const SERVER = { preview: previewGuildImport, apply: applyGuildImport, bank: importGuildBank };
 
 /** A fixed format, so the date reads the same everywhere. */
 const day = (seconds: number) =>
@@ -92,6 +94,9 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
   const [problem, setProblem] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  /** How bringing in the bank went, and whether it is under way. */
+  const [bankNote, setBankNote] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [bankPending, startBank] = useTransition();
   const fileInput = useRef<HTMLInputElement>(null);
   /** Counts the looks asked for, so an answer to an earlier one is not shown. */
   const looks = useRef(0);
@@ -160,6 +165,7 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
       return;
     }
     setLoaded({ fileName: file.name, guilds: read.guilds });
+    setBankNote(null);
     openGuild(read.guilds[0]);
   };
 
@@ -261,6 +267,52 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
 
       {guild ? (
         <>
+          <h3 className={styles.subheading}>Guild bank</h3>
+          {guild.bank ? (
+            <section className={styles.character} aria-label="Guild bank">
+              <p>
+                <Money copper={guild.bank.money} />{" "}
+                <span className={styles.muted}>
+                  · {count(guild.bank.tabs.length, "tab")}, {count(bankContents(guild.bank.tabs).slots, "slot")} in use ·{" "}
+                  {count(guild.bank.ledger.length, "ledger line")}
+                </span>
+              </p>
+              <p className={styles.muted}>
+                Read by Guildy on {day(guild.bank.at)}
+                {guild.bank.by ? ` by ${guild.bank.by}` : ""}. Guild members see it on the Guild bank page.
+              </p>
+              {bankNote ? (
+                <p className={bankNote.kind === "ok" ? styles.ok : styles.error} role="status">
+                  {bankNote.text}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className={wow.button}
+                disabled={bankPending}
+                onClick={() => {
+                  const reading = guild.bank;
+                  if (!reading) return;
+                  setBankNote(null);
+                  startBank(async () => {
+                    const result = await actions.bank(reading);
+                    setBankNote(
+                      result.ok
+                        ? { kind: "ok", text: `The Guild bank page now shows the reading of ${day(reading.at)}.` }
+                        : { kind: "error", text: result.error },
+                    );
+                  });
+                }}
+              >
+                {bankPending ? "Updating…" : "Update the guild bank"}
+              </button>
+            </section>
+          ) : (
+            <p className={styles.muted}>
+              Guildy has not read the guild bank in this file. Open the bank at a guild banker in game, log out, then
+              choose the file again.
+            </p>
+          )}
           <h3 className={styles.subheading}>
             {guild.name}: {count(rows.length, "member")} with professions
           </h3>

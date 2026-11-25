@@ -4,6 +4,7 @@ export const SECTIONS: { href: string; label: string }[] = [
   { href: "/crafting", label: "Crafting" },
   { href: "/gear", label: "Best gear" },
   { href: "/roster", label: "Roster" },
+  { href: "/bank", label: "Guild bank" },
 ];
 
 export const SITE_NAME = "Missile Mafia HQ";

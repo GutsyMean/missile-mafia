@@ -76,6 +76,39 @@ describe("readGuildyFile", () => {
     expect(guilds()[1].players).toEqual([]);
   });
 
+  it("reads the guild bank: its gold, what lies in each tab, and the newest of the ledger", () => {
+    const [guild, old] = guilds();
+    expect(old.bank).toBeNull();
+    expect(guild.bank).toEqual({
+      at: 1795395192,
+      by: "Bram Anvil",
+      money: 1234567,
+      nextTabCost: 2500000,
+      tabs: [
+        {
+          n: 1,
+          name: "Ore and bars",
+          slots: [
+            { slot: 1, id: 2842, name: "Silver Bar", count: 5 },
+            { slot: 3, id: 2841, name: "Bronze Bar", count: 20 },
+          ],
+        },
+        { n: 3, name: "Tab 3", slots: [] },
+      ],
+      // The money log and each tab's log as one, newest first; a tab's log says which tab.
+      ledger: [
+        { kind: "withdraw", who: "Zoë Quill", id: 2841, name: "Bronze Bar", count: 4, tab: 1, toTab: null, copper: null, at: 1795390000 },
+        { kind: "repair", who: "Bram Anvil", id: null, name: null, count: null, tab: null, toTab: null, copper: 12300, at: 1795315991 },
+        { kind: "gap", who: null, id: null, name: null, count: null, tab: 1, toTab: null, copper: null, at: 1795200000 },
+        { kind: "deposit", who: "Tessa Thimble", id: null, name: null, count: null, tab: null, toTab: null, copper: 500000, at: 1794885522 },
+      ],
+    });
+  });
+
+  it("leaves behind what a character may take out themselves", () => {
+    expect(JSON.stringify(guilds()[0].bank)).not.toContain("gold");
+  });
+
   it("says what is wrong with other files", () => {
     expect(readGuildyFile("just some text")).toEqual({ ok: false, problem: "not_saved_data" });
     expect(readGuildyFile('GuildonCraftsDB = { ["sets"] = {} }')).toEqual({ ok: false, problem: "not_guildy" });

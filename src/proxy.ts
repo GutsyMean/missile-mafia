@@ -36,5 +36,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/login", "/auth/:path*"],
+  // The pages that show something to members only, and the way in and out. Everything else is served as built.
+  matcher: ["/admin/:path*", "/bank", "/login", "/auth/:path*"],
 };

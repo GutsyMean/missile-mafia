@@ -1035,3 +1035,56 @@ select test.is(has_function_privilege('anon', 'public.admin_link_player(uuid, uu
 select test.is(has_function_privilege('anon', 'public.admin_group_crafters(jsonb)', 'execute'), false, 'nor on grouping characters');
 select test.is(has_table_privilege('authenticated', 'public.crafter_players', 'select'), false, 'who shares a player is not readable through the API');
 update public.site_settings set auto_approve = false;
+
+-- ---------------------------------------------------------------------------
+-- The guild bank: brought in by an admin, shown to members only
+-- ---------------------------------------------------------------------------
+\set outsider '66666666-6666-6666-6666-666666666666'
+insert into auth.users (id, raw_user_meta_data) values (:'outsider', '{"full_name": "outsider"}');
+\set reading '{"at": 1795395192, "by": "  Bram Anvil ", "money": 1234567, "nextTabCost": 1000000, "tabs": [{"n": 1, "name": "Ore", "slots": [{"slot": 1, "id": 2841, "name": "Bronze Bar", "count": 20}, {"slot": 2, "id": 99999999, "name": "Mystery Thing", "count": 1}]}], "ledger": [{"kind": "deposit", "who": "Bram Anvil", "copper": 50000, "at": 1795390000}, {"kind": "withdraw", "who": "Tessa Thimble", "id": 3483, "name": "Silvered Bronze Gauntlets", "count": 1, "tab": 1, "at": 1795380000}], "mine": {"secret": true}}'
+
+set role anon;
+select test.login(null);
+select test.throws($$select public.guild_bank()$$, '42501', 'a visitor cannot see the guild bank');
+select test.throws($$select public.admin_set_guild_bank('{}'::jsonb)$$, '42501', 'nor bring a reading in');
+reset role;
+
+set role authenticated;
+select test.login(:'outsider');
+select test.throws($$select public.guild_bank()$$, '42501', 'someone signed in who is not of the guild cannot see the bank');
+select test.throws($$select count(*) from public.guild_bank$$, '42501', 'and nobody reads the table itself');
+
+select test.login(:'member');
+select test.is(public.guild_bank() is null, true, 'a member who manages a crafter is let in, and sees nothing before a reading exists');
+select test.throws(format('select public.admin_set_guild_bank(%L::jsonb)', :'reading'), '42501', 'but cannot bring a reading in');
+
+select test.login(:'owner');
+select public.admin_set_guild_bank(:'reading'::jsonb);
+select test.is((public.guild_bank() ->> 'money')::bigint, 1234567::bigint, 'an admin brings in a reading, with the gold in the bank');
+select test.is(public.guild_bank() ->> 'readBy', 'Bram Anvil', 'who read it');
+select test.is((public.guild_bank() ->> 'readAt')::timestamptz, to_timestamp(1795395192), 'and when');
+select test.is(public.guild_bank() -> 'tabs' -> 0 -> 'slots' -> 0 ->> 'name', 'Bronze Bar', 'what lies in each tab');
+select test.is(jsonb_array_length(public.guild_bank() -> 'ledger'), 2, 'and the ledger');
+select test.is(public.guild_bank() -> 'items' -> '2841' ->> 'iconFileId', '133227', 'items the site knows come with their icon');
+select test.is(public.guild_bank() -> 'items' -> '3483' ->> 'quality', '2', 'those in the ledger too');
+select test.is((public.guild_bank() -> 'items') ? '99999999', false, 'an item the site does not know is left to its name');
+select test.is(public.guild_bank() ? 'mine', false, 'anything else in what was sent is dropped');
+
+select test.throws(
+  format('select public.admin_set_guild_bank(%L::jsonb)', (:'reading'::jsonb || '{"at": 1795000000, "money": 1}'::jsonb)::text),
+  'P0001', 'an older reading than the site has is refused');
+select test.is((public.guild_bank() ->> 'money')::bigint, 1234567::bigint, 'and changes nothing');
+select public.admin_set_guild_bank(:'reading'::jsonb || '{"at": 1795395999, "money": 0, "tabs": [], "ledger": []}'::jsonb);
+select test.is((public.guild_bank() ->> 'money')::bigint, 0::bigint, 'a newer reading replaces it');
+select test.is(public.guild_bank() -> 'items', '{}'::jsonb, 'an empty bank is still a reading');
+select test.throws($$select public.admin_set_guild_bank('{"money": 5}'::jsonb)$$, '22023', 'a reading needs its time');
+select test.throws($$select public.admin_set_guild_bank('{"at": 1795395999, "money": "lots"}'::jsonb)$$, '22023', 'and its gold as a number');
+select test.throws($$select public.admin_set_guild_bank('{"at": 1795395999, "money": 1, "tabs": {}}'::jsonb)$$, '22023', 'and its tabs as a list');
+select test.throws($$select public.admin_set_guild_bank('{"at": 99999999999, "money": 1}'::jsonb)$$, '22023', 'and not a date in the future');
+select test.throws($$select public.admin_set_guild_bank('[1]'::jsonb)$$, '22023', 'and to be a reading at all');
+
+select test.login(:'joiner');
+select test.is((public.guild_bank() ->> 'money')::bigint, 0::bigint, 'a member Discord confirmed sees the bank');
+reset role;
+select test.is(has_function_privilege('anon', 'public.guild_bank()', 'execute'), false, 'visitors have no execute right on the bank');
+select test.is(has_table_privilege('authenticated', 'public.guild_bank', 'select'), false, 'the bank is not readable through the API');

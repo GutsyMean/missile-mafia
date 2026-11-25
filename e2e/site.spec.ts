@@ -7,7 +7,7 @@ test.describe("the site", () => {
     await page.goto("/");
     await expect(page).toHaveTitle("Missile Mafia HQ");
     await expect(page.getByRole("heading", { level: 1, name: "What do you need made?" })).toBeVisible();
-    await expect(sections(page).getByRole("link")).toHaveText(["Home", "Crafting", "Best gear", "Roster"]);
+    await expect(sections(page).getByRole("link")).toHaveText(["Home", "Crafting", "Best gear", "Roster", "Guild bank"]);
     await expect(sections(page).getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
     await expect(page.getByText("62 recipes from 2 crafters across 2 professions.")).toBeVisible();
   });
@@ -100,12 +100,23 @@ test.describe("the site", () => {
 
 test.describe("on a phone @phone", () => {
   test("keeps the sections within reach and nothing wider than the screen", async ({ page }) => {
-    for (const path of ["/", "/crafting", "/gear", "/roster"]) {
+    for (const path of ["/", "/crafting", "/gear", "/roster", "/bank"]) {
       await page.goto(path);
-      await expect(sections(page).getByRole("link", { name: "Roster" })).toBeVisible();
+      await expect(sections(page).getByRole("link", { name: "Home" })).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, path).toBe(0);
     }
+  });
+});
+
+test.describe("the guild bank", () => {
+  test("is kept for guild members: a visitor is asked to sign in", async ({ page }) => {
+    await page.goto("/");
+    await sections(page).getByRole("link", { name: "Guild bank" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "Guild bank" })).toBeVisible();
+    await expect(page.getByText("is for guild members")).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: "Sign in" })).toHaveAttribute("href", "/login");
+    await expect(page.getByText("What it holds")).toHaveCount(0);
   });
 });
 

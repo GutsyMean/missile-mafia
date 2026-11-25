@@ -5,7 +5,7 @@ import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
-import type { GuildImportMember, GuildImportPlayer, GuildImportTally } from "@/lib/guildy";
+import { LEDGER_LINES, type GuildImportMember, type GuildImportPlayer, type GuildImportTally, type GuildyBank } from "@/lib/guildy";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /** What every action returns: either it worked, or a message the page can show. */
@@ -485,6 +485,100 @@ export async function applyGuildImport(
     }
   }
   return { ok: true, data: { tallies: imported.data, directory: directory.data, ownRecipes, warning } };
+}
+
+const isCount = (value: unknown, max: number): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= max;
+const isOptionalCount = (value: unknown, max: number) => value === null || isCount(value, max);
+const isOptionalText = (value: unknown, max: number) => value === null || (typeof value === "string" && value.length <= max);
+
+/** A reading of the guild bank as the page sends it, checked before the database sees it. */
+function checkGuildBank(bank: unknown): GuildyBank | string {
+  const wrong = "That file's reading of the guild bank is not valid.";
+  const reading = bank as Partial<GuildyBank> | null;
+  if (
+    !reading ||
+    !isCount(reading.at, 99_999_999_999) ||
+    !isCount(reading.money, Number.MAX_SAFE_INTEGER) ||
+    !isOptionalText(reading.by ?? null, 40) ||
+    !isOptionalCount(reading.nextTabCost ?? null, Number.MAX_SAFE_INTEGER) ||
+    !Array.isArray(reading.tabs) ||
+    reading.tabs.length > 20 ||
+    !Array.isArray(reading.ledger) ||
+    reading.ledger.length > LEDGER_LINES
+  ) {
+    return wrong;
+  }
+  for (const tab of reading.tabs) {
+    if (!isCount(tab?.n, 99) || typeof tab.name !== "string" || tab.name.length > 40 || !Array.isArray(tab.slots) || tab.slots.length > 400) {
+      return wrong;
+    }
+    for (const held of tab.slots) {
+      if (
+        !isCount(held?.slot, 999) ||
+        !isOptionalCount(held.id, 2_000_000_000) ||
+        typeof held.name !== "string" ||
+        held.name.length > 80 ||
+        !isCount(held.count, 1_000_000)
+      ) {
+        return wrong;
+      }
+    }
+  }
+  for (const entry of reading.ledger) {
+    if (
+      typeof entry?.kind !== "string" ||
+      entry.kind.length > 24 ||
+      !isOptionalText(entry.who, 40) ||
+      !isOptionalCount(entry.id, 2_000_000_000) ||
+      !isOptionalText(entry.name, 80) ||
+      !isOptionalCount(entry.count, 1_000_000) ||
+      !isOptionalCount(entry.tab, 99) ||
+      !isOptionalCount(entry.toTab, 99) ||
+      !isOptionalCount(entry.copper, Number.MAX_SAFE_INTEGER) ||
+      !isCount(entry.at, 99_999_999_999)
+    ) {
+      return wrong;
+    }
+  }
+  return {
+    at: reading.at,
+    by: reading.by ?? null,
+    money: reading.money,
+    nextTabCost: reading.nextTabCost ?? null,
+    tabs: reading.tabs.map((tab) => ({
+      n: tab.n,
+      name: tab.name,
+      slots: tab.slots.map((held) => ({ slot: held.slot, id: held.id, name: held.name, count: held.count })),
+    })),
+    ledger: reading.ledger.map((entry) => ({
+      kind: entry.kind,
+      who: entry.who,
+      id: entry.id,
+      name: entry.name,
+      count: entry.count,
+      tab: entry.tab,
+      toTab: entry.toTab,
+      copper: entry.copper,
+      at: entry.at,
+    })),
+  };
+}
+
+/**
+ * Brings in a guild addon's reading of the guild bank, replacing the one the
+ * site has. Site admins only; the database checks that again, and refuses a
+ * reading older than the one it holds.
+ */
+export async function importGuildBank(bank: GuildyBank): Promise<ActionResult> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  const checked = checkGuildBank(bank);
+  if (typeof checked === "string") return fail(checked);
+
+  const { error } = await session.supabase.rpc("admin_set_guild_bank", { p_bank: checked });
+  if (error) return fail(error.code === "42501" ? NOT_ADMIN : error.message);
+  return { ok: true, data: undefined };
 }
 
 /** Sets who is approved automatically: members of a Discord server, optionally with a role. */

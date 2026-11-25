@@ -1,0 +1,233 @@
+/* The guild bank: the gold, what lies in each tab, and what happened lately. */
+
+.page {
+  padding-top: 10px;
+}
+
+.window {
+  width: var(--page-width);
+  min-height: calc(100dvh - var(--header-h) - 110px);
+  margin: 0 auto;
+}
+
+.summary {
+  display: grid;
+  gap: 6px;
+  padding: 10px 8px 16px;
+}
+
+.gold {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.15;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.reading {
+  max-width: 90ch;
+  margin: 0;
+  color: #d8cfbf;
+  font-size: 15px;
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.columns {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-height: 0;
+}
+
+.pane {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 14px 16px 18px;
+  border: 6px solid transparent;
+  border-image: url("/ui/inset.png") 6 / 6px stretch;
+  background:
+    linear-gradient(rgb(8 6 5 / 0.72), rgb(8 6 5 / 0.8)),
+    url("/ui/inset-bg.png") padding-box;
+  color: #e9e2d4;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.heading {
+  margin: 0;
+  color: var(--gold);
+  font-size: 18px;
+  font-weight: 400;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.note {
+  max-width: 60ch;
+  margin: 0;
+  color: #c8c1b3;
+}
+
+.tab {
+  display: grid;
+  gap: 8px;
+}
+
+.tab + .tab {
+  padding-top: 12px;
+  border-top: 1px solid rgb(120 90 50 / 0.3);
+}
+
+.tabName {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  margin: 0;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.tabCount {
+  color: #c8b98f;
+  font-size: 13px;
+}
+
+.items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.itemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.itemName[data-quality="0"] {
+  color: var(--q0);
+}
+
+.itemName[data-quality="1"] {
+  color: var(--q1);
+}
+
+.itemName[data-quality="2"] {
+  color: var(--q2);
+}
+
+.itemName[data-quality="3"] {
+  color: var(--q3);
+}
+
+.itemName[data-quality="4"] {
+  color: var(--q4);
+}
+
+.itemName[data-quality="5"] {
+  color: var(--q5);
+}
+
+.ledger {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgb(120 90 50 / 0.25);
+}
+
+.line:last-child {
+  border-bottom: 0;
+}
+
+.line[data-gap] {
+  color: #a39c8f;
+  font-size: 13px;
+}
+
+.line .itemName {
+  white-space: normal;
+}
+
+.when {
+  color: #c8b98f;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.who {
+  color: #fff;
+}
+
+.where {
+  color: #c8b98f;
+  font-size: 13px;
+}
+
+/* For someone who may not see the bank, or when there is nothing to see yet. */
+.gate {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  max-width: 62ch;
+  margin: 0;
+  padding: 26px 18px;
+  color: #e9e2d4;
+  font-size: 15px;
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.gate p {
+  margin: 0;
+}
+
+.gate a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 124px;
+  height: 34px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+@media (max-width: 1000px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .gold {
+    font-size: 27px;
+  }
+
+  .line {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 8px;
+  }
+}
