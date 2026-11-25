@@ -1,7 +1,16 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { matchGuildyMember, readGuildyFile, suggestCrafters, toImportMember, type GuildyGuild } from "@/lib/guildy";
+import {
+  matchGuildyMember,
+  playersToRecord,
+  readGuildyFile,
+  samePlayer,
+  suggestCrafters,
+  toImportMember,
+  type GuildImportMember,
+  type GuildyGuild,
+} from "@/lib/guildy";
 
 const FILE = readFileSync(path.resolve(__dirname, "../fixtures/guildy/Guildy.lua"), "utf8");
 
@@ -59,6 +68,12 @@ describe("readGuildyFile", () => {
 
   it("reads the file as the game writes it on Windows", () => {
     expect(guilds(FILE.replace(/\n/g, "\r\n"))).toEqual(guilds());
+  });
+
+  it("joins up the characters the addon knows to be one player's", () => {
+    // Each character's own entry lists the others; one of them was added later and is on one list only.
+    expect(guilds()[0].players).toEqual([["Tessa Thimble", "Wren Hollow", "Zoë Quill"]]);
+    expect(guilds()[1].players).toEqual([]);
   });
 
   it("says what is wrong with other files", () => {
@@ -159,5 +174,56 @@ describe("suggestCrafters", () => {
     const pairs = suggestCrafters(["Ada Flint", "Ada Flint"], [{ id: "r", characterName: "Ada Flint" }]);
     expect(pairs.get("Ada Flint")).toEqual({ crafterId: "r", how: "exact" });
     expect(pairs.size).toBe(1);
+  });
+});
+
+describe("samePlayer", () => {
+  const players = [["Tessa Thimble", "Wren Hollow", "Zoë Quill"]];
+
+  it("names a member's other characters", () => {
+    expect(samePlayer("zoe  quill", players)).toEqual(["Tessa Thimble", "Wren Hollow"]);
+  });
+
+  it("names nobody for a member the file knows as one character", () => {
+    expect(samePlayer("Bram Anvil", players)).toEqual([]);
+  });
+});
+
+describe("playersToRecord", () => {
+  const players = [
+    ["Tessa Thimble", "Wren Hollow", "Zoë Quill"],
+    ["Ada Flint", "Max Hammer"],
+  ];
+  const member = (name: string, crafterId: string | null = null): GuildImportMember => ({ name, crafterId, professions: [], recipeIds: [] });
+
+  it("points at the members being imported by their place in the list", () => {
+    const sent = [member("Bram Anvil"), member("Zoë Quill"), member("Tessa Thimble", "t")];
+    expect(playersToRecord(players, sent, [])).toEqual([{ members: [2, 1], crafterIds: [] }]);
+  });
+
+  it("brings in a character the site already has under exactly that name", () => {
+    const crafters = [
+      { id: "w", characterName: "wren hollow" },
+      { id: "x", characterName: "Wren" },
+    ];
+    expect(playersToRecord(players, [member("Tessa Thimble")], crafters)).toEqual([{ members: [0], crafterIds: ["w"] }]);
+  });
+
+  it("leaves out a player with fewer than two characters on the site", () => {
+    expect(playersToRecord(players, [member("Tessa Thimble"), member("Ada Flint")], [])).toEqual([]);
+  });
+
+  it("does not count a crafter twice when a member is being imported into it", () => {
+    const crafters = [{ id: "z", characterName: "Zoë Quill" }];
+    // The admin aimed Tessa at the crafter called Zoë Quill: it is Tessa's now, not a second character.
+    expect(playersToRecord(players, [member("Tessa Thimble", "z")], crafters)).toEqual([]);
+  });
+
+  it("does not guess between two crafters of one name", () => {
+    const crafters = [
+      { id: "w1", characterName: "Wren Hollow" },
+      { id: "w2", characterName: "Wren Hollow" },
+    ];
+    expect(playersToRecord(players, [member("Tessa Thimble")], crafters)).toEqual([]);
   });
 });

@@ -20,7 +20,7 @@ async function AdminContent({ searchParams }: { searchParams: Promise<{ welcome?
 
   // A member Discord confirmed sets up their own profile.
   if (data.crafters.length === 0 && !data.isAdmin && data.signup.open && data.signup.verified) {
-    return <SignupForm accountName={data.accountName} professions={data.catalog.professions} />;
+    return <SignupForm accountName={data.accountName} professions={data.catalog.professions} waitingFor={data.waitingFor} />;
   }
 
   if (data.crafters.length === 0 && !data.isAdmin) {

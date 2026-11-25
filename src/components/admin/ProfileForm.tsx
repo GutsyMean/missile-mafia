@@ -26,10 +26,12 @@ interface Props {
   onSubmit: (input: ProfileInput) => Promise<ActionResult<unknown>>;
   /** Called with whatever the save returned, e.g. the id of a new character. */
   onSaved: (result: unknown) => void;
+  /** Something to say beside the button once a save went through without leaving the form. */
+  notice?: string | null;
 }
 
 /** A crafter's profile: used both for signing up and for editing later. */
-export function ProfileForm({ heading, lead, initial, professions, submitLabel, onSubmit, onSaved }: Props) {
+export function ProfileForm({ heading, lead, initial, professions, submitLabel, onSubmit, onSaved, notice }: Props) {
   const [form, setForm] = useState({
     characterName: initial.characterName,
     realm: initial.realm,
@@ -121,6 +123,11 @@ export function ProfileForm({ heading, lead, initial, professions, submitLabel, 
         />
       </label>
       {error ? <p className={styles.error}>{error}</p> : null}
+      {notice && !error && !pending ? (
+        <p className={styles.ok} role="status">
+          {notice}
+        </p>
+      ) : null}
       <div>
         <button type="submit" className={wow.button} disabled={pending}>
           {pending ? "Saving…" : submitLabel}

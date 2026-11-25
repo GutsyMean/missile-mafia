@@ -43,6 +43,8 @@ export interface AdminData {
   settings: AdminSettings | null;
   /** Whether members can sign up by themselves, and whether Discord confirmed this account. */
   signup: { open: boolean; verified: boolean };
+  /** Characters already on the list that this account asked for and is waiting to be handed. */
+  waitingFor: string[];
   catalog: AdminCatalog;
   runs: SyncRunView[];
   /** False until the server has the secret key the sync writes with. */
@@ -58,7 +60,7 @@ export async function loadAdminData(): Promise<AdminData | null> {
   const claims = auth?.claims;
   if (!claims?.sub) return null;
 
-  const [crafterRows, adminRow, catalog, runRows, signupRow, verifiedRow] = await Promise.all([
+  const [crafterRows, adminRow, catalog, runRows, signupRow, verifiedRow, claimRows] = await Promise.all([
     supabase.from("crafters").select("*").eq("user_id", claims.sub).order("character_name"),
     supabase.from("app_admins").select("user_id").maybeSingle(),
     supabase.rpc("admin_catalog"),
@@ -66,6 +68,8 @@ export async function loadAdminData(): Promise<AdminData | null> {
     supabase.from("site_settings").select("auto_approve").maybeSingle(),
     // Row level security shows a user only their own row here.
     supabase.from("verified_members").select("user_id").maybeSingle(),
+    // And here only what they asked for themselves.
+    supabase.from("crafter_claims").select("character_name").order("created_at"),
   ]);
   if (crafterRows.error) throw new Error(crafterRows.error.message);
   if (catalog.error) throw new Error(catalog.error.message);
@@ -128,6 +132,7 @@ export async function loadAdminData(): Promise<AdminData | null> {
     directory,
     settings,
     signup: { open: Boolean(signupRow.data?.auto_approve), verified: Boolean(verifiedRow.data) },
+    waitingFor: [...new Set((claimRows.data ?? []).map((row) => row.character_name as string))],
     catalog: catalog.data as AdminCatalog,
     runs: (runRows.data ?? []).map((run) => ({
       id: run.id,

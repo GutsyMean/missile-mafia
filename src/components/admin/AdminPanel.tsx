@@ -11,6 +11,7 @@ import {
   saveProfile,
   saveRecipes,
   signUpCrafter,
+  type SignUpResult,
   type SyncSummary,
 } from "@/app/admin/actions";
 import { signOut } from "@/app/login/actions";
@@ -25,10 +26,12 @@ import {
 } from "@/lib/guildon";
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
+import { listNames } from "@/lib/admin/directory";
 import { CraftersPanel } from "./CraftersPanel";
 import { GuildImportPanel } from "./GuildImportPanel";
 import { SaveQueue } from "@/lib/admin/save-queue";
 import { EMPTY_PROFILE, ProfileForm } from "./ProfileForm";
+import { heldNotice } from "./SignupForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
@@ -127,6 +130,8 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
   const [catalog, setCatalog] = useState<AdminCatalog>(data.catalog);
   const [directory, setDirectory] = useState<AdminDirectory | null>(data.directory);
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  /** A character just asked for that turned out to be listed already. */
+  const [held, setHeld] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const changeRecipes = (add: number[], remove: number[], source: "manual" | "bulk") => {
@@ -319,6 +324,15 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             }}
           />
         ) : null}
+        {tab === "add" && canAddCharacter && data.waitingFor.length > 0 ? (
+          <p className={styles.welcome}>
+            <strong>
+              {listNames(data.waitingFor)} {data.waitingFor.length === 1 ? "is" : "are"} already on the crafting list.
+            </strong>{" "}
+            A site admin will hand {data.waitingFor.length === 1 ? "it" : "them"} over to you; nothing more is needed
+            from you.
+          </p>
+        ) : null}
         {tab === "add" && canAddCharacter ? (
           <ProfileForm
             heading="Add another character"
@@ -327,10 +341,17 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             professions={catalog.professions}
             submitLabel="Add character"
             onSubmit={signUpCrafter}
+            notice={held ? heldNotice(held) : null}
             onSaved={(result) => {
+              const outcome = result as SignUpResult;
+              if ("held" in outcome) {
+                // Nothing was created: the character is listed already and is being kept for them.
+                setHeld(outcome.held);
+                router.refresh();
+                return;
+              }
               // Reload on the new character, at the recipe import.
-              const { crafterId } = result as { crafterId: string };
-              router.replace(`/admin?character=${crafterId}&welcome=1`);
+              router.replace(`/admin?character=${outcome.crafterId}&welcome=1`);
               router.refresh();
             }}
           />

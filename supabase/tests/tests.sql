@@ -943,3 +943,95 @@ reset role;
 select test.is((select count(*)::int from public.crafters where character_name = 'Fine Person'), 0, 'an import that fails part-way keeps none of it');
 select test.is(has_function_privilege('anon', 'public.admin_import_guild(jsonb, boolean, boolean)', 'execute'), false, 'visitors have no execute right on the import');
 select test.is(has_function_privilege('anon', 'private.admin_import_guild(jsonb, boolean, boolean)', 'execute'), false, 'nor on the inner function');
+
+-- ---------------------------------------------------------------------------
+-- A sign-up for a character already on the list is kept for an admin
+-- ---------------------------------------------------------------------------
+update public.site_settings set auto_approve = true;
+select array_agg(id order by slug) as brams from public.crafters where character_name = 'Bram Anvil' \gset
+select (:'brams'::uuid[])[1] as bram_one \gset
+select (:'brams'::uuid[])[2] as bram_two \gset
+select count(*)::int as crafters_before from public.crafters \gset
+
+set role authenticated;
+select test.login(:'joiner');
+select test.is(public.signup_crafter('  tessa   THIMBLE ') is null, true, 'signing up as a character nobody manages yet makes no second crafter');
+select test.is(
+  (select row(crafter_id, character_name)::text from public.crafter_claims), row(:'tessa_id'::uuid, 'Tessa Thimble')::text,
+  'the member is noted as asking for the one on the list');
+select test.is(public.signup_crafter('Tessa Thimble') is null, true, 'asking twice is still one request');
+select test.is((select count(*)::int from public.crafter_claims), 1, 'and one note');
+select test.is(public.signup_crafter('bram anvil') is null, true, 'a name two unmanaged crafters share asks for both');
+select test.is((select count(*)::int from public.crafter_claims), 3, 'a member sees everything they are waiting for');
+select test.is(public.signup_crafter('Joiner') is not null, true, 'a name someone already manages is not held back');
+select test.throws($$insert into public.crafter_claims (user_id, crafter_id, character_name) values ('44444444-4444-4444-4444-444444444444', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Damien')$$, '42501', 'a member cannot note a request by hand');
+select test.throws($$select count(*) from public.crafter_players$$, '42501', 'nor read which characters share a player');
+select test.throws(format('select public.admin_link_player(%L, %L)', :'tessa_id', :'joiner'), '42501', 'nor hand characters to themselves');
+select test.throws(format($$select public.admin_group_crafters('[[%s, %s]]'::jsonb)$$, to_jsonb(:'tessa_id'::text), to_jsonb(:'bram_one'::text)), '42501', 'nor say whose characters go together');
+
+select test.login(:'member');
+select test.is((select count(*)::int from public.crafter_claims), 0, 'nobody sees what another member asked for');
+reset role;
+set role anon;
+select test.login(null);
+select test.throws($$select count(*) from public.crafter_claims$$, '42501', 'visitors cannot read requests at all');
+reset role;
+select test.is((select count(*)::int from public.crafters), :crafters_before + 1, 'only the sign-up under a managed name made a crafter');
+
+-- The admin sees who asked, and files one player's characters together.
+set role authenticated;
+select test.login(:'owner');
+select test.is(
+  (select c -> 'claimedBy' from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' = :'tessa_id'),
+  jsonb_build_array(:'joiner'), 'the crafter list says who asked for a character');
+select test.is(
+  (select c -> 'playerId' from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' = :'tessa_id'),
+  'null'::jsonb, 'a crafter filed under no player says so');
+
+select public.admin_group_crafters(jsonb_build_array(
+  jsonb_build_array(:'tessa_id', :'bram_one'),
+  jsonb_build_array(:'bram_two'),
+  jsonb_build_array('not an id', :'bram_two'),
+  '"not a list"'::jsonb));
+select test.is(
+  (select count(distinct c ->> 'playerId')::int from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' in (:'tessa_id', :'bram_one')),
+  1, 'characters grouped together are one player');
+select test.is(
+  (select c -> 'playerId' from jsonb_array_elements(public.admin_directory() -> 'crafters') c where c ->> 'id' = :'bram_two'),
+  'null'::jsonb, 'a group of one, or one with a stranger in it, files nobody');
+select public.admin_group_crafters(jsonb_build_array(jsonb_build_array(:'bram_two', :'alt_id')));
+select public.admin_group_crafters(jsonb_build_array(jsonb_build_array(:'bram_one', :'bram_two')));
+select test.is(
+  (select count(distinct c ->> 'playerId')::int from jsonb_array_elements(public.admin_directory() -> 'crafters') c
+   where c ->> 'id' in (:'tessa_id', :'bram_one', :'bram_two', :'alt_id')),
+  1, 'grouping a character of one player with a character of another makes them all one player');
+select test.throws($$select public.admin_group_crafters('{"a": 1}'::jsonb)$$, '22023', 'the groups must come as a list');
+
+-- One of them is managed by someone already; the rest go to the member who asked.
+select public.admin_link_crafter(:'alt_id', :'member');
+select test.is(public.admin_link_player(:'tessa_id', :'joiner'), 3, 'handing over a player hands over every character of theirs nobody manages');
+reset role;
+select test.is(
+  (select count(*)::int from public.crafters where id in (:'tessa_id', :'bram_one', :'bram_two') and user_id = :'joiner'), 3,
+  'they all belong to the account now');
+select test.is((select user_id from public.crafters where id = :'alt_id'), :'member'::uuid, 'a character someone else manages stays theirs');
+select test.is((select count(*)::int from public.crafter_claims), 0, 'and nobody is left waiting for them');
+
+set role authenticated;
+select test.throws(format('select public.admin_link_player(%L, null)', :'tessa_id'), '22023', 'handing over a player needs an account');
+select test.throws($$select public.admin_link_player('99999999-9999-9999-9999-999999999999', '44444444-4444-4444-4444-444444444444')$$, 'P0002', 'and a crafter that exists');
+select test.is(public.admin_link_player(:'crafter_other', :'joiner'), 1, 'a crafter filed under no player is handed over alone');
+select public.admin_link_crafter(:'crafter_other', :'other');
+
+-- Linking a single crafter answers the request for it as well.
+select public.admin_link_crafter(:'tessa_id', null);
+select test.login(:'joiner');
+select test.is(public.signup_crafter('Tessa Thimble') is null, true, '(a member asks for a character again)');
+select test.login(:'owner');
+select public.admin_link_crafter(:'tessa_id', :'member');
+reset role;
+select test.is((select count(*)::int from public.crafter_claims where crafter_id = :'tessa_id'), 0, 'linking a crafter clears the requests for it');
+select test.is(has_function_privilege('anon', 'public.admin_link_player(uuid, uuid)', 'execute'), false, 'visitors have no execute right on handing over a player');
+select test.is(has_function_privilege('anon', 'public.admin_group_crafters(jsonb)', 'execute'), false, 'nor on grouping characters');
+select test.is(has_table_privilege('authenticated', 'public.crafter_players', 'select'), false, 'who shares a player is not readable through the API');
+update public.site_settings set auto_approve = false;

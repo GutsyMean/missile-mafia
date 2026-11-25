@@ -13,6 +13,9 @@
  *
  * `recipes` is missing while only the skill is known. `src` says where a
  * reading came from; "note" is a guess from a guild note and is left out.
+ *
+ * The guild's `families` say which characters are one player's, as the players'
+ * own copies of the addon reported it: families["<name>"].chars = { "First Last", ... }.
  */
 import { LuaReadError, isLuaTable, listOf, readLuaAssignments, tableAt, type LuaTable } from "./lua-table";
 
@@ -36,6 +39,8 @@ export interface GuildyGuild {
   name: string;
   realm: string | null;
   members: GuildyMember[];
+  /** Characters the addon knows to be one player's, by name. Only players with more than one. */
+  players: string[][];
 }
 
 export type GuildyFileProblem = "not_saved_data" | "not_guildy" | "no_guild";
@@ -59,6 +64,39 @@ function professionsOf(profs: LuaTable | null): GuildyProfession[] {
     professions.push({ skillLineId, skill, spellIds, readAt: wholeNumber(record.get("ts"), 0, 99_999_999_999) ?? 0 });
   }
   return professions.sort((a, b) => a.skillLineId - b.skillLineId);
+}
+
+/** The characters each family entry names, joined up into players. */
+function playersOf(families: LuaTable | null): string[][] {
+  /** Each name's player, as the name it is filed under; names are compared in lower case. */
+  const leader = new Map<string, string>();
+  const shown = new Map<string, string>();
+  const find = (name: string): string => {
+    let at = name;
+    while (leader.get(at) !== at) at = leader.get(at) ?? at;
+    return at;
+  };
+  for (const [key, family] of families ?? []) {
+    if (!isLuaTable(family)) continue;
+    const chars = tableAt(family, "chars");
+    const names = (chars ? listOf(chars) : []).filter((name): name is string => typeof name === "string" && name.trim() !== "");
+    const keys = [String(key), ...names].map((name) => name.trim().toLowerCase());
+    names.forEach((name) => shown.set(name.trim().toLowerCase(), name.trim()));
+    for (const name of keys) if (!leader.has(name)) leader.set(name, name);
+    for (const name of keys) leader.set(find(name), find(keys[0]));
+  }
+  const players = new Map<string, string[]>();
+  for (const name of leader.keys()) {
+    const display = shown.get(name);
+    if (!display) continue; // named only as a key: the file does not say how it is written
+    const group = players.get(find(name)) ?? [];
+    group.push(display);
+    players.set(find(name), group);
+  }
+  return [...players.values()]
+    .filter((group) => group.length > 1)
+    .map((group) => group.sort((a, b) => a.localeCompare(b)))
+    .sort((a, b) => a[0].localeCompare(b[0]));
 }
 
 /** What a Guildy saved-data file holds, per guild. */
@@ -91,6 +129,7 @@ export function readGuildyFile(text: string): GuildyFile {
       name: split > 0 ? key.slice(0, split) : key,
       realm: split > 0 ? key.slice(split + 1) || null : null,
       members,
+      players: playersOf(tableAt(guild, "families")),
     });
   }
   if (guilds.length === 0) return { ok: false, problem: "no_guild" };
@@ -257,6 +296,51 @@ export interface GuildImportTally {
   /** Recipes from the file left out because the crafter took them off their own list. */
   recipesSkipped: number;
   skills: { professionId: number; from: number | null; to: number }[];
+}
+
+/**
+ * One player's characters, as the import can point at them: members being
+ * imported, by their place in the list sent, and crafters the site already has.
+ */
+export interface GuildImportPlayer {
+  members: number[];
+  crafterIds: string[];
+}
+
+/** The other characters of a member's player, by name. Empty when the file knows of none. */
+export function samePlayer(name: string, players: string[][]): string[] {
+  const group = players.find((names) => names.some((other) => tidy(other) === tidy(name)));
+  return group ? group.filter((other) => tidy(other) !== tidy(name)) : [];
+}
+
+/**
+ * Which of the file's players the site can record: those with at least two
+ * characters it will have once the members sent are imported. A character not
+ * being imported counts when a crafter of exactly that name is already there.
+ */
+export function playersToRecord(
+  players: string[][],
+  sent: GuildImportMember[],
+  crafters: { id: string; characterName: string }[],
+): GuildImportPlayer[] {
+  const aimedAt = new Set(sent.flatMap((member) => member.crafterId ?? []));
+  const recorded: GuildImportPlayer[] = [];
+  for (const names of players) {
+    const members: number[] = [];
+    const crafterIds: string[] = [];
+    for (const name of names) {
+      const place = sent.findIndex((member) => tidy(member.name) === tidy(name));
+      if (place >= 0) {
+        members.push(place);
+        continue;
+      }
+      const existing = crafters.filter((crafter) => tidy(crafter.characterName) === tidy(name) && !aimedAt.has(crafter.id));
+      // Two crafters of one name: there is no telling which is meant, so neither is filed.
+      if (existing.length === 1) crafterIds.push(existing[0].id);
+    }
+    if (members.length + crafterIds.length > 1) recorded.push({ members, crafterIds });
+  }
+  return recorded;
 }
 
 export function toImportMember(match: GuildyMemberMatch, crafterId: string | null): GuildImportMember {

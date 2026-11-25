@@ -82,4 +82,8 @@ export interface DirectoryCrafter {
   userId: string | null;
   isListed: boolean;
   recipeCount: number;
+  /** Shared by the characters of one player, as a guild import recorded it. Null when none is known. */
+  playerId: string | null;
+  /** Accounts that signed up under this character's name while nobody managed it, first come first. */
+  claimedBy: string[];
 }

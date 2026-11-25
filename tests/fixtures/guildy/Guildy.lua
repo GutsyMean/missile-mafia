@@ -30,6 +30,29 @@ GuildyDB = {
 ["d"] = 20777,
 },
 },
+["families"] = {
+["tessa thimble"] = {
+["ts"] = 1795378148,
+["chars"] = {
+"Tessa Thimble",
+"Zoë Quill",
+},
+},
+["zoë quill"] = {
+["ts"] = 1795376375,
+["chars"] = {
+"Tessa Thimble",
+"Zoë Quill",
+"Wren Hollow",
+},
+},
+["bram anvil"] = {
+["ts"] = 1795376375,
+["chars"] = {
+"Bram Anvil",
+},
+},
+},
 ["members"] = {
 ["tessa thimble"] = {
 ["seen"] = {

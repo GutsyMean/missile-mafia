@@ -3,9 +3,12 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { applyGuildImport, previewGuildImport, type GuildImportResult } from "@/app/admin/actions";
 import type { AdminCatalog, AdminDirectory } from "@/lib/admin/types";
+import { listNames } from "@/lib/admin/directory";
 import {
   matchGuildyMember,
+  playersToRecord,
   readGuildyFile,
+  samePlayer,
   suggestCrafters,
   toImportMember,
   type GuildImportTally,
@@ -173,11 +176,12 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
     setProblem(null);
     setDone(null);
     startTransition(async () => {
-      const result = await actions.apply(members, listNew);
+      const result = await actions.apply(members, listNew, playersToRecord(guild?.players ?? [], members, directory.crafters));
       if (!result.ok) {
         setProblem(result.error);
         return;
       }
+      setProblem(result.data.warning);
       const created = result.data.tallies.filter((tally) => tally.created).length;
       const recipes = result.data.tallies.reduce((sum, tally) => sum + tally.recipesAdded, 0);
       setDone(
@@ -270,6 +274,7 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
             const tally = tallies[row.name];
             const suggestion = suggestions.get(row.name);
             const target = choice.crafterId === "" ? null : (crafterName.get(choice.crafterId) ?? null);
+            const others = samePlayer(row.name, guild.players);
             return (
               <section key={row.name} className={styles.character} aria-label={row.name} data-included={choice.include}>
                 <div className={styles.row}>
@@ -321,6 +326,7 @@ export function GuildImportPanel({ catalog, directory, onImported, actions = SER
                   </p>
                 ) : null}
                 <p className={styles.muted}>
+                  {others.length > 0 ? `Same player as ${listNames(others)} · ` : ""}
                   {row.readAt > 0 ? `Read by Guildy on ${day(row.readAt)}` : "Guildy does not say when it read this"}
                   {row.unknownSpellIds.length > 0
                     ? ` · ${count(row.unknownSpellIds.length, "entry is", "entries are")} not ${row.unknownSpellIds.length === 1 ? "a recipe" : "recipes"} this site lists`

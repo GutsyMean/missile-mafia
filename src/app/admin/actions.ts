@@ -5,7 +5,7 @@ import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
-import type { GuildImportMember, GuildImportTally } from "@/lib/guildy";
+import type { GuildImportMember, GuildImportPlayer, GuildImportTally } from "@/lib/guildy";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /** What every action returns: either it worked, or a message the page can show. */
@@ -154,12 +154,16 @@ export async function saveProfile(crafterId: string, input: ProfileInput): Promi
   return { ok: true, data: { recipeIds: await recipeIdsOf(session, crafterId) } };
 }
 
+/** What signing up led to: a new crafter, or a character already on the list that an admin will hand over. */
+export type SignUpResult = { crafterId: string } | { held: string };
+
 /**
  * Sign-up, and adding another character later: a member Discord confirmed (or
  * a site admin) creates a crafter profile of their own. The database refuses
- * anyone else.
+ * anyone else. A character of that name that is already listed and managed by
+ * nobody is not made a second time: the request waits for an admin.
  */
-export async function signUpCrafter(input: ProfileInput): Promise<ActionResult<{ crafterId: string }>> {
+export async function signUpCrafter(input: ProfileInput): Promise<ActionResult<SignUpResult>> {
   const session = await signedIn();
   if (!session) return fail("Sign in again to continue.");
   const profile = parseProfile(input);
@@ -173,6 +177,7 @@ export async function signUpCrafter(input: ProfileInput): Promise<ActionResult<{
         : error.message,
     );
   }
+  if (data === null) return { ok: true, data: { held: profile.data.row.character_name } };
   const written = await writeProfile(session, data as string, profile.data);
   return written.ok ? { ok: true, data: { crafterId: data as string } } : written;
 }
@@ -318,6 +323,18 @@ export async function linkCrafter(crafterId: string, userId: string | null): Pro
   return directoryAfterChange(session);
 }
 
+/** Hands a crafter to an account together with the same player's other characters nobody manages yet. */
+export async function linkPlayer(crafterId: string, userId: string): Promise<ActionResult<AdminDirectory>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  if (!UUID.test(String(crafterId))) return fail("That crafter is not known.");
+  if (!UUID.test(String(userId))) return fail("That account is not known.");
+
+  const { error } = await session.supabase.rpc("admin_link_player", { p_crafter_id: crafterId, p_user_id: userId });
+  if (error) return fail(error.message);
+  return directoryAfterChange(session);
+}
+
 /** Shows a crafter on the public crafting list, or takes them off it. */
 export async function setCrafterListed(crafterId: string, listed: boolean): Promise<ActionResult<AdminDirectory>> {
   const session = await signedInAdmin();
@@ -365,6 +382,28 @@ function checkGuildMembers(members: unknown): GuildImportMember[] | string {
   return checked;
 }
 
+/** Which of the members sent, and which crafters already there, are one player's characters. */
+function checkGuildPlayers(players: unknown, memberCount: number): GuildImportPlayer[] | string {
+  if (players === undefined || players === null) return [];
+  if (!Array.isArray(players) || players.length > 500) return "The list of players in that file is not valid.";
+  const checked: GuildImportPlayer[] = [];
+  for (const player of players as Partial<GuildImportPlayer>[]) {
+    const members = player?.members;
+    const crafterIds = player?.crafterIds;
+    if (
+      !Array.isArray(members) ||
+      !Array.isArray(crafterIds) ||
+      members.length + crafterIds.length > 40 ||
+      !members.every((place) => Number.isInteger(place) && place >= 0 && place < memberCount) ||
+      !crafterIds.every((id) => typeof id === "string" && UUID.test(id))
+    ) {
+      return "The list of players in that file is not valid.";
+    }
+    checked.push({ members, crafterIds });
+  }
+  return checked;
+}
+
 async function importGuild(
   session: AdminSession,
   members: GuildImportMember[],
@@ -400,24 +439,41 @@ export interface GuildImportResult {
   directory: AdminDirectory;
   /** The admin's own crafters the import touched, with their recipe lists as they now stand. */
   ownRecipes: Record<string, number[]>;
+  /** Something that went wrong after the members were imported, to be told rather than hidden. */
+  warning: string | null;
 }
 
 /**
  * Imports members from a guild addon's file: creates the crafters that are
- * new, and adds recipes and raises skills for the rest. Site admins only; the
- * database checks that again.
+ * new, and adds recipes and raises skills for the rest. Then records which of
+ * them the file knows to be one player's characters, so they can be handed to
+ * that player's account together. Site admins only; the database checks that again.
  */
 export async function applyGuildImport(
   members: GuildImportMember[],
   listNew: boolean,
+  players: GuildImportPlayer[] = [],
 ): Promise<ActionResult<GuildImportResult>> {
   const session = await signedInAdmin();
   if (!session) return fail(NOT_ADMIN);
   const checked = checkGuildMembers(members);
   if (typeof checked === "string") return fail(checked);
+  const checkedPlayers = checkGuildPlayers(players, checked.length);
+  if (typeof checkedPlayers === "string") return fail(checkedPlayers);
 
   const imported = await importGuild(session, checked, listNew, true);
   if (!imported.ok) return imported;
+
+  // The members are in. Who shares a player is worth having, but not worth losing the import over.
+  let warning: string | null = null;
+  const groups = checkedPlayers
+    .map((player) => [...player.members.flatMap((place) => imported.data[place]?.crafterId ?? []), ...player.crafterIds])
+    .filter((group) => group.length > 1);
+  if (groups.length > 0) {
+    const { error } = await session.supabase.rpc("admin_group_crafters", { p_groups: groups });
+    if (error) warning = `The members were imported, but which characters share a player could not be recorded: ${error.message}`;
+  }
+
   const directory = await directoryAfterChange(session);
   if (!directory.ok) return directory;
 
@@ -428,7 +484,7 @@ export async function applyGuildImport(
       ownRecipes[crafter.id] = await recipeIdsOf(session, crafter.id);
     }
   }
-  return { ok: true, data: { tallies: imported.data, directory: directory.data, ownRecipes } };
+  return { ok: true, data: { tallies: imported.data, directory: directory.data, ownRecipes, warning } };
 }
 
 /** Sets who is approved automatically: members of a Discord server, optionally with a role. */

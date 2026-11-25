@@ -5,12 +5,22 @@ import { useState, useTransition } from "react";
 import {
   createCrafter,
   linkCrafter,
+  linkPlayer,
   saveApprovalSettings,
   setCrafterListed,
   type ActionResult,
 } from "@/app/admin/actions";
-import { unlinkedCrafters, waitingAccounts } from "@/lib/admin/directory";
-import type { AdminDirectory, AdminSettings } from "@/lib/admin/types";
+import {
+  askedFor,
+  byPlayer,
+  likelyOwner,
+  listNames,
+  samePlayer,
+  unlinkedCrafters,
+  unlinkedOfPlayer,
+  waitingAccounts,
+} from "@/lib/admin/directory";
+import type { AdminDirectory, AdminSettings, DirectoryAccount, DirectoryCrafter } from "@/lib/admin/types";
 import wow from "@/components/wow/wow.module.css";
 import styles from "./admin.module.css";
 
@@ -62,6 +72,12 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
     });
   };
 
+  /** Hands every character of a crafter's player that nobody manages to one account. */
+  const linkAll = (crafter: DirectoryCrafter, account: DirectoryAccount) => {
+    const names = unlinkedOfPlayer(crafter, directory).map((one) => one.characterName);
+    run(() => linkPlayer(crafter.id, account.id), `${listNames(names)} are now managed by ${account.name}.`, account.id === ownUserId);
+  };
+
   return (
     <div className={styles.section}>
       <h2 className={styles.heading}>Crafters</h2>
@@ -85,7 +101,11 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
       ) : (
         waiting.map((account) => {
           const name = names[account.id] ?? account.name;
-          const pick = picks[account.id] ?? spare[0]?.id ?? "";
+          // A member who signed up under the name of a character already here is waiting for that one.
+          const asked = askedFor(account.id, directory);
+          const pick = picks[account.id] ?? asked[0]?.id ?? spare[0]?.id ?? "";
+          const picked = spare.find((c) => c.id === pick);
+          const whole = picked ? unlinkedOfPlayer(picked, directory) : [];
           const own = account.id === ownUserId;
           return (
             <section key={account.id} className={styles.character} aria-label={account.name}>
@@ -94,6 +114,12 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
                 {own ? " (you)" : ""} signed in on {day(account.createdAt)}
                 {account.isVerifiedMember ? <span className={styles.ok}> · confirmed by Discord as a member</span> : null}
               </p>
+              {asked.length > 0 ? (
+                <p className={styles.ok}>
+                  Signed up as {listNames(asked.map((c) => c.characterName))}, already on the list. Hand{" "}
+                  {asked.length === 1 ? "it" : "them"} over rather than adding {asked.length === 1 ? "it" : "them"} again.
+                </p>
+              ) : null}
               <div className={styles.row}>
                 <label className={styles.inlineLabel}>
                   Character name
@@ -136,12 +162,16 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
                     className={wow.button}
                     disabled={pending || pick === ""}
                     onClick={() => {
-                      const crafter = spare.find((c) => c.id === pick);
-                      if (crafter) run(() => linkCrafter(crafter.id, account.id), `${crafter.characterName} is now managed by ${account.name}.`, own);
+                      if (picked) run(() => linkCrafter(picked.id, account.id), `${picked.characterName} is now managed by ${account.name}.`, own);
                     }}
                   >
                     Link
                   </button>
+                  {picked && whole.length > 1 ? (
+                    <button type="button" className={wow.button} disabled={pending} onClick={() => linkAll(picked, account)}>
+                      Link all {whole.length} of this player
+                    </button>
+                  ) : null}
                 </div>
               ) : null}
             </section>
@@ -151,10 +181,14 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
 
       <h3 className={styles.subheading}>Crafters</h3>
       {directory.crafters.length === 0 ? <p className={styles.muted}>There are no crafters yet.</p> : null}
-      {directory.crafters.map((crafter) => {
+      {byPlayer(directory).map((crafter) => {
         const owner = crafter.userId ? accounts.get(crafter.userId) : undefined;
         const own = crafter.userId === ownUserId;
-        const pick = picks[crafter.id] ?? directory.accounts[0]?.id ?? "";
+        const siblings = samePlayer(crafter, directory);
+        const whole = unlinkedOfPlayer(crafter, directory);
+        const askers = crafter.claimedBy.flatMap((id) => accounts.get(id)?.name ?? []);
+        // Preselected: whoever asked for it, else whoever manages another character of the same player.
+        const pick = picks[crafter.id] ?? likelyOwner(crafter, directory) ?? directory.accounts[0]?.id ?? "";
         return (
           <section key={crafter.id} className={styles.character} aria-label={crafter.characterName}>
             <p>
@@ -163,6 +197,12 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
                 {crafter.recipeCount} {crafter.recipeCount === 1 ? "recipe" : "recipes"}
               </span>
             </p>
+            {siblings.length > 0 ? (
+              <p className={styles.muted}>Same player as {listNames(siblings.map((one) => one.characterName))}.</p>
+            ) : null}
+            {crafter.userId === null && askers.length > 0 ? (
+              <p className={styles.ok}>{listNames(askers)} signed up as this character and {askers.length === 1 ? "is" : "are"} waiting for it.</p>
+            ) : null}
             {crafter.userId ? (
               <div className={styles.row}>
                 <span>
@@ -208,6 +248,19 @@ export function CraftersPanel({ directory, settings, serverReady, ownUserId, onC
                 >
                   Link
                 </button>
+                {whole.length > 1 ? (
+                  <button
+                    type="button"
+                    className={wow.button}
+                    disabled={pending || pick === ""}
+                    onClick={() => {
+                      const account = accounts.get(pick);
+                      if (account) linkAll(crafter, account);
+                    }}
+                  >
+                    Link all {whole.length} of this player
+                  </button>
+                ) : null}
               </div>
             )}
             <label className={wow.checkbox}>
