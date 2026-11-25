@@ -1,58 +1,13 @@
+/* A page that is one working window: the crafting list, the gear ranking. */
+.workspace {
+  padding-top: 10px;
+}
+
+/* A page that reads from top to bottom: sign-in, a member's own pages. */
 .page {
   display: grid;
-  gap: 10px;
-  min-height: 100dvh;
-  padding: 14px 12px 12px;
+  gap: 16px;
   align-content: start;
-}
-
-/* Above the window: where guild crafters sign in to manage their own list. */
-.header {
-  display: flex;
-  justify-content: flex-end;
-  width: min(1060px, 100%);
-  margin: 0 auto;
-}
-
-.signIn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 156px;
-  height: 32px;
-  font-size: 14px;
-  text-decoration: none;
-}
-
-/* A visitor who has signed in here before is asked to sign in; anyone else is invited to join. */
-.returning {
-  display: none;
-}
-
-:global(html[data-account]) .newVisitor {
-  display: none;
-}
-
-:global(html[data-account]) .returning {
-  display: inline;
-}
-
-.credits {
-  max-width: 1060px;
-  margin: 0 auto;
-  color: #a39a8b;
-  font-family: system-ui, sans-serif;
-  font-size: 11px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.credits a {
-  color: #c9bfae;
-}
-
-@media (max-width: 820px) {
-  .page {
-    padding: 8px 4px;
-  }
+  min-height: calc(100dvh - var(--header-h) - 90px);
+  padding: 22px var(--page-gutter) 12px;
 }

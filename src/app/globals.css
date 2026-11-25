@@ -31,9 +31,22 @@
   /* Keyboard focus, text selection and other browser-drawn accents: the game's gold, never blue. */
   --focus: #ffe27a;
 
+  /* The bar across the top of every page, and how wide a page runs under it. */
+  --header-h: 64px;
+  --page-gutter: 20px;
+  --page-width: min(1760px, 100% - 2 * var(--page-gutter));
+
   color-scheme: dark;
   accent-color: var(--gold);
   caret-color: var(--gold);
+}
+
+@media (max-width: 860px) {
+  :root {
+    /* The bar is two rows there: the name, then the sections. */
+    --header-h: 104px;
+    --page-gutter: 6px;
+  }
 }
 
 ::selection {
@@ -51,6 +64,12 @@ body {
   min-height: 100%;
 }
 
+html {
+  /* A link into a page lands below the bar, not under it. */
+  scroll-padding-top: calc(var(--header-h) + 12px);
+  scrollbar-color: #8a6238 #0a0605;
+}
+
 body {
   /* A dim, firelit hall: the kind of light the game's forges sit in. */
   background:
@@ -65,6 +84,11 @@ body {
 
 a {
   color: inherit;
+}
+
+/* Where "Skip to the page" lands. It takes the focus without showing a ring of its own. */
+#main:focus {
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

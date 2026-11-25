@@ -6,7 +6,7 @@ import wow from "@/components/wow/wow.module.css";
 import pageStyles from "../page.module.css";
 import { signInWithDiscord } from "./actions";
 
-export const metadata = { title: "Sign in · Missile Mafia Crafting" };
+export const metadata = { title: "Sign in" };
 
 const ERRORS: Record<string, string> = {
   discord: "Discord sign-in could not be started. Try again in a moment.",
@@ -22,11 +22,11 @@ async function SignInError({ searchParams }: { searchParams: Promise<{ error?: s
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <main className={pageStyles.page}>
-      <Frame title="Crafter Sign-in" className={styles.window}>
+      <Frame title="Sign in" className={styles.signIn}>
         <div className={styles.card}>
           <p>
-            Browsing the crafting list needs no account. Sign in only if you are a guild crafter managing your own
-            recipe list.
+            Everything on this site can be looked at without an account. Sign in only if you are a guild crafter
+            managing your own recipe list.
           </p>
           <p>
             New here? Signing in with Discord is also how you join: it creates your account, and you then set up
@@ -41,7 +41,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
             </button>
           </form>
           <p>
-            <Link href="/">Back to the crafting list</Link>
+            <Link href="/crafting">Back to the crafting list</Link>
           </p>
         </div>
       </Frame>

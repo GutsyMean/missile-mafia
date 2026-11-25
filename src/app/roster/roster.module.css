@@ -1,0 +1,167 @@
+/* The roster: every crafter against every profession. */
+
+.page {
+  padding-top: 10px;
+}
+
+.window {
+  width: var(--page-width);
+  min-height: calc(100dvh - var(--header-h) - 110px);
+  margin: 0 auto;
+}
+
+.lead {
+  max-width: 96ch;
+  margin: 6px 6px 12px;
+  color: #e9e2d4;
+  font-size: 15px;
+  line-height: 1.5;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.pane {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border: 6px solid transparent;
+  border-image: url("/ui/inset.png") 6 / 6px stretch;
+  background:
+    linear-gradient(rgb(8 6 5 / 0.72), rgb(8 6 5 / 0.8)),
+    url("/ui/inset-bg.png") padding-box;
+  scrollbar-color: #8a6238 rgb(0 0 0 / 0.45);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.table th,
+.table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid rgb(120 90 50 / 0.3);
+  font-weight: 400;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover > * {
+  background-color: #1d140d;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #120c08;
+  color: var(--gold);
+  font-size: 13px;
+  vertical-align: bottom;
+}
+
+/* Who the row is about stays in view while the professions scroll sideways. */
+.who {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 190px;
+  padding-left: 14px;
+  background: #120c08;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead .who {
+  z-index: 3;
+}
+
+.name {
+  display: block;
+  color: #fff;
+  font-size: 17px;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.about {
+  display: block;
+  color: #c8b98f;
+  font-size: 13px;
+}
+
+.count {
+  width: 1%;
+  padding-right: 18px;
+  color: #c8c1b3;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.profession {
+  min-width: 78px;
+  text-align: center;
+}
+
+.profession a {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  color: var(--gold);
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.skill {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.skill a {
+  display: inline-block;
+  min-width: 44px;
+  padding: 3px 4px;
+  border-radius: 3px;
+  color: #e9e2d4;
+  text-decoration: none;
+}
+
+.skill a[data-best] {
+  color: var(--gold);
+}
+
+.skill a:hover,
+.name:hover,
+.profession a:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.skill a:focus-visible,
+.name:focus-visible,
+.profession a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+@media (max-width: 860px) {
+  .who {
+    min-width: 132px;
+    padding-left: 8px;
+    white-space: normal;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .profession {
+    min-width: 70px;
+  }
+}

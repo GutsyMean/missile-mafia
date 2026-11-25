@@ -124,7 +124,7 @@ export function GearBar({
                 onChange(NO_GEAR);
               }}
             >
-              Show everything
+              Another class
             </button>
           </>
         ) : null}

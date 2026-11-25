@@ -7,10 +7,12 @@ interface Props {
   portraitFileId?: number;
   children: ReactNode;
   className?: string;
+  /** The title is the page's heading unless the page has one of its own. */
+  heading?: "h1" | "h2";
 }
 
 /** The game's standard window: bronze frame, dark title bar, round portrait. */
-export function Frame({ title, portraitFileId, children, className }: Props) {
+export function Frame({ title, portraitFileId, children, className, heading: Heading = "h1" }: Props) {
   return (
     <section
       className={`${styles.frame} ${className ?? ""}`}
@@ -24,7 +26,7 @@ export function Frame({ title, portraitFileId, children, className }: Props) {
         </span>
       ) : null}
       <header className={styles.titleBar}>
-        <h1 className={styles.title}>{title}</h1>
+        <Heading className={styles.title}>{title}</Heading>
       </header>
       {children}
     </section>

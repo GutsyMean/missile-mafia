@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const rows = (page: Page) => page.locator("[data-recipe]");
+// A page left by way of a link stays in the document, hidden, so that Back is instant: only what shows counts.
+const rows = (page: Page) => page.locator("[data-recipe]:visible");
 const row = (page: Page, name: string) => page.getByRole("button", { name: new RegExp(`^${name}`) });
 const detail = (page: Page) => page.locator('[data-testid="detail"]:visible');
 const crafterPicker = (page: Page) => page.getByRole("combobox", { name: "Crafter", exact: true });
@@ -8,14 +9,14 @@ const professionPicker = (page: Page) => page.getByRole("combobox", { name: "Pro
 
 test.describe("browsing", () => {
   test("lists everything the crafter can make, grouped by type", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(page.locator('[data-recipe][data-available="true"]')).toHaveCount(62);
     await expect(page.getByRole("heading", { name: /Mail Armor/ })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Cloth Armor/ })).toBeVisible();
   });
 
   test("shows the Blacksmithing skill each item needs", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(row(page, "Silvered Bronze Gauntlets")).toContainText("Blacksmithing 110");
     await row(page, "Patterned Bronze Bracers").click();
     await expect(detail(page).getByText("Requires Blacksmithing (95)")).toBeVisible();
@@ -23,7 +24,7 @@ test.describe("browsing", () => {
   });
 
   test("shows the in-game tooltip and the three reagents when an item is clicked", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await row(page, "Silvered Bronze Gauntlets").click();
 
     const pane = detail(page);
@@ -36,7 +37,7 @@ test.describe("browsing", () => {
   });
 
   test("shows a tooltip beside a row on hover", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await row(page, "Shining Silver Breastplate").hover();
     const tooltip = page.getByRole("tooltip");
     await expect(tooltip).toBeVisible();
@@ -48,7 +49,7 @@ test.describe("browsing", () => {
   });
 
   test("warns that a Bind on Pickup craft cannot be traded", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     const helm = row(page, "Veteran's Silvered Chain Helm");
     await expect(helm).toContainText("Soulbound");
     await helm.click();
@@ -66,32 +67,32 @@ test.describe("browsing", () => {
 
 test.describe("the button for crafters", () => {
   test("invites a new visitor to become a crafter, from the top of the page", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     const button = page.getByRole("link", { name: "Become a Crafter" });
     await expect(button).toBeVisible();
     await expect(button).toHaveAttribute("href", "/admin");
-    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "My characters" })).toHaveCount(0);
     const [buttonBox, listBox] = await Promise.all([button.boundingBox(), rows(page).first().boundingBox()]);
     expect(buttonBox!.y + buttonBox!.height).toBeLessThan(listBox!.y);
     expect(buttonBox!.height).toBeGreaterThanOrEqual(30);
   });
 
-  test("asks someone who is signed in to sign in, and remembers them after they sign out", async ({ page, context }) => {
+  test("offers someone who has signed in their characters, and remembers them after they sign out", async ({ page, context }) => {
     // A sign-in leaves a cookie like this one.
     await context.addCookies([{ name: "sb-example-auth-token", value: "x", url: "http://localhost:3100" }]);
-    await page.goto("/");
-    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toBeVisible();
+    await page.goto("/crafting");
+    await expect(page.getByRole("link", { name: "My characters" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Become a Crafter" })).toHaveCount(0);
 
     await context.clearCookies();
     await page.reload();
-    await expect(page.getByRole("link", { name: "Crafter sign-in" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "My characters" })).toBeVisible();
   });
 });
 
 test.describe("recipes not learned yet", () => {
   test("are listed greyed out and marked as not available", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     await expect(rows(page)).toHaveCount(65);
     await expect(page.getByText("65 recipes · 7 not available yet")).toBeVisible();
 
@@ -103,7 +104,7 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("come after what can be made now, soonest first", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     const mail = page.getByRole("region", { name: "Mail Armor" }).locator("[data-recipe]");
     await expect(mail.nth(24)).toHaveAttribute("data-available", "true");
     await expect(mail.nth(25)).toContainText("Azure Skyforged Chain");
@@ -115,7 +116,7 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("say so in red when only the Horde can do the quest for them", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     const shoulders = row(page, "Barbaric Iron Shoulders");
     const mark = shoulders.getByText("Horde only", { exact: true });
     await expect(mark).toBeVisible();
@@ -128,14 +129,14 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("say it too when the quest is the Alliance's, and nothing for other recipes", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     await expect(row(page, "Ironforge Breastplate").getByText("Alliance only", { exact: true })).toBeVisible();
     await expect(row(page, "Green Iron Hauberk")).not.toContainText("only");
     await expect(page.getByText(/(Horde|Alliance) only/)).toHaveCount(2);
   });
 
   test("say what they need and where they come from when opened", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     await row(page, "Green Iron Hauberk").click();
     const note = detail(page).getByRole("note");
     await expect(note).toContainText("Not available yet.");
@@ -147,19 +148,19 @@ test.describe("recipes not learned yet", () => {
   });
 
   test("admit it when the skill needed is not confirmed", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     await row(page, "Truesilver Gauntlets").click();
     await expect(detail(page).getByText("Blacksmithing skill needed: not confirmed")).toBeVisible();
   });
 
   test("are hidden by Available now only, and the link remembers it", async ({ page }) => {
-    await page.goto("/?crafter=damien");
+    await page.goto("/crafting?crafter=damien");
     await page.getByLabel("Available now only").check();
     await expect(rows(page)).toHaveCount(58);
     await expect(row(page, "Green Iron Hauberk")).toHaveCount(0);
     await expect(page).toHaveURL(/available=1/);
 
-    await page.goto("/?crafter=damien&available=1");
+    await page.goto("/crafting?crafter=damien&available=1");
     await expect(rows(page)).toHaveCount(58);
     await expect(page.getByLabel("Available now only")).toBeChecked();
   });
@@ -167,7 +168,7 @@ test.describe("recipes not learned yet", () => {
 
 test.describe("choosing whose recipes to see", () => {
   test("starts with everyone, including what nobody has learned yet", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(rows(page)).toHaveCount(71);
     await expect(page.locator('[data-recipe][data-available="false"]')).toHaveCount(9);
     await expect(page.getByText("71 recipes · 9 not available yet")).toBeVisible();
@@ -176,7 +177,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("finds a recipe nobody has learned when searching across everyone", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByRole("searchbox").fill("hauberk");
     await expect(rows(page)).toHaveCount(1);
     await expect(row(page, "Green Iron Hauberk")).toHaveAttribute("data-available", "false");
@@ -193,7 +194,7 @@ test.describe("choosing whose recipes to see", () => {
       await held;
       await route.continue();
     });
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(page.getByText(/Loading recipes not learned yet \(0 of 2 professions\)/)).toBeVisible();
     await expect(rows(page)).toHaveCount(62);
 
@@ -208,7 +209,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("shows one crafter's own list and profile", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await crafterPicker(page).selectOption({ label: "Stitches" });
 
     await expect(rows(page)).toHaveCount(6);
@@ -223,7 +224,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("shows one profession, with what nobody has learned in it", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await professionPicker(page).selectOption({ label: "Blacksmithing" });
 
     await expect(rows(page)).toHaveCount(65);
@@ -236,7 +237,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("opens a pasted link on the same crafter and profession", async ({ page }) => {
-    await page.goto("/?crafter=damien&prof=blacksmithing");
+    await page.goto("/crafting?crafter=damien&prof=blacksmithing");
     await expect(crafterPicker(page)).toHaveValue("damien");
     await expect(professionPicker(page)).toHaveValue("blacksmithing");
     await expect(rows(page)).toHaveCount(65);
@@ -244,7 +245,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("keeps the crafter when the other filters are cleared", async ({ page }) => {
-    await page.goto("/?crafter=stitches");
+    await page.goto("/crafting?crafter=stitches");
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
@@ -253,7 +254,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("shows nothing when the chosen crafter does not have the chosen profession", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await crafterPicker(page).selectOption({ label: "Stitches" });
     await expect(rows(page)).toHaveCount(6);
     await professionPicker(page).selectOption({ label: "Blacksmithing" });
@@ -268,7 +269,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("keeps a filter in force, and visible, when the crafter changes under it", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByLabel("Slot").selectOption("Hands");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
 
@@ -280,7 +281,7 @@ test.describe("choosing whose recipes to see", () => {
   });
 
   test("shows everyone again for a link to a crafter who has left", async ({ page }) => {
-    await page.goto("/?crafter=someone-gone");
+    await page.goto("/crafting?crafter=someone-gone");
     await expect(rows(page)).toHaveCount(71);
     await expect(crafterPicker(page)).toHaveValue("");
   });
@@ -294,8 +295,18 @@ test.describe("best gear for a character", () => {
     await page.getByLabel("Character level").fill(level);
   };
 
+  test("asks who the gear is for before it ranks anything", async ({ page }) => {
+    await page.goto("/gear");
+    await expect(page.getByRole("heading", { name: "Who is the gear for?" })).toBeVisible();
+    await expect(rows(page)).toHaveCount(0);
+    await page.getByRole("button", { name: "Paladin", exact: true }).click();
+    await expect(page).toHaveURL(/\/gear\?class=paladin$/);
+    await expect(page.getByRole("combobox", { name: "Talent tree" })).toBeVisible();
+    await expect(rows(page).first()).toBeVisible();
+  });
+
   test("ranks the best craftable pieces slot by slot for a class, talent tree and level", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/gear");
     await choose(page, "Paladin", "Retribution", "31");
 
     await expect(page.getByText("Best for a level 31 Retribution Paladin: 31 pieces for 11 slots")).toBeVisible();
@@ -310,7 +321,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("says which order of stats it ranks by, and owns up to an order that is its own", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     const order = page.getByRole("list", { name: "Order of stats" }).getByRole("listitem");
     await expect(order.first()).toHaveText("Weapon damage");
     await expect(order.nth(1)).toHaveText("Hit");
@@ -322,7 +333,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("only offers what the character can equip at that level", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     // Plate opens to a Paladin at 40.
     await expect(section(page, "Hands").nth(0)).toContainText("Toughened Leather Gloves");
     await expect(row(page, "Truesilver Gauntlets")).toHaveCount(0);
@@ -337,7 +348,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("explains why a piece ranks where it does", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await row(page, "Shining Silver Breastplate").click();
     await expect(detail(page).getByTestId("rank")).toHaveText(
       "Chest for a level 31 Retribution Paladin. Scores 8.2: Strength 14 (7.2) · Stamina 6 (1.0).",
@@ -345,7 +356,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("looks at gear from professions nobody in the guild has, too", async ({ page }) => {
-    await page.goto("/?class=hunter&spec=marksmanship&lvl=30");
+    await page.goto("/gear?class=hunter&spec=marksmanship&lvl=30");
     const rifle = section(page, "Ranged").nth(0);
     await expect(rifle).toContainText("Moonsight Rifle");
     await expect(rifle).toHaveAttribute("data-available", "false");
@@ -358,7 +369,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("says so when a piece can only be worn by someone with a profession", async ({ page }) => {
-    await page.goto("/?class=mage&spec=frost&lvl=20");
+    await page.goto("/gear?class=mage&spec=frost&lvl=20");
     const goggles = row(page, "Flying Tiger Goggles");
     await expect(goggles).toContainText("Wearer needs Engineering 100");
     await goggles.click();
@@ -367,7 +378,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("opens a slot up to everything in the running, each piece with its place", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     const feet = section(page, "Feet");
     await expect(feet).toHaveCount(3);
     const header = page.getByRole("region", { name: "Feet", exact: true }).getByRole("heading");
@@ -387,7 +398,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("finds a piece by name wherever it stands, with its true place", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     // Fourth of the chest pieces, so not among the three shown.
     await expect(row(page, "Rough Bronze Cuirass")).toHaveCount(0);
     await page.getByRole("searchbox").fill("rough bronze cuirass");
@@ -404,14 +415,14 @@ test.describe("best gear for a character", () => {
   });
 
   test("shows the whole ranking for one slot when that slot is picked", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await page.getByLabel("Slot").selectOption("Feet");
     await expect(section(page, "Feet")).toHaveCount(7);
     await expect(page.getByText("Best for a level 31 Retribution Paladin: 7 pieces for 1 slot")).toBeVisible();
   });
 
   test("lets a visitor change the order, and remembers it", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
 
     await page.getByRole("button", { name: "Change" }).click();
@@ -431,18 +442,21 @@ test.describe("best gear for a character", () => {
     await expect(page.getByText("Your own order, kept in this browser.")).toHaveCount(0);
   });
 
-  test("goes back to the full list with Show everything", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+  test("starts over with Another class, and keeps the ranking out of the crafting list", async ({ page }) => {
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(page.getByLabel("Sort")).toHaveCount(0);
-    await page.getByRole("button", { name: "Show everything" }).click();
+    await page.getByRole("button", { name: "Another class" }).click();
+    await expect(page.getByRole("heading", { name: "Who is the gear for?" })).toBeVisible();
+    await expect(page).not.toHaveURL(/class=/);
+
+    await page.getByRole("link", { name: "Crafting", exact: true }).click();
     await expect(rows(page)).toHaveCount(71);
     await expect(page.getByLabel("Sort")).toBeVisible();
     await expect(row(page, "Moonsight Rifle")).toHaveCount(0);
-    await expect(page).not.toHaveURL(/class=/);
   });
 
   test("leaves soulbound crafted pieces out of the ranking with Tradeable only", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(section(page, "Head").nth(0)).toContainText("Defender's Leather Helm");
     await expect(section(page, "Head").nth(0)).toContainText("Soulbound");
     await page.getByLabel("Tradeable only").check();
@@ -456,7 +470,7 @@ test.describe("comparing with gear that is not crafted", () => {
   const everySource = (page: Page) => page.getByLabel("Include drops and quest rewards");
 
   test("ranks drops and quest rewards beside what can be crafted, on request", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
     await expect(row(page, "Avenger's Armor")).toHaveCount(0);
 
@@ -474,7 +488,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("shows the best craftable piece even when gear from elsewhere fills the list", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
     const twoHand = section(page, "Two-Hand");
     await expect(twoHand).toHaveCount(4);
     await expect(twoHand.nth(0)).toContainText("Thermaplugg's Left Arm");
@@ -484,7 +498,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("says where a piece comes from, with links to read up on it", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
     await row(page, "Thermaplugg's Left Arm").click();
     const pane = detail(page);
     await expect(pane).toContainText("Not crafted · Drop");
@@ -506,7 +520,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("marks a quest reward only one side can earn", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
     const cape = row(page, "Grimsteel Cape");
     await expect(cape).toContainText("Quest reward");
     await expect(cape.getByText("Horde only", { exact: true })).toHaveCSS("color", "rgb(255, 32, 32)");
@@ -517,7 +531,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("offers a class quest's reward to that class alone, once the quest opens", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
     const cloak = row(page, "Cloak of the Divine Storm");
     await expect(cloak).toContainText("Paladin class quests");
     await expect(cloak).toContainText("Best");
@@ -534,14 +548,14 @@ test.describe("comparing with gear that is not crafted", () => {
     // Not before level 22, and never for another class, though anyone could wear a cloth cloak.
     await page.getByLabel("Character level").fill("21");
     await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
-    await page.goto("/?class=warrior&spec=arms&lvl=31&all=1");
+    await page.goto("/gear?class=warrior&spec=arms&lvl=31&all=1");
     await expect(row(page, "Cape of the Brotherhood")).toHaveCount(1);
     await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
   });
 
   test("keeps a quest reward out of reach until its quest can be taken", async ({ page }) => {
     // The leggings ask for no level themselves; their quest opens at 14.
-    await page.goto("/?class=paladin&spec=retribution&lvl=13&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=13&all=1");
     await expect(page.getByText(/Best for a level 13 Retribution Paladin/)).toBeVisible();
     await expect(row(page, "Chausses of Westfall")).toHaveCount(0);
     await page.getByLabel("Character level").fill("14");
@@ -549,7 +563,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("only offers what the character can equip, like everything else", async ({ page }) => {
-    await page.goto("/?class=mage&spec=frost&lvl=20&all=1");
+    await page.goto("/gear?class=mage&spec=frost&lvl=20&all=1");
     await expect(section(page, "Chest").nth(0)).toContainText("Robe of Evocation");
     await expect(row(page, "Avenger's Armor")).toHaveCount(0);
     // A mace is no use to a Mage at any level. A Priest can wield it, but not this one before level 57.
@@ -566,18 +580,19 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("opens a pasted link on the same piece", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1&item=6087");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1&item=6087");
     await expect(everySource(page)).toBeChecked();
     await expect(detail(page).getByRole("heading", { name: "Chausses of Westfall" })).toBeVisible();
   });
 
   test("never puts such gear in the ordinary list", async ({ page }) => {
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
     await expect(row(page, "Avenger's Armor")).toHaveCount(1);
     await everySource(page).uncheck();
     await expect(row(page, "Avenger's Armor")).toHaveCount(0);
-    await page.goto("/?class=paladin&spec=retribution&lvl=31&all=1");
-    await page.getByRole("button", { name: "Show everything" }).click();
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(1);
+    await page.getByRole("link", { name: "Crafting", exact: true }).click();
     await expect(rows(page)).toHaveCount(71);
     await page.getByRole("searchbox").fill("avenger");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
@@ -587,7 +602,7 @@ test.describe("comparing with gear that is not crafted", () => {
 
 test.describe("reading up on an item", () => {
   test("links a crafted item to its page and to where its recipe is listed", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await row(page, "Silvered Bronze Gauntlets").click();
     const pane = detail(page);
     await expect(pane.getByRole("link", { name: "Wowhead" })).toHaveAttribute(
@@ -603,7 +618,7 @@ test.describe("reading up on an item", () => {
 
 test.describe("search and filters", () => {
   test("searches item names", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByRole("searchbox").fill("silver");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Copper Chain Belt")).toHaveCount(0);
@@ -611,21 +626,21 @@ test.describe("search and filters", () => {
   });
 
   test("finds recipes by a reagent they use", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByRole("searchbox").fill("green dye");
     await expect(row(page, "Green Iron Leggings")).toBeVisible();
     await expect(row(page, "Silvered Bronze Gauntlets")).toHaveCount(0);
   });
 
   test("filters by slot", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByLabel("Slot").selectOption("Hands");
     await expect(row(page, "Silvered Bronze Gauntlets")).toBeVisible();
     await expect(row(page, "Green Iron Leggings")).toHaveCount(0);
   });
 
   test("hides soulbound crafts with Tradeable only", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(row(page, "Veteran's Silvered Chain Helm")).toBeVisible();
     await page.getByLabel("Tradeable only").check();
     await expect(row(page, "Veteran's Silvered Chain Helm")).toHaveCount(0);
@@ -633,7 +648,7 @@ test.describe("search and filters", () => {
   });
 
   test("offers a way out when nothing matches", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByRole("searchbox").fill("thunderfury");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
     await page.getByRole("button", { name: "Clear filters" }).first().click();
@@ -643,14 +658,14 @@ test.describe("search and filters", () => {
 
 test.describe("links", () => {
   test("keeps filters and the open item in the address", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await page.getByLabel("Slot").selectOption("Hands");
     await row(page, "Silvered Bronze Gauntlets").click();
     await expect(page).toHaveURL(/\?slot=Hands&recipe=3333$/);
   });
 
   test("reopens the same item and filters from a pasted link", async ({ page }) => {
-    await page.goto("/?slot=Legs&recipe=3506");
+    await page.goto("/crafting?slot=Legs&recipe=3506");
     await expect(detail(page).getByRole("heading", { name: "Green Iron Leggings" })).toBeVisible();
     await expect(page.getByLabel("Slot")).toHaveValue("Legs");
     await expect(row(page, "Silvered Bronze Gauntlets")).toHaveCount(0);
@@ -659,7 +674,7 @@ test.describe("links", () => {
 
 test.describe("on a phone @phone", () => {
   test("opens details as a full-screen sheet that Back closes", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     const sheet = page.getByRole("dialog", { name: "Item details" });
     await expect(sheet).toBeHidden();
 
@@ -674,7 +689,7 @@ test.describe("on a phone @phone", () => {
   });
 
   test("closes the sheet with its close button", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await row(page, "Green Iron Leggings").tap();
     const sheet = page.getByRole("dialog", { name: "Item details" });
     await sheet.getByRole("button", { name: "Close" }).tap();
@@ -682,7 +697,7 @@ test.describe("on a phone @phone", () => {
   });
 
   test("lets a crafter be chosen without opening the extra filters", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(crafterPicker(page)).toBeVisible();
     await crafterPicker(page).selectOption({ label: "Stitches" });
     await expect(rows(page)).toHaveCount(6);
@@ -690,7 +705,7 @@ test.describe("on a phone @phone", () => {
   });
 
   test("keeps extra filters folded away until asked for", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/crafting");
     await expect(page.getByLabel("Slot")).toBeHidden();
     await page.getByRole("button", { name: /^Filters/ }).tap();
     await page.getByLabel("Slot").selectOption("Hands");

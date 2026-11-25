@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { FilterOptions } from "@/lib/craftables/filter";
 import type { CrafterView, Filters, ProfessionView, SortMode } from "@/lib/craftables/types";
 import wow from "@/components/wow/wow.module.css";
@@ -14,6 +14,18 @@ interface Props {
   /** True while gear is ranked for a character: the level range and sort order then have no say. */
   ranking?: boolean;
   onChange: (patch: Partial<Filters>) => void;
+}
+
+/** A control with its name above it. The name shows where there is room for a column of them. */
+function Field({ caption, children }: { caption: string; children: ReactNode }) {
+  return (
+    <span className={styles.field}>
+      <span className={styles.caption} aria-hidden="true">
+        {caption}
+      </span>
+      {children}
+    </span>
+  );
 }
 
 function levelValue(text: string): number | null {
@@ -33,55 +45,27 @@ export function FilterBar({ filters, options, crafters, professions, ranking = f
     filters.tradeableOnly,
     filters.availableOnly,
   ].filter(Boolean).length;
-  const select = (label: string, key: "slot" | "type" | "stat", all: string, values: string[]) => (
-    <select
-      className={wow.field}
-      aria-label={label}
-      value={filters[key]}
-      onChange={(event) => onChange({ [key]: event.target.value })}
-    >
-      <option value="">{all}</option>
-      {/* A choice stays in force when the list changes under it, so it must stay visible too. */}
-      {(filters[key] && !values.includes(filters[key]) ? [filters[key], ...values] : values).map((value) => (
-        <option key={value} value={value}>
-          {value}
-        </option>
-      ))}
-    </select>
+  const select = (caption: string, label: string, key: "slot" | "type" | "stat", all: string, values: string[]) => (
+    <Field caption={caption}>
+      <select
+        className={wow.field}
+        aria-label={label}
+        value={filters[key]}
+        onChange={(event) => onChange({ [key]: event.target.value })}
+      >
+        <option value="">{all}</option>
+        {/* A choice stays in force when the list changes under it, so it must stay visible too. */}
+        {(filters[key] && !values.includes(filters[key]) ? [filters[key], ...values] : values).map((value) => (
+          <option key={value} value={value}>
+            {value}
+          </option>
+        ))}
+      </select>
+    </Field>
   );
 
   return (
     <form className={styles.filters} role="search" onSubmit={(event) => event.preventDefault()}>
-      {crafters.length > 0 ? (
-        <select
-          className={`${wow.field} ${styles.picker}`}
-          aria-label="Crafter"
-          value={crafters.some((crafter) => crafter.slug === filters.crafter) ? filters.crafter : ""}
-          onChange={(event) => onChange({ crafter: event.target.value })}
-        >
-          <option value="">All crafters</option>
-          {crafters.map((crafter) => (
-            <option key={crafter.id} value={crafter.slug}>
-              {crafter.characterName}
-            </option>
-          ))}
-        </select>
-      ) : null}
-      {professions.length > 0 ? (
-        <select
-          className={`${wow.field} ${styles.picker}`}
-          aria-label="Profession"
-          value={professions.some((profession) => profession.slug === filters.profession) ? filters.profession : ""}
-          onChange={(event) => onChange({ profession: event.target.value })}
-        >
-          <option value="">All professions</option>
-          {professions.map((profession) => (
-            <option key={profession.id} value={profession.slug}>
-              {profession.name}
-            </option>
-          ))}
-        </select>
-      ) : null}
       <input autoComplete="off"
         className={`${wow.field} ${styles.search}`}
         type="search"
@@ -90,6 +74,40 @@ export function FilterBar({ filters, options, crafters, professions, ranking = f
         value={filters.search}
         onChange={(event) => onChange({ search: event.target.value })}
       />
+      {crafters.length > 0 ? (
+        <Field caption="Crafter">
+          <select
+            className={`${wow.field} ${styles.picker}`}
+            aria-label="Crafter"
+            value={crafters.some((crafter) => crafter.slug === filters.crafter) ? filters.crafter : ""}
+            onChange={(event) => onChange({ crafter: event.target.value })}
+          >
+            <option value="">All crafters</option>
+            {crafters.map((crafter) => (
+              <option key={crafter.id} value={crafter.slug}>
+                {crafter.characterName}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
+      {professions.length > 0 ? (
+        <Field caption="Profession">
+          <select
+            className={`${wow.field} ${styles.picker}`}
+            aria-label="Profession"
+            value={professions.some((profession) => profession.slug === filters.profession) ? filters.profession : ""}
+            onChange={(event) => onChange({ profession: event.target.value })}
+          >
+            <option value="">All professions</option>
+            {professions.map((profession) => (
+              <option key={profession.id} value={profession.slug}>
+                {profession.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
       <button
         type="button"
         className={`${wow.button} ${styles.filterToggle}`}
@@ -100,9 +118,9 @@ export function FilterBar({ filters, options, crafters, professions, ranking = f
         Filters{active > 0 ? ` (${active})` : ""}
       </button>
       <div id="more-filters" className={styles.moreFilters} data-expanded={expanded}>
-      {select("Slot", "slot", "All slots", options.slots)}
-      {select("Armor or weapon type", "type", "All types", options.types)}
-      {select("Stat", "stat", "Any stat", options.stats)}
+      {select("Slot", "Slot", "slot", "All slots", options.slots)}
+      {select("Type", "Armor or weapon type", "type", "All types", options.types)}
+      {select("Stat", "Stat", "stat", "Any stat", options.stats)}
       {ranking ? null : (
         <>
       <span className={styles.levels}>
@@ -125,16 +143,18 @@ export function FilterBar({ filters, options, crafters, professions, ranking = f
           onChange={(event) => onChange({ maxLevel: levelValue(event.target.value) })}
         />
       </span>
-      <select
-        className={wow.field}
-        aria-label="Sort"
-        value={filters.sort}
-        onChange={(event) => onChange({ sort: event.target.value as SortMode })}
-      >
-        <option value="category">By type</option>
-        <option value="name">By name</option>
-        <option value="level">By level</option>
-      </select>
+      <Field caption="Order">
+        <select
+          className={wow.field}
+          aria-label="Sort"
+          value={filters.sort}
+          onChange={(event) => onChange({ sort: event.target.value as SortMode })}
+        >
+          <option value="category">By type</option>
+          <option value="name">By name</option>
+          <option value="level">By level</option>
+        </select>
+      </Field>
         </>
       )}
       <label className={wow.checkbox}>

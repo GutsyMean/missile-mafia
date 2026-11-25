@@ -94,11 +94,17 @@ interface Props {
   doc: CraftablesDoc;
   /** Recipes still to learn that came with the page, by profession id. */
   initialUnlearned?: Record<number, UnlearnedDoc>;
+  /** Which page this is: everything the guild crafts, or gear ranked for a character. */
+  view?: "crafting" | "gear";
 }
 
-export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
+export function ProfessionWindow({ doc, initialUnlearned = {}, view: page = "crafting" }: Props) {
   const search = useSyncExternalStore(subscribeToUrl, readUrl, readUrlOnServer);
-  const view = useMemo(() => parseViewState(new URLSearchParams(search)), [search]);
+  const view = useMemo(() => {
+    const parsed = parseViewState(new URLSearchParams(search));
+    // Gear is ranked on its own page; the crafting list takes no character.
+    return page === "gear" ? parsed : { ...parsed, gear: NO_GEAR };
+  }, [search, page]);
   const { recipeId, gear } = view;
 
   // Gear is being chosen once a class is named. The talent tree defaults to the class's first, the level to the highest.
@@ -108,6 +114,8 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   );
   const spec = gameClass ? (gameClass.specs.find((option) => option.slug === gear.specSlug) ?? gameClass.specs[0]) : null;
   const level = Math.min(MAX_LEVEL, gear.level ?? MAX_LEVEL);
+  // The gear page has nothing to rank, and nothing to list, until it knows who the gear is for.
+  const choosing = page === "gear" && gameClass === null;
 
   // Then the gear of professions nobody in the guild has joins in, so that "best" looks at everything.
   const [elsewhere, setElsewhere] = useState<GearElsewhereDoc | null>(null);
@@ -152,7 +160,7 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   // Recipes nobody has learned yet are fetched per profession, when a view calls for them.
   const [unlearned, setUnlearned] = useState(initialUnlearned);
   const requested = useRef(new Set(Object.keys(initialUnlearned).map(Number)));
-  const wanted = useMemo(() => unlearnedToLoad(withElsewhere, filters), [withElsewhere, filters]);
+  const wanted = useMemo(() => (choosing ? [] : unlearnedToLoad(withElsewhere, filters)), [choosing, withElsewhere, filters]);
   useEffect(() => {
     for (const id of wanted) {
       if (requested.current.has(id)) continue;
@@ -367,17 +375,26 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
   // The profile shown beside the filters: the chosen crafter, or the only one there is.
   const profiled = crafter ?? (doc.crafters.length === 1 ? doc.crafters[0] : null);
   const chosenProfession = withElsewhere.professions.find((p) => p.slug === filters.profession) ?? null;
-  const portrait = (
-    chosenProfession ??
-    doc.professions.find((p) => profiled && (profiled.skills[String(p.id)] ?? 0) > 0) ??
-    doc.professions[0]
-  )?.iconFileId;
-  const title = "Missile Mafia Crafting";
+  const title = page === "gear" ? "Best gear" : "Crafting";
 
   return (
     <>
-      <Frame title={title} portraitFileId={portrait} className={styles.window}>
-        <div className={styles.toolbar}>
+      <Frame title={title} className={styles.window}>
+        <div className={styles.layout}>
+        <aside className={styles.toolbar} aria-label={page === "gear" ? "Character and filters" : "Filters"}>
+          {page === "gear" ? (
+            <GearBar
+              classes={doc.classes ?? []}
+              gear={gear}
+              gameClass={gameClass}
+              spec={spec}
+              order={order}
+              custom={tree in customOrders}
+              guide={priority?.guide ?? null}
+              onChange={setGear}
+              onOrderChange={(next) => saveCustomOrder(tree, next)}
+            />
+          ) : null}
           {profiled ? (
             <section className={styles.profile} aria-label={`${profiled.characterName}'s profile`}>
               <p className={styles.profileName}>{profiled.characterName}</p>
@@ -403,30 +420,42 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
                 })}
             </section>
           ) : null}
-          <FilterBar
-            filters={filters}
-            options={options}
-            crafters={doc.crafters}
-            professions={withElsewhere.professions}
-            ranking={gameClass !== null}
-            onChange={(patch) => setFilters({ ...filters, ...patch })}
-          />
-          <GearBar
-            classes={doc.classes ?? []}
-            gear={gear}
-            gameClass={gameClass}
-            spec={spec}
-            order={order}
-            custom={tree in customOrders}
-            guide={priority?.guide ?? null}
-            onChange={setGear}
-            onOrderChange={(next) => saveCustomOrder(tree, next)}
-          />
-        </div>
+          {choosing ? null : (
+            <FilterBar
+              filters={filters}
+              options={options}
+              crafters={doc.crafters}
+              professions={withElsewhere.professions}
+              ranking={gameClass !== null}
+              onChange={(patch) => setFilters({ ...filters, ...patch })}
+            />
+          )}
+        </aside>
 
-        <div className={styles.body}>
+        <div className={styles.body} data-choosing={choosing}>
           <div className={styles.listPane}>
-            {entries.length === 0 ? (
+            {choosing ? (
+              <div className={styles.chooser}>
+                <h2 className={styles.chooserTitle}>Who is the gear for?</h2>
+                <p>
+                  Pick a class, then its talent tree and level. Each slot then lists the best pieces for that
+                  character, and who in the guild can make them.
+                </p>
+                <ul className={styles.classes}>
+                  {(doc.classes ?? []).map((option) => (
+                    <li key={option.id}>
+                      <button
+                        type="button"
+                        className={wow.button}
+                        onClick={() => setGear({ ...NO_GEAR, classSlug: option.slug })}
+                      >
+                        {option.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : entries.length === 0 ? (
               <p className={styles.empty}>
                 {crafter
                   ? `${crafter.characterName} has not listed any recipes yet.`
@@ -487,24 +516,29 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
               />
             )}
           </div>
-          <div className={styles.detailPane}>
-            {shown ? (
-              <DetailPane entry={shown} rank={ranks.get(shown.recipe.id)} character={character} />
-            ) : (
-              <p className={styles.empty}>Select an item to see what it needs.</p>
-            )}
-          </div>
+          {choosing ? null : (
+            <div className={styles.detailPane}>
+              {shown ? (
+                <DetailPane entry={shown} rank={ranks.get(shown.recipe.id)} character={character} />
+              ) : (
+                <p className={styles.empty}>Select an item to see what it needs.</p>
+              )}
+            </div>
+          )}
+        </div>
         </div>
 
         <footer className={styles.status}>
           <span>
-            {sections && character
+            {choosing
+              ? "No class chosen yet"
+              : sections && character
               ? `Best for a ${character}: ${visible.length} ${visible.length === 1 ? "piece" : "pieces"} for ${sections.length} ${sections.length === 1 ? "slot" : "slots"}`
               : visible.length === entries.length
                 ? `${entries.length} recipes`
                 : `${visible.length} of ${entries.length} recipes`}
-            {notCrafted > 0 ? ` · ${notCrafted} not crafted` : ""}
-            {notYet > 0 ? ` · ${notYet} not available yet` : ""}
+            {!choosing && notCrafted > 0 ? ` · ${notCrafted} not crafted` : ""}
+            {!choosing && notYet > 0 ? ` · ${notYet} not available yet` : ""}
             {stillLoading > 0 ? (
               <span className={styles.loading} role="status">
                 <span className={styles.spinner} aria-hidden="true" />

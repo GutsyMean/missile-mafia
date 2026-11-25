@@ -1,0 +1,224 @@
+/* The frame every page of Missile Mafia HQ sits in: the bar across the top with
+   the sections, and the credits at the foot. */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  /* Dark worked stone with a bronze lip, like the top of the game's own windows. */
+  background:
+    linear-gradient(rgb(34 20 12 / 0.94), rgb(12 7 5 / 0.97)),
+    url("/ui/frame-bg.png") 0 0 / 512px 512px;
+  border-bottom: 2px solid;
+  border-image: linear-gradient(90deg, #2c1d0c, #8a6a34 18%, #d8b668 50%, #8a6a34 82%, #2c1d0c) 1;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.55);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  width: var(--page-width);
+  height: var(--header-h);
+  margin: 0 auto;
+}
+
+.brand {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 11px;
+  color: var(--gold);
+  text-decoration: none;
+}
+
+/* The guild's mark, ringed in bronze like a portrait in game. */
+.crest {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #b08f4f;
+  border-radius: 50%;
+  background: #000;
+  box-shadow:
+    0 0 0 1px #000,
+    0 2px 6px rgb(0 0 0 / 0.7);
+  object-fit: cover;
+}
+
+.wordmark {
+  font-size: 23px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-shadow: 1px 2px 0 #000;
+  white-space: nowrap;
+}
+
+.wordmark span {
+  color: #fff;
+}
+
+.nav {
+  display: flex;
+  flex: 1;
+  align-self: stretch;
+  min-width: 0;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  padding: 0 17px;
+  color: #d9c79a;
+  font-size: 16px;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 #000;
+  transition:
+    color 160ms ease-out,
+    background-color 160ms ease-out;
+}
+
+.tab:hover {
+  background: rgb(255 226 150 / 0.06);
+  color: #fff;
+}
+
+.tab[aria-current="page"] {
+  background: linear-gradient(rgb(255 209 0 / 0), rgb(255 209 0 / 0.1));
+  color: var(--gold);
+}
+
+/* The section in view is underlined on the bar's bronze lip. */
+.tab[aria-current="page"]::after {
+  position: absolute;
+  right: 10px;
+  bottom: -2px;
+  left: 10px;
+  height: 3px;
+  border-radius: 2px 2px 0 0;
+  background: var(--gold);
+  content: "";
+}
+
+.tab:focus-visible,
+.brand:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -3px;
+}
+
+.brand:focus-visible {
+  outline-offset: 4px;
+}
+
+.account {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  height: 34px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+/* A visitor who has signed in here before goes to their characters; anyone else is invited to join. */
+.returning {
+  display: none;
+}
+
+:global(html[data-account]) .newVisitor {
+  display: none;
+}
+
+:global(html[data-account]) .returning {
+  display: inline;
+}
+
+.skip {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 30;
+  padding: 8px 12px;
+  border: 1px solid #b08f4f;
+  border-radius: 3px;
+  background: #1a100b;
+  color: var(--gold);
+  font-size: 14px;
+  transform: translateY(-64px);
+}
+
+.skip:focus-visible {
+  transform: none;
+}
+
+.footer {
+  width: var(--page-width);
+  margin: 0 auto;
+  padding: 18px 0 22px;
+  color: #a39a8b;
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.footer p {
+  max-width: 96ch;
+  margin: 0 auto;
+}
+
+.footer a {
+  color: #c9bfae;
+}
+
+@media (max-width: 860px) {
+  /* Two rows: the name and the sign-in, then the sections, which scroll sideways if they must. */
+  .bar {
+    flex-wrap: wrap;
+    gap: 0 12px;
+    height: auto;
+    padding-top: 8px;
+  }
+
+  .brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .crest {
+    width: 34px;
+    height: 34px;
+  }
+
+  .wordmark {
+    overflow: hidden;
+    font-size: 19px;
+    text-overflow: ellipsis;
+  }
+
+  .account {
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 13px;
+  }
+
+  .nav {
+    flex: 1 1 100%;
+    order: 3;
+    height: 44px;
+    margin: 6px -4px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    padding: 0 13px;
+    font-size: 15px;
+  }
+}

@@ -1,10 +1,16 @@
 /* The crafter's own page: same window frame as the public list. */
 
 .window {
-  width: min(1060px, 100%);
-  height: min(860px, calc(100dvh - 40px));
+  width: min(1180px, 100%);
+  height: calc(100dvh - var(--header-h) - 60px);
   min-height: 460px;
   margin: 0 auto;
+}
+
+/* The sign-in window: a few lines and one button, so it stays small. */
+.signIn {
+  width: min(620px, 100%);
+  margin: 4vh auto 0;
 }
 
 .topbar {
@@ -517,7 +523,7 @@ select.wideSelect {
 
 @media (max-width: 820px) {
   .window {
-    height: calc(100dvh - 16px);
+    height: calc(100dvh - var(--header-h) - 24px);
   }
 
   .recipe {

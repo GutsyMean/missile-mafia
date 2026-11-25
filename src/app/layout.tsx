@@ -1,12 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "@fontsource/marcellus/400.css";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
 import { ACCOUNT_MARKER_SCRIPT } from "@/lib/account-marker";
+import { SITE_NAME } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Missile Mafia Crafting",
+  title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
   description:
-    "What Missile Mafia's crafters can make in World of Warcraft: Forever, with in-game tooltips and the materials each item needs.",
+    "The Missile Mafia guild in World of Warcraft: Forever: what its crafters can make, who to ask, and the best gear for your character.",
 };
 
 export const viewport: Viewport = {
@@ -20,7 +24,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: ACCOUNT_MARKER_SCRIPT }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <SiteHeader />
+        {/* Pages left by way of a link stay in the document, hidden; the way past the bar leads to this, not to one of them. */}
+        <div id="main" tabIndex={-1}>
+          {children}
+        </div>
+        <Suspense fallback={null}>
+          <SiteFooter />
+        </Suspense>
+      </body>
     </html>
   );
 }

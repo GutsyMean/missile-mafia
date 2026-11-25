@@ -9,7 +9,7 @@ import wow from "@/components/wow/wow.module.css";
 import { loadAdminData } from "@/lib/admin/load";
 import pageStyles from "../page.module.css";
 
-export const metadata = { title: "My recipes · Missile Mafia Crafting" };
+export const metadata = { title: "My characters" };
 
 /** "Check for game updates" runs a full sync from this page's actions. */
 export const maxDuration = 300;

@@ -249,7 +249,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
           ))}
         </nav>
         <div className={styles.account}>
-          <Link href="/" className={styles.linkButton}>
+          <Link href="/crafting" className={styles.linkButton}>
             View the crafting list
           </Link>
           <form action={signOut}>
