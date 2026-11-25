@@ -110,6 +110,29 @@ describe("groupEntries", () => {
     expect(groups).toHaveLength(1);
     expect(groups[0].category).toBeNull();
   });
+
+  it("tells apart two categories the game gives one name", () => {
+    // Engineering has "Miscellaneous" twice: a kind of weapon, and odds and ends at the end of the list.
+    const renamed = entries.map((entry) =>
+      ["Mail Armor", "Enchantments"].includes(entry.recipe.category)
+        ? { ...entry, recipe: { ...entry.recipe, category: "Miscellaneous" } }
+        : entry,
+    );
+    const groups = groupEntries(applyFilters(renamed, DEFAULT_FILTERS), "category");
+    expect(groups.map((g) => [g.category, g.entries.length])).toEqual([
+      ["Miscellaneous", 3],
+      ["Two-Handed Axes", 1],
+      ["Trade Goods", 1],
+      ["Miscellaneous", 1],
+    ]);
+    expect(new Set(groups.map((g) => g.key)).size).toBe(groups.length);
+  });
+
+  it("gives a group the same key however the list around it changes", () => {
+    const all = groupEntries(applyFilters(entries, DEFAULT_FILTERS), "category");
+    const some = groupEntries(applyFilters(entries, { ...DEFAULT_FILTERS, search: "axe" }), "category");
+    expect(some.map((g) => g.key)).toEqual([all.find((g) => g.category === "Two-Handed Axes")?.key]);
+  });
 });
 
 describe("filterOptions", () => {

@@ -242,6 +242,7 @@ export function ProfessionWindow({ doc, initialUnlearned = {} }: Props) {
     () =>
       sections
         ? sections.map((section) => ({
+            key: `slot:${section.slot}`,
             category: section.slot,
             entries: section.rows.map((ranked) => ranked.entry),
             ranked: true,

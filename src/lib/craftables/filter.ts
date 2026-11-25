@@ -212,6 +212,8 @@ export function applyFilters(entries: Entry[], filters: Filters): Entry[] {
 }
 
 export interface EntryGroup {
+  /** Tells the group from every other in the list. A heading cannot: the game has categories that share a name. */
+  key: string;
   /** Null when the list is not grouped. */
   category: string | null;
   entries: Entry[];
@@ -226,12 +228,21 @@ export interface EntryGroup {
 }
 
 export function groupEntries(sorted: Entry[], sort: SortMode): EntryGroup[] {
-  if (sort !== "category") return [{ category: null, entries: sorted }];
+  if (sort !== "category") return [{ key: "all", category: null, entries: sorted }];
   const groups: EntryGroup[] = [];
+  const taken = new Set<string>();
   for (const entry of sorted) {
     const last = groups[groups.length - 1];
-    if (last && last.category === entry.recipe.category) last.entries.push(entry);
-    else groups.push({ category: entry.recipe.category, entries: [entry] });
+    if (last && last.category === entry.recipe.category) {
+      last.entries.push(entry);
+      continue;
+    }
+    // Engineering has "Miscellaneous" twice, a kind of weapon and odds and ends: where a
+    // category stands in the list tells the two apart when their name does not.
+    let key = `${entry.recipe.categoryOrder}:${entry.recipe.category}`;
+    for (let again = 2; taken.has(key); again++) key = `${entry.recipe.categoryOrder}:${entry.recipe.category}:${again}`;
+    taken.add(key);
+    groups.push({ key, category: entry.recipe.category, entries: [entry] });
   }
   return groups;
 }

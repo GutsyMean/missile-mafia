@@ -88,7 +88,7 @@ export const RecipeList = memo(function RecipeList({
         // A group with nothing drawn yet waits for its turn, heading and all.
         if (entries.length === 0) return null;
         return (
-        <section key={group.category ?? "all"} aria-label={group.category ?? "Recipes"}>
+        <section key={group.key} aria-label={group.category ?? "Recipes"}>
           {group.category ? (
             <h2 className={styles.groupHeader}>
               <span>{group.category}</span>
