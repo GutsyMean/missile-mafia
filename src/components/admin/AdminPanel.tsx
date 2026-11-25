@@ -26,12 +26,13 @@ import {
 import { Frame } from "@/components/wow/Frame";
 import wow from "@/components/wow/wow.module.css";
 import { CraftersPanel } from "./CraftersPanel";
+import { GuildImportPanel } from "./GuildImportPanel";
 import { SaveQueue } from "@/lib/admin/save-queue";
 import { EMPTY_PROFILE, ProfileForm } from "./ProfileForm";
 import { RecipeChecklist } from "./RecipeChecklist";
 import styles from "./admin.module.css";
 
-type Tab = "recipes" | "import" | "profile" | "add" | "crafters" | "data";
+type Tab = "recipes" | "import" | "profile" | "add" | "crafters" | "guild" | "data";
 
 const IMPORT_ERRORS: Record<GuildonErrorReason, string> = {
   format: "is not an export line. Copy the whole text from /gnc export.",
@@ -190,6 +191,7 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
     ...(data.isAdmin
       ? ([
           ["crafters", "Crafters"],
+          ["guild", "Import guild"],
           ["data", "Game data"],
         ] as [Tab, string][])
       : []),
@@ -343,6 +345,21 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
               setDirectory((current) => (typeof next === "function" ? (current ? next(current) : current) : next))
             }
             onSettingsChange={setSettings}
+          />
+        ) : null}
+        {tab === "guild" && directory ? (
+          <GuildImportPanel
+            catalog={catalog}
+            directory={directory}
+            onImported={(result) => {
+              setDirectory(result.directory);
+              // The admin's own characters may be among those imported: their lists follow.
+              for (const [id, recipeIds] of Object.entries(result.ownRecipes)) {
+                const own = data.crafters.find((c) => c.id === id);
+                if (own) queueFor(own).reset(new Set(recipeIds));
+              }
+              router.refresh(); // skills the file raised show on the profile
+            }}
           />
         ) : null}
         {tab === "data" ? <GameDataPanel runs={data.runs} configured={data.syncConfigured} /> : null}

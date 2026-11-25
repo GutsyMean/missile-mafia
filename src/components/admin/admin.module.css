@@ -449,6 +449,18 @@ select.wideSelect {
   padding: 0;
   list-style: none;
 }
+/* A long tick-box label that may break over two lines on a narrow screen. */
+.wrapLabel {
+  white-space: normal;
+}
+.inlineList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
 .fields {
   display: grid;

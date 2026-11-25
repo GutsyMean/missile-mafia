@@ -5,6 +5,7 @@ import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
+import type { GuildImportMember, GuildImportTally } from "@/lib/guildy";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /** What every action returns: either it worked, or a message the page can show. */
@@ -326,6 +327,108 @@ export async function setCrafterListed(crafterId: string, listed: boolean): Prom
   const { error } = await session.supabase.rpc("admin_set_crafter_listed", { p_crafter_id: crafterId, p_listed: listed === true });
   if (error) return fail(error.message);
   return directoryAfterChange(session);
+}
+
+/** The members of a guild file as the page sends them, checked before the database sees them. */
+function checkGuildMembers(members: unknown): GuildImportMember[] | string {
+  if (!Array.isArray(members) || members.length === 0) return "Choose at least one member to import.";
+  if (members.length > 500) return "That is more than 500 members. Import them in smaller groups.";
+  const targets = new Set<string>();
+  const checked: GuildImportMember[] = [];
+  for (const member of members as Partial<GuildImportMember>[]) {
+    const name = typeof member?.name === "string" ? member.name.trim() : "";
+    if (name.length < 1 || name.length > 40) return "A member in that file has no name, or one longer than 40 characters.";
+    const crafterId = member.crafterId ?? null;
+    if (crafterId !== null) {
+      if (typeof crafterId !== "string" || !UUID.test(crafterId)) return `The crafter chosen for ${name} is not known.`;
+      if (targets.has(crafterId.toLowerCase())) return "Two members point at the same crafter. Give each their own.";
+      targets.add(crafterId.toLowerCase());
+    }
+    const professions = member.professions;
+    if (
+      !Array.isArray(professions) ||
+      professions.length > 30 ||
+      !professions.every(
+        (p) => Number.isInteger(p?.id) && p.id > 0 && Number.isInteger(p?.skill) && p.skill >= 1 && p.skill <= 450,
+      )
+    ) {
+      return `The professions of ${name} are not valid.`;
+    }
+    if (!isIdList(member.recipeIds)) return `The recipes of ${name} are not valid.`;
+    checked.push({
+      name,
+      crafterId,
+      professions: professions.map((p) => ({ id: p.id, skill: p.skill })),
+      recipeIds: member.recipeIds,
+    });
+  }
+  return checked;
+}
+
+async function importGuild(
+  session: AdminSession,
+  members: GuildImportMember[],
+  listNew: boolean,
+  apply: boolean,
+): Promise<ActionResult<GuildImportTally[]>> {
+  const { data, error } = await session.supabase.rpc("admin_import_guild", {
+    p_members: members,
+    p_list_new: listNew === true,
+    p_apply: apply,
+  });
+  if (error) return fail(error.code === "42501" ? NOT_ADMIN : error.message);
+  return { ok: true, data: data as GuildImportTally[] };
+}
+
+/**
+ * What importing these members of a guild addon's file would do: who would
+ * become a crafter, and the recipes and skills each would gain. Changes nothing.
+ */
+export async function previewGuildImport(
+  members: GuildImportMember[],
+  listNew: boolean,
+): Promise<ActionResult<GuildImportTally[]>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  const checked = checkGuildMembers(members);
+  if (typeof checked === "string") return fail(checked);
+  return importGuild(session, checked, listNew, false);
+}
+
+export interface GuildImportResult {
+  tallies: GuildImportTally[];
+  directory: AdminDirectory;
+  /** The admin's own crafters the import touched, with their recipe lists as they now stand. */
+  ownRecipes: Record<string, number[]>;
+}
+
+/**
+ * Imports members from a guild addon's file: creates the crafters that are
+ * new, and adds recipes and raises skills for the rest. Site admins only; the
+ * database checks that again.
+ */
+export async function applyGuildImport(
+  members: GuildImportMember[],
+  listNew: boolean,
+): Promise<ActionResult<GuildImportResult>> {
+  const session = await signedInAdmin();
+  if (!session) return fail(NOT_ADMIN);
+  const checked = checkGuildMembers(members);
+  if (typeof checked === "string") return fail(checked);
+
+  const imported = await importGuild(session, checked, listNew, true);
+  if (!imported.ok) return imported;
+  const directory = await directoryAfterChange(session);
+  if (!directory.ok) return directory;
+
+  const touched = new Set(imported.data.map((tally) => tally.crafterId));
+  const ownRecipes: Record<string, number[]> = {};
+  for (const crafter of directory.data.crafters) {
+    if (crafter.userId === session.userId && touched.has(crafter.id)) {
+      ownRecipes[crafter.id] = await recipeIdsOf(session, crafter.id);
+    }
+  }
+  return { ok: true, data: { tallies: imported.data, directory: directory.data, ownRecipes } };
 }
 
 /** Sets who is approved automatically: members of a Discord server, optionally with a role. */

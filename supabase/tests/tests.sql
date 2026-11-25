@@ -825,3 +825,121 @@ select test.is(
 select test.throws(
   $$update public.game_meta set value = '{}'::jsonb where key = 'gear_sources'$$, '42501', 'a visitor cannot rewrite the sources');
 reset role;
+
+-- ---------------------------------------------------------------------------
+-- A site admin imports what a guild addon collected about the members
+-- ---------------------------------------------------------------------------
+set role anon;
+select test.login(null);
+select test.throws($$select public.admin_import_guild('[]'::jsonb, true, true)$$, '42501', 'a visitor cannot import guild members');
+reset role;
+set role authenticated;
+select test.login(:'member');
+select test.throws(
+  $$select public.admin_import_guild('[{"name": "Sneaky", "crafterId": null, "professions": [], "recipeIds": []}]'::jsonb, true, true)$$,
+  '42501', 'a signed-in member cannot import guild members');
+select test.throws($$select private.admin_import_guild('[]'::jsonb, true, false)$$, '42501', 'nor look at what an import would do');
+reset role;
+select test.is((select count(*)::int from public.crafters where character_name = 'Sneaky'), 0, 'and nothing was created');
+
+-- What Tessa should end up with: the recipes the file names that the game still has,
+-- and the trainer recipes Blacksmithing 60 brings.
+select count(*)::int as tessa_expected from public.recipes r
+where (r.id in (505, 1252277) and r.status <> 'removed')
+   or (r.profession_id = 164 and private.trainer_unlock_level(r) <= 60) \gset
+select test.is((select status from public.recipes where id = 1252277), 'removed', '(the file names a recipe the game has retired)');
+
+set role authenticated;
+select test.login(:'owner');
+\set tessa '[{"name": "  Tessa Thimble ", "crafterId": null, "professions": [{"id": 164, "skill": 60}, {"id": 424242, "skill": 10}, {"id": 164, "skill": "many"}], "recipeIds": [505, 1252277, 99999999, "x"]}]'
+
+select public.admin_import_guild(:'tessa'::jsonb, false, false) as look \gset
+select test.is((:'look'::jsonb -> 0 ->> 'created')::boolean, true, 'a look at an import says a new crafter would be created');
+select test.is((:'look'::jsonb -> 0 ->> 'recipesAdded')::int, :tessa_expected, 'and how many recipes they would get, trainer recipes included');
+select test.is((:'look'::jsonb -> 0 ->> 'recipesFromFile')::int, 1, 'and how many of those the file itself names');
+select test.is(:'look'::jsonb -> 0 -> 'skills', '[{"professionId": 164, "from": null, "to": 60}]'::jsonb, 'and which skills would be set');
+reset role;
+select test.is((select count(*)::int from public.crafters where character_name = 'Tessa Thimble'), 0, 'a look creates nobody');
+select test.is((select count(*)::int from public.crafter_recipes cr where cr.source = 'import' and cr.recipe_id = 505), 0, 'and adds no recipe');
+
+set role authenticated;
+select public.admin_import_guild(:'tessa'::jsonb, false, true) as done \gset
+select (:'done'::jsonb -> 0 ->> 'crafterId') as tessa_id \gset
+select test.is((:'done'::jsonb -> 0 ->> 'recipesAdded')::int, :tessa_expected, 'importing does exactly what the look said');
+reset role;
+select test.is(
+  (select row(character_name, slug, user_id is null, is_listed)::text from public.crafters where id = :'tessa_id'),
+  row('Tessa Thimble', 'tessa-thimble', true, false)::text,
+  'the new crafter has the member''s name, no account, and is hidden when the admin asked for that');
+select test.is((select skill from public.crafter_professions where crafter_id = :'tessa_id' and profession_id = 164), 60, 'with the skill from the file');
+select test.is((select count(*)::int from public.crafter_professions where crafter_id = :'tessa_id'), 1, 'a profession the site does not have is passed over');
+select test.is((select source from public.crafter_recipes where crafter_id = :'tessa_id' and recipe_id = 505), 'import', 'recipes from the file are recorded as imported');
+select test.is((select source from public.crafter_recipes where crafter_id = :'tessa_id' and recipe_id = 502), 'auto', 'trainer recipes for the skill follow by themselves');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'tessa_id' and recipe_id = 1252277), 0, 'a recipe the game retired is not added');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'tessa_id' and recipe_id = 503), 0, 'nor a trainer recipe above the skill');
+
+-- The same file again, now aimed at the crafter it made.
+set role authenticated;
+select test.is(
+  public.admin_import_guild(jsonb_build_array(jsonb_build_object(
+    'name', 'Tessa Thimble', 'crafterId', :'tessa_id', 'professions', '[{"id": 164, "skill": 60}]'::jsonb, 'recipeIds', '[505]'::jsonb)), true, true) -> 0,
+  jsonb_build_object('name', 'Tessa Thimble', 'crafterId', :'tessa_id', 'created', false, 'recipesAdded', 0, 'recipesFromFile', 0, 'recipesSkipped', 0, 'skills', '[]'::jsonb),
+  'importing the same file twice changes nothing');
+select test.is(
+  public.admin_import_guild(jsonb_build_array(jsonb_build_object(
+    'name', 'Tessa Thimble', 'crafterId', :'tessa_id', 'professions', '[{"id": 164, "skill": 40}]'::jsonb, 'recipeIds', '[]'::jsonb)), true, true) -> 0 -> 'skills',
+  '[]'::jsonb, 'an older file with a lower skill changes no skill');
+reset role;
+select test.is((select skill from public.crafter_professions where crafter_id = :'tessa_id' and profession_id = 164), 60, 'a skill is never lowered');
+set role authenticated;
+select test.is(
+  public.admin_import_guild(jsonb_build_array(jsonb_build_object(
+    'name', 'Tessa Thimble', 'crafterId', :'tessa_id', 'professions', '[{"id": 164, "skill": 150}]'::jsonb, 'recipeIds', '[]'::jsonb)), true, true) -> 0 -> 'skills',
+  '[{"professionId": 164, "from": 60, "to": 150}]'::jsonb, 'a higher skill is taken');
+reset role;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'tessa_id' and recipe_id = 503), 1, 'and brings its trainer recipes');
+select test.is((select is_listed from public.crafters where id = :'tessa_id'), false, 'adding to a crafter does not change whether they are listed');
+
+-- A member who took a recipe off their own list keeps it off.
+set role authenticated;
+select test.login(:'member');
+select public.set_crafter_recipes(:'new_id', array[3333], '{}'::int[]);
+select public.set_crafter_recipes(:'new_id', '{}'::int[], array[3333]);
+select test.login(:'owner');
+select public.admin_import_guild(jsonb_build_array(jsonb_build_object(
+  'name', 'New Member', 'crafterId', :'new_id', 'professions', '[]'::jsonb, 'recipeIds', '[3333, 505]'::jsonb)), true, true) as kept \gset
+select test.is((:'kept'::jsonb -> 0 ->> 'recipesSkipped')::int, 1, 'an import says which of a member''s recipes it left alone');
+reset role;
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'new_id' and recipe_id = 3333), 0, 'a recipe a member took off their list is not put back by an import');
+select test.is((select count(*)::int from public.crafter_recipes where crafter_id = :'new_id' and recipe_id = 505), 1, 'the rest of their recipes are added');
+select test.is((select user_id from public.crafters where id = :'new_id'), :'member'::uuid, 'and the crafter stays theirs');
+
+-- Several members at once, and what is refused.
+set role authenticated;
+select public.admin_import_guild($json$[
+  {"name": "Bram Anvil", "crafterId": null, "professions": [{"id": 164, "skill": 1}], "recipeIds": []},
+  {"name": "Bram Anvil", "crafterId": null, "professions": [], "recipeIds": [505]}
+]$json$::jsonb, null, true) as pair \gset
+select test.is(jsonb_array_length(:'pair'::jsonb), 2, 'several members are imported in one go, in the order given');
+reset role;
+select test.is(
+  (select array_agg(slug order by slug) from public.crafters where character_name = 'Bram Anvil'), array['bram-anvil', 'bram-anvil-2'],
+  'two members of one name each get their own address');
+select test.is((select bool_and(is_listed) from public.crafters where character_name = 'Bram Anvil'), true, 'new crafters are listed unless the admin says otherwise');
+
+set role authenticated;
+select test.throws(
+  format($$select public.admin_import_guild('[{"name": "A", "crafterId": %1$s}, {"name": "B", "crafterId": %1$s}]'::jsonb, true, true)$$, to_jsonb(:'tessa_id'::text)),
+  '22023', 'two members cannot be imported into one crafter');
+select test.throws(
+  $$select public.admin_import_guild('[{"name": "Fine Person", "crafterId": null}, {"name": "Lost", "crafterId": "99999999-9999-9999-9999-999999999999"}]'::jsonb, true, true)$$,
+  'P0002', 'a crafter that does not exist is an error');
+select test.throws($$select public.admin_import_guild('{"name": "Not A List"}'::jsonb, true, true)$$, '22023', 'the members must come as a list');
+select test.throws(
+  $$select public.admin_import_guild(jsonb_build_array(jsonb_build_object('name', repeat('x', 41), 'crafterId', null)), true, true)$$,
+  '22023', 'a new crafter needs a name that fits');
+select test.throws($$select public.admin_import_guild('[{"name": "   ", "crafterId": null}]'::jsonb, true, true)$$, '22023', 'and one that is not blank');
+reset role;
+select test.is((select count(*)::int from public.crafters where character_name = 'Fine Person'), 0, 'an import that fails part-way keeps none of it');
+select test.is(has_function_privilege('anon', 'public.admin_import_guild(jsonb, boolean, boolean)', 'execute'), false, 'visitors have no execute right on the import');
+select test.is(has_function_privilege('anon', 'private.admin_import_guild(jsonb, boolean, boolean)', 'execute'), false, 'nor on the inner function');
