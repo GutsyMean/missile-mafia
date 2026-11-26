@@ -1,6 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import { runSiteSync } from "@/lib/game-data/run";
+import { settle } from "@/lib/publish";
 
 /** A full sync downloads about thirty game tables; give it room. */
 export const maxDuration = 300;
@@ -16,7 +17,10 @@ export async function GET(request: Request) {
   }
   try {
     const result = await runSiteSync("cron");
-    if (result.status === "ok") revalidateTag(CRAFTABLES_TAG, "max");
+    if (result.status === "ok") {
+      revalidateTag(CRAFTABLES_TAG, "max");
+      settle(CRAFTABLES_TAG);
+    }
     return Response.json(result, { status: result.status === "ok" ? 200 : 500 });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : String(error) }, { status: 500 });

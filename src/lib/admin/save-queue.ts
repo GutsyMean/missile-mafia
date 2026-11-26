@@ -5,6 +5,10 @@
  * and clicks made while a save is on its way are kept and sent next. If a
  * save fails, only the changes it carried are undone; everything saved
  * before and everything clicked since stays as it is.
+ *
+ * What was saved is put on the site once, when the clicking pauses. Doing it
+ * after every save had each click rebuild every public page, and a page
+ * rebuilt between two clicks could be kept with the earlier of the two lists.
  */
 
 export type SaveResult = { ok: true } | { ok: false; error: string };
@@ -21,9 +25,16 @@ interface Options<Source extends string> {
   onBusy?: (saving: boolean) => void;
   /** How long to wait for more clicks before sending, in milliseconds. */
   delay?: number;
+  /** Puts what has been saved on the site. Called when the clicking pauses, not after every save. */
+  publish?: () => Promise<SaveResult>;
+  /** How long the clicking must pause before that, in milliseconds. */
+  publishDelay?: number;
 }
 
 type Intent<Source> = { on: boolean; source: Source };
+
+/** A refresh that keeps failing is left for the next save to try; the server catches the site up by itself. */
+const PUBLISH_TRIES = 3;
 
 export class SaveQueue<Source extends string = string> {
   /** What the server is known to have. */
@@ -34,6 +45,13 @@ export class SaveQueue<Source extends string = string> {
   private sending: Map<number, Intent<Source>> | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private busy = false;
+  /** Something was saved that the site has not been refreshed for. */
+  private unpublished = false;
+  private publishing = false;
+  private publishTimer: ReturnType<typeof setTimeout> | null = null;
+  private publishFailures = 0;
+  /** The page was left: nothing more is coming, so nothing waits. */
+  private hurried = false;
   private readonly options: Options<Source>;
 
   constructor(options: Options<Source>) {
@@ -50,9 +68,20 @@ export class SaveQueue<Source extends string = string> {
   change(add: number[], remove: number[], source: Source): void {
     for (const id of add) this.queued.set(id, { on: true, source });
     for (const id of remove) this.queued.set(id, { on: false, source });
+    this.hurried = false;
+    // More is coming: the site is refreshed after it, not in the middle of it.
+    if (this.publishTimer) clearTimeout(this.publishTimer);
+    this.publishTimer = null;
     this.options.onChange(this.view());
     this.setBusy(true);
     this.schedule();
+  }
+
+  /** The page is being left: send what is waiting and refresh the site without waiting for more clicks. */
+  finish(): void {
+    this.hurried = true;
+    if (this.timer) this.schedule();
+    else if (!this.sending) this.schedulePublish();
   }
 
   /** The server's list changed by another route (an import, say). Unsaved clicks stay on top. */
@@ -83,7 +112,36 @@ export class SaveQueue<Source extends string = string> {
     this.timer = setTimeout(() => {
       this.timer = null;
       void this.flush();
-    }, this.options.delay ?? 250);
+    }, this.hurried ? 0 : (this.options.delay ?? 250));
+  }
+
+  /** Everything is saved: refresh the site for it once the clicking has paused. */
+  private schedulePublish(): void {
+    if (!this.options.publish || !this.unpublished || this.publishing) return;
+    if (this.publishTimer) clearTimeout(this.publishTimer);
+    this.publishTimer = setTimeout(() => {
+      this.publishTimer = null;
+      void this.publish();
+    }, this.hurried ? 0 : (this.options.publishDelay ?? 1500));
+  }
+
+  private async publish(): Promise<void> {
+    if (this.publishing || this.unsaved) return; // the save on its way asks again when it returns
+    this.publishing = true;
+    this.unpublished = false; // whatever is saved from here on needs a refresh of its own
+    let result: SaveResult;
+    try {
+      result = await this.options.publish!();
+    } catch (error) {
+      result = { ok: false, error: error instanceof Error ? error.message : String(error) };
+    }
+    this.publishing = false;
+    if (result.ok) {
+      this.publishFailures = 0;
+    } else if (++this.publishFailures < PUBLISH_TRIES) {
+      this.unpublished = true;
+    }
+    if (!this.unsaved) this.schedulePublish();
   }
 
   private async flush(): Promise<void> {
@@ -94,6 +152,7 @@ export class SaveQueue<Source extends string = string> {
     this.queued.clear();
     if (batch.size === 0) {
       this.setBusy(false);
+      this.schedulePublish();
       return;
     }
     this.sending = batch;
@@ -113,6 +172,8 @@ export class SaveQueue<Source extends string = string> {
       if (result.ok) {
         for (const id of add) this.confirmed.add(id);
         for (const id of remove) this.confirmed.delete(id);
+        this.unpublished = true;
+        this.publishFailures = 0;
       } else {
         failure = result.error;
         // What was clicked again since keeps its newer wish and is tried again with the next save.
@@ -123,7 +184,11 @@ export class SaveQueue<Source extends string = string> {
     this.sending = null;
     this.options.onChange(this.view());
     if (failure !== null) this.options.onError(failure, undone);
-    if (this.queued.size > 0) this.schedule();
-    else this.setBusy(false);
+    if (this.queued.size > 0) {
+      this.schedule();
+    } else {
+      this.setBusy(false);
+      this.schedulePublish();
+    }
   }
 }

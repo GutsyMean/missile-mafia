@@ -163,4 +163,149 @@ describe("SaveQueue", () => {
     expect(busy).toEqual([true, false]);
     expect(queue.unsaved).toBe(false);
   });
+
+  describe("putting what was saved on the site", () => {
+    /** As above, with a stand-in for the step that refreshes the public pages. */
+    function setupPublishing(initial: number[] = []) {
+      const backend = server();
+      const waiting: ((result: SaveResult) => void)[] = [];
+      let published = 0;
+      const queue = new SaveQueue<"manual" | "bulk">({
+        initial,
+        save: backend.save,
+        onChange: () => {},
+        onError: () => {},
+        delay: 250,
+        publish: () => {
+          published += 1;
+          return new Promise<SaveResult>((resolve) => waiting.push(resolve));
+        },
+        publishDelay: 1500,
+      });
+      const publishAnswer = async (result: SaveResult = { ok: true }) => {
+        waiting.shift()!(result);
+        await vi.advanceTimersByTimeAsync(0);
+      };
+      return { ...backend, queue, published: () => published, publishAnswer };
+    }
+
+    /** One tick, sent and saved. */
+    async function tickAndSave(context: ReturnType<typeof setupPublishing>, id: number) {
+      context.queue.change([id], [], "manual");
+      await vi.advanceTimersByTimeAsync(250);
+      await context.answer();
+    }
+
+    it("refreshes the site once for a run of ticks, when the clicking pauses", async () => {
+      const context = setupPublishing();
+      await tickAndSave(context, 1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(context.published()).toBe(0);
+      await tickAndSave(context, 2); // the clicking goes on, so the wait starts again
+      await vi.advanceTimersByTimeAsync(1499);
+      expect(context.published()).toBe(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(context.published()).toBe(1);
+      expect(context.calls).toHaveLength(2);
+    });
+
+    it("waits for a save that is still on its way", async () => {
+      const context = setupPublishing();
+      context.queue.change([1], [], "manual");
+      await vi.advanceTimersByTimeAsync(250);
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(context.published()).toBe(0);
+      await context.answer();
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(context.published()).toBe(1);
+    });
+
+    it("refreshes nothing when nothing was saved", async () => {
+      const context = setupPublishing();
+      context.queue.change([1], [], "manual");
+      context.queue.change([], [1], "manual"); // undone before it was sent
+      await vi.advanceTimersByTimeAsync(5000);
+      context.queue.change([2], [], "manual");
+      await vi.advanceTimersByTimeAsync(250);
+      await context.answer({ ok: false, error: "nope" });
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(context.published()).toBe(0);
+    });
+
+    it("still refreshes for what was saved when later clicks come to nothing", async () => {
+      const context = setupPublishing();
+      await tickAndSave(context, 1);
+      await vi.advanceTimersByTimeAsync(500);
+      context.queue.change([2], [], "manual");
+      context.queue.change([], [2], "manual");
+      await vi.advanceTimersByTimeAsync(250); // nothing to send
+      await vi.advanceTimersByTimeAsync(1499);
+      expect(context.published()).toBe(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(context.published()).toBe(1);
+    });
+
+    it("refreshes again for what is saved while a refresh is on its way", async () => {
+      const context = setupPublishing();
+      await tickAndSave(context, 1);
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(context.published()).toBe(1);
+      await tickAndSave(context, 2);
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(context.published()).toBe(1); // one at a time
+      await context.publishAnswer();
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(context.published()).toBe(2);
+    });
+
+    it("tries a failed refresh again, three times at most, and afresh after the next save", async () => {
+      const context = setupPublishing();
+      await tickAndSave(context, 1);
+      for (const attempt of [1, 2, 3]) {
+        await vi.advanceTimersByTimeAsync(1500);
+        expect(context.published()).toBe(attempt);
+        await context.publishAnswer({ ok: false, error: "network down" });
+      }
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(context.published()).toBe(3);
+      await tickAndSave(context, 2);
+      await vi.advanceTimersByTimeAsync(1500);
+      expect(context.published()).toBe(4);
+    });
+
+    it("saves and refreshes at once when the page is left", async () => {
+      const context = setupPublishing();
+      context.queue.change([1], [], "manual");
+      context.queue.finish();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(context.calls).toHaveLength(1);
+      expect(context.published()).toBe(0); // not before it is saved
+      await context.answer();
+      expect(context.published()).toBe(1);
+    });
+
+    it("refreshes at once when the page is left with everything saved", async () => {
+      const context = setupPublishing();
+      await tickAndSave(context, 1);
+      await vi.advanceTimersByTimeAsync(100);
+      context.queue.finish();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(context.published()).toBe(1);
+    });
+
+    it("goes back to waiting for more clicks when the page is come back to", async () => {
+      const context = setupPublishing();
+      context.queue.finish();
+      context.queue.change([1], [], "manual");
+      await vi.advanceTimersByTimeAsync(249);
+      expect(context.calls).toHaveLength(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(context.calls).toHaveLength(1);
+      await context.answer();
+      await vi.advanceTimersByTimeAsync(1499);
+      expect(context.published()).toBe(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(context.published()).toBe(1);
+    });
+  });
 });

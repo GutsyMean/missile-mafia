@@ -1,12 +1,12 @@
 "use server";
 
-import { updateTag } from "next/cache";
 import { CRAFTABLES_TAG } from "@/lib/craftables/load";
 import type { AdminCatalog, AdminDirectory, AdminSettings, QuestFactionChoice } from "@/lib/admin/types";
 import { EVENTS_TAG, type GuildEvent } from "@/lib/events";
 import { runSiteSync } from "@/lib/game-data/run";
 import { matchGuildonExport, parseGuildonExport } from "@/lib/guildon";
 import { LEDGER_LINES, type GuildImportMember, type GuildImportPlayer, type GuildImportTally, type GuildyBank } from "@/lib/guildy";
+import { publish, settle } from "@/lib/publish";
 import { createServerSupabase } from "@/lib/supabase/server";
 
 /** What every action returns: either it worked, or a message the page can show. */
@@ -24,7 +24,13 @@ async function signedIn() {
 const isIdList = (value: unknown): value is number[] =>
   Array.isArray(value) && value.length <= 5000 && value.every((id) => Number.isInteger(id) && id > 0);
 
-/** Ticks and unticks recipes. Row level security only lets the crafter's owner do this. */
+/**
+ * Ticks and unticks recipes. Row level security only lets the crafter's owner do this.
+ *
+ * The site is not refreshed here: a run of ticks is many saves, and the page
+ * asks for one refresh when the clicking pauses (`publishRecipes`). Should it
+ * never get to ask, the site still catches up by itself a few seconds on.
+ */
 export async function saveRecipes(
   crafterId: string,
   add: number[],
@@ -42,8 +48,22 @@ export async function saveRecipes(
     p_source: source,
   });
   if (error) return fail(error.message);
-  updateTag(CRAFTABLES_TAG);
+  settle(CRAFTABLES_TAG);
   return { ok: true, data: data as { added: number; removed: number } };
+}
+
+/** Puts the ticks saved so far on the site, once the clicking has paused. */
+export async function publishRecipes(crafterId: string): Promise<ActionResult> {
+  const session = await signedIn();
+  if (!session) return fail("Sign in again to save.");
+  // Only someone with a crafter of their own has anything to put there.
+  const { data, error } = await session.supabase.rpc("my_crafters");
+  if (error) return fail(error.message);
+  if (!((data ?? []) as { id: string }[]).some((crafter) => crafter.id === crafterId)) {
+    return fail("You can only change your own crafter");
+  }
+  publish(CRAFTABLES_TAG);
+  return { ok: true, data: undefined };
 }
 
 export interface ProfileInput {
@@ -121,7 +141,7 @@ async function writeProfile(session: Session, crafterId: string, profile: Parsed
     if (skillError) return fail(skillError.message);
   }
 
-  updateTag(CRAFTABLES_TAG);
+  publish(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
 }
 
@@ -221,7 +241,7 @@ export async function importGuildon(
     p_source: "import",
   });
   if (error) return fail(error.message);
-  updateTag(CRAFTABLES_TAG);
+  publish(CRAFTABLES_TAG);
   return {
     ok: true,
     data: {
@@ -256,7 +276,7 @@ export async function correctUnlockLevel(recipeId: number, level: number | null)
   if (error) return fail(error.message);
   if (count === 0) return fail("That recipe could not be updated.");
   // The level shows on the public list, and a settled trainer level adds the recipe for crafters past it.
-  updateTag(CRAFTABLES_TAG);
+  publish(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
 }
 
@@ -279,7 +299,7 @@ export async function correctQuestFaction(
     .eq("id", recipeId);
   if (error) return fail(error.message);
   if (count === 0) return fail("That recipe could not be updated.");
-  updateTag(CRAFTABLES_TAG);
+  publish(CRAFTABLES_TAG);
   return { ok: true, data: undefined };
 }
 
@@ -292,7 +312,7 @@ type AdminSession = Session;
 async function directoryAfterChange(session: AdminSession): Promise<ActionResult<AdminDirectory>> {
   const { data, error } = await session.supabase.rpc("admin_directory");
   if (error) return fail(error.message);
-  updateTag(CRAFTABLES_TAG);
+  publish(CRAFTABLES_TAG);
   return { ok: true, data: data as AdminDirectory };
 }
 
@@ -599,7 +619,7 @@ async function eventsAfterChange(session: AdminSession): Promise<ActionResult<Gu
     .order("starts_at", { ascending: false })
     .limit(300);
   if (error) return fail(error.message);
-  updateTag(EVENTS_TAG);
+  publish(EVENTS_TAG);
   return {
     ok: true,
     data: (data ?? []).map((row) => ({
@@ -697,7 +717,7 @@ export async function checkForGameUpdates(): Promise<ActionResult<SyncSummary>> 
 
   try {
     const result = await runSiteSync("manual");
-    if (result.status === "ok") updateTag(CRAFTABLES_TAG);
+    if (result.status === "ok") publish(CRAFTABLES_TAG);
     return {
       ok: true,
       data: {

@@ -8,6 +8,7 @@ import {
   correctQuestFaction,
   correctUnlockLevel,
   importGuildon,
+  publishRecipes,
   saveProfile,
   saveRecipes,
   signUpCrafter,
@@ -91,6 +92,8 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
   );
   // Ticks are saved in the background, one queue per character, so ticking never waits for the server.
   const queues = useRef(new Map<string, SaveQueue<"manual" | "bulk">>());
+  /** True once this page has been left for another page of the site. */
+  const away = useRef(false);
   const [saving, setSaving] = useState(false);
   const queueFor = (owner: AdminCrafter) => {
     let queue = queues.current.get(owner.id);
@@ -108,6 +111,13 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
             text: `Not saved: ${error} ${undone.length === 1 ? "That change was" : `Those ${undone.length} changes were`} undone.`,
           }),
         onBusy: () => setSaving([...queues.current.values()].some((entry) => entry.unsaved)),
+        // One refresh of the site for a run of ticks, not one for each.
+        publish: async () => {
+          const result = await publishRecipes(owner.id);
+          // The page gone to was drawn before these ticks reached the site, so it is drawn again.
+          if (result.ok && away.current) router.refresh();
+          return result.ok ? { ok: true } : { ok: false, error: result.error };
+        },
       });
       queues.current.set(owner.id, queue);
     }
@@ -124,7 +134,14 @@ export function AdminPanel({ data, welcome = false, initialCrafterId }: Props) {
       if ([...queues.current.values()].some((entry) => entry.unsaved)) event.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    away.current = false;
+    const open = queues.current;
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      // Leaving for another page of the site: no more clicks are coming, so nothing waits for them.
+      away.current = true;
+      for (const queue of open.values()) queue.finish();
+    };
   }, []);
   // Members Discord confirmed, and admins, can add characters themselves.
   const canAddCharacter = data.isAdmin || (data.signup.open && data.signup.verified);
