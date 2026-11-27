@@ -308,6 +308,7 @@ test.describe("best gear for a character", () => {
   test("ranks the best craftable pieces slot by slot for a class, talent tree and level", async ({ page }) => {
     await page.goto("/gear");
     await choose(page, "Paladin", "Retribution", "31");
+    await page.getByLabel("Include drops and quest rewards").uncheck();
 
     await expect(page.getByText("Best for a level 31 Retribution Paladin: 31 pieces for 11 slots")).toBeVisible();
     const chest = section(page, "Chest");
@@ -321,7 +322,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("says which order of stats it ranks by, and owns up to an order that is its own", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     const order = page.getByRole("list", { name: "Order of stats" }).getByRole("listitem");
     await expect(order.first()).toHaveText("Weapon damage");
     await expect(order.nth(1)).toHaveText("Hit");
@@ -333,7 +334,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("only offers what the character can equip at that level", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     // Plate opens to a Paladin at 40.
     await expect(section(page, "Hands").nth(0)).toContainText("Toughened Leather Gloves");
     await expect(row(page, "Truesilver Gauntlets")).toHaveCount(0);
@@ -342,13 +343,14 @@ test.describe("best gear for a character", () => {
 
     // A Mage wears cloth and nothing else.
     await choose(page, "Mage", "Frost", "20");
+    await expect(page).toHaveURL(/class=mage&spec=frost&lvl=20&all=0/);
     await expect(page.getByText("Best for a level 20 Frost Mage: 5 pieces for 4 slots")).toBeVisible();
     await expect(row(page, "Shining Silver Breastplate")).toHaveCount(0);
     await expect(section(page, "Feet").nth(0)).toContainText("Woolen Boots");
   });
 
   test("explains why a piece ranks where it does", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     await row(page, "Shining Silver Breastplate").click();
     await expect(detail(page).getByTestId("rank")).toHaveText(
       "Chest for a level 31 Retribution Paladin. Scores 8.2: Strength 14 (7.2) · Stamina 6 (1.0).",
@@ -356,7 +358,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("looks at gear from professions nobody in the guild has, too", async ({ page }) => {
-    await page.goto("/gear?class=hunter&spec=marksmanship&lvl=30");
+    await page.goto("/gear?class=hunter&spec=marksmanship&lvl=30&all=0");
     const rifle = section(page, "Ranged").nth(0);
     await expect(rifle).toContainText("Moonsight Rifle");
     await expect(rifle).toHaveAttribute("data-available", "false");
@@ -369,7 +371,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("says so when a piece can only be worn by someone with a profession", async ({ page }) => {
-    await page.goto("/gear?class=mage&spec=frost&lvl=20");
+    await page.goto("/gear?class=mage&spec=frost&lvl=20&all=0");
     const goggles = row(page, "Flying Tiger Goggles");
     await expect(goggles).toContainText("Wearer needs Engineering 100");
     await goggles.click();
@@ -378,7 +380,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("opens a slot up to everything in the running, each piece with its place", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     const feet = section(page, "Feet");
     await expect(feet).toHaveCount(3);
     const header = page.getByRole("region", { name: "Feet", exact: true }).getByRole("heading");
@@ -398,7 +400,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("finds a piece by name wherever it stands, with its true place", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     // Fourth of the chest pieces, so not among the three shown.
     await expect(row(page, "Rough Bronze Cuirass")).toHaveCount(0);
     await page.getByRole("searchbox").fill("rough bronze cuirass");
@@ -415,14 +417,14 @@ test.describe("best gear for a character", () => {
   });
 
   test("shows the whole ranking for one slot when that slot is picked", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     await page.getByLabel("Slot").selectOption("Feet");
     await expect(section(page, "Feet")).toHaveCount(7);
     await expect(page.getByText("Best for a level 31 Retribution Paladin: 7 pieces for 1 slot")).toBeVisible();
   });
 
   test("lets a visitor change the order, and remembers it", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
 
     await page.getByRole("button", { name: "Change" }).click();
@@ -443,7 +445,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("starts over with Another class, and keeps the ranking out of the crafting list", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     await expect(page.getByLabel("Sort")).toHaveCount(0);
     await page.getByRole("button", { name: "Another class" }).click();
     await expect(page.getByRole("heading", { name: "Who is the gear for?" })).toBeVisible();
@@ -456,7 +458,7 @@ test.describe("best gear for a character", () => {
   });
 
   test("leaves soulbound crafted pieces out of the ranking with Tradeable only", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=0");
     await expect(section(page, "Head").nth(0)).toContainText("Defender's Leather Helm");
     await expect(section(page, "Head").nth(0)).toContainText("Soulbound");
     await page.getByLabel("Tradeable only").check();
@@ -469,12 +471,13 @@ test.describe("comparing with gear that is not crafted", () => {
   const section = (page: Page, slot: string) => page.getByRole("region", { name: slot, exact: true }).locator("[data-recipe]");
   const everySource = (page: Page) => page.getByLabel("Include drops and quest rewards");
 
-  test("ranks drops and quest rewards beside what can be crafted, on request", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
-    await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
-    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+  test("ranks drops and quest rewards beside what can be crafted, without being asked", async ({ page }) => {
+    await page.goto("/gear");
+    await page.getByRole("button", { name: "Paladin", exact: true }).click();
+    await expect(everySource(page)).toBeChecked();
+    await page.getByRole("combobox", { name: "Talent tree" }).selectOption({ label: "Retribution" });
+    await page.getByLabel("Character level").fill("31");
 
-    await everySource(page).check();
     const chest = section(page, "Chest");
     await expect(chest.nth(0)).toContainText("Avenger's Armor");
     await expect(chest.nth(0)).toContainText("Razorfen Kraul");
@@ -484,11 +487,29 @@ test.describe("comparing with gear that is not crafted", () => {
     await expect(chest.nth(1)).toContainText("Shining Silver Breastplate");
     await expect(chest.nth(1)).toContainText("Best craftable");
     await expect(page.getByText(/Best for a level 31 Retribution Paladin: 35 pieces for 11 slots · 8 not crafted/)).toBeVisible();
-    await expect(page).toHaveURL(/all=1/);
+    await expect(page).toHaveURL(/\/gear\?class=paladin&spec=retribution&lvl=31$/);
+  });
+
+  test("leaves them out when asked to, and remembers that in the link", async ({ page }) => {
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(1);
+
+    await everySource(page).uncheck();
+    await expect(section(page, "Chest").nth(0)).toContainText("Shining Silver Breastplate");
+    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+    await expect(page).toHaveURL(/lvl=31&all=0$/);
+
+    await page.reload();
+    await expect(everySource(page)).not.toBeChecked();
+    await expect(row(page, "Avenger's Armor")).toHaveCount(0);
+
+    await everySource(page).check();
+    await expect(row(page, "Avenger's Armor")).toHaveCount(1);
+    await expect(page).not.toHaveURL(/all=/);
   });
 
   test("shows the best craftable piece even when gear from elsewhere fills the list", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     const twoHand = section(page, "Two-Hand");
     await expect(twoHand).toHaveCount(4);
     await expect(twoHand.nth(0)).toContainText("Thermaplugg's Left Arm");
@@ -498,7 +519,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("says where a piece comes from, with links to read up on it", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await row(page, "Thermaplugg's Left Arm").click();
     const pane = detail(page);
     await expect(pane).toContainText("Not crafted · Drop");
@@ -520,7 +541,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("marks a quest reward only one side can earn", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     const cape = row(page, "Grimsteel Cape");
     await expect(cape).toContainText("Quest reward");
     await expect(cape.getByText("Horde only", { exact: true })).toHaveCSS("color", "rgb(255, 32, 32)");
@@ -531,7 +552,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("offers a class quest's reward to that class alone, once the quest opens", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     const cloak = row(page, "Cloak of the Divine Storm");
     await expect(cloak).toContainText("Paladin class quests");
     await expect(cloak).toContainText("Best");
@@ -548,14 +569,14 @@ test.describe("comparing with gear that is not crafted", () => {
     // Not before level 22, and never for another class, though anyone could wear a cloth cloak.
     await page.getByLabel("Character level").fill("21");
     await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
-    await page.goto("/gear?class=warrior&spec=arms&lvl=31&all=1");
+    await page.goto("/gear?class=warrior&spec=arms&lvl=31");
     await expect(row(page, "Cape of the Brotherhood")).toHaveCount(1);
     await expect(row(page, "Cloak of the Divine Storm")).toHaveCount(0);
   });
 
   test("keeps a quest reward out of reach until its quest can be taken", async ({ page }) => {
     // The leggings ask for no level themselves; their quest opens at 14.
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=13&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=13");
     await expect(page.getByText(/Best for a level 13 Retribution Paladin/)).toBeVisible();
     await expect(row(page, "Chausses of Westfall")).toHaveCount(0);
     await page.getByLabel("Character level").fill("14");
@@ -563,7 +584,7 @@ test.describe("comparing with gear that is not crafted", () => {
   });
 
   test("only offers what the character can equip, like everything else", async ({ page }) => {
-    await page.goto("/gear?class=mage&spec=frost&lvl=20&all=1");
+    await page.goto("/gear?class=mage&spec=frost&lvl=20");
     await expect(section(page, "Chest").nth(0)).toContainText("Robe of Evocation");
     await expect(row(page, "Avenger's Armor")).toHaveCount(0);
     // A mace is no use to a Mage at any level. A Priest can wield it, but not this one before level 57.
@@ -579,24 +600,29 @@ test.describe("comparing with gear that is not crafted", () => {
     await expect(row(page, "Hand of Edward the Odd")).toContainText("Listed");
   });
 
-  test("opens a pasted link on the same piece", async ({ page }) => {
+  test("opens a pasted link on the same piece, one from before as well", async ({ page }) => {
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&item=6087");
+    await expect(everySource(page)).toBeChecked();
+    await expect(detail(page).getByRole("heading", { name: "Chausses of Westfall" })).toBeVisible();
+
+    // Links made when drops and quest rewards had to be asked for say so with "all=1".
     await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1&item=6087");
     await expect(everySource(page)).toBeChecked();
     await expect(detail(page).getByRole("heading", { name: "Chausses of Westfall" })).toBeVisible();
   });
 
   test("never puts such gear in the ordinary list", async ({ page }) => {
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(row(page, "Avenger's Armor")).toHaveCount(1);
     await everySource(page).uncheck();
     await expect(row(page, "Avenger's Armor")).toHaveCount(0);
-    await page.goto("/gear?class=paladin&spec=retribution&lvl=31&all=1");
+    await page.goto("/gear?class=paladin&spec=retribution&lvl=31");
     await expect(row(page, "Avenger's Armor")).toHaveCount(1);
     await page.getByRole("link", { name: "Crafting", exact: true }).click();
     await expect(rows(page)).toHaveCount(71);
     await page.getByRole("searchbox").fill("avenger");
     await expect(page.getByText("Nothing matches these filters.")).toBeVisible();
-    await expect(page).not.toHaveURL(/all=1/);
+    await expect(page).not.toHaveURL(/all=/);
   });
 });
 

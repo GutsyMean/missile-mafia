@@ -7,11 +7,11 @@ export interface GearChoice {
   specSlug: string;
   /** The character's level. Null for the highest. */
   level: number | null;
-  /** Compare with gear that is not crafted too: dungeon drops and quest rewards. */
+  /** Compare with gear that is not crafted too: dungeon drops and quest rewards. So unless it is turned off. */
   everySource: boolean;
 }
 
-export const NO_GEAR: GearChoice = { classSlug: "", specSlug: "", level: null, everySource: false };
+export const NO_GEAR: GearChoice = { classSlug: "", specSlug: "", level: null, everySource: true };
 
 /** What a link to the crafting window can carry: the filters, the open recipe, and who gear is chosen for. */
 export interface ViewState {
@@ -52,7 +52,8 @@ export function parseViewState(params: URLSearchParams): ViewState {
       classSlug: params.get("class") ?? "",
       specSlug: params.get("spec") ?? "",
       level: positiveInteger(params.get("lvl")),
-      everySource: params.get("all") === "1",
+      // Links from when this had to be asked for say "all=1", which reads the same.
+      everySource: params.get("all") !== "0",
     },
   };
 }
@@ -75,7 +76,7 @@ export function serializeViewState({ filters, recipeId, gear }: ViewState): stri
     params.set("class", gear.classSlug);
     if (gear.specSlug) params.set("spec", gear.specSlug);
     if (gear.level !== null) params.set("lvl", String(gear.level));
-    if (gear.everySource) params.set("all", "1");
+    if (!gear.everySource) params.set("all", "0");
     // Gear that is not crafted only shows while every source is being compared.
     if (gear.everySource && recipeId !== null && recipeId < 0) params.set("item", String(-recipeId));
   }

@@ -49,21 +49,21 @@ describe("who gear is chosen for", () => {
     const view = {
       filters: DEFAULT_FILTERS,
       recipeId: null,
-      gear: { classSlug: "paladin", specSlug: "retribution", level: 31, everySource: false },
+      gear: { classSlug: "paladin", specSlug: "retribution", level: 31, everySource: true },
     };
     expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31");
     expect(parseViewState(new URLSearchParams("class=paladin&spec=retribution&lvl=31"))).toEqual(view);
   });
 
   it("leaves the talent tree and level out when they are not chosen", () => {
-    const gear = { classSlug: "mage", specSlug: "", level: null, everySource: false };
+    const gear = { classSlug: "mage", specSlug: "", level: null, everySource: true };
     expect(serializeViewState({ filters: DEFAULT_FILTERS, recipeId: null, gear })).toBe("class=mage");
     expect(parseViewState(new URLSearchParams("class=mage")).gear).toEqual(gear);
   });
 
   it("is nobody by default, and a tree or level without a class is not kept", () => {
     expect(parseViewState(new URLSearchParams("")).gear).toEqual(NO_GEAR);
-    const stray = { classSlug: "", specSlug: "frost", level: 20, everySource: true };
+    const stray = { classSlug: "", specSlug: "frost", level: 20, everySource: false };
     expect(serializeViewState({ filters: DEFAULT_FILTERS, recipeId: null, gear: stray })).toBe("");
   });
 
@@ -74,22 +74,33 @@ describe("who gear is chosen for", () => {
 
 describe("comparing with gear that is not crafted", () => {
   const gear = { classSlug: "paladin", specSlug: "retribution", level: 31, everySource: true };
+  const craftedOnly = { ...gear, everySource: false };
 
-  it("is carried in the link", () => {
-    const view = { filters: DEFAULT_FILTERS, recipeId: null, gear };
-    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31&all=1");
-    expect(parseViewState(new URLSearchParams("class=paladin&spec=retribution&lvl=31&all=1"))).toEqual(view);
+  it("is how gear is chosen unless the link says otherwise", () => {
+    expect(NO_GEAR.everySource).toBe(true);
+    expect(parseViewState(new URLSearchParams("class=paladin")).gear.everySource).toBe(true);
+  });
+
+  it("is left out when the link says so", () => {
+    const view = { filters: DEFAULT_FILTERS, recipeId: null, gear: craftedOnly };
+    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31&all=0");
+    expect(parseViewState(new URLSearchParams("class=paladin&spec=retribution&lvl=31&all=0"))).toEqual(view);
+  });
+
+  it("still reads links from when it had to be asked for", () => {
+    const view = { filters: DEFAULT_FILTERS, recipeId: -872, gear };
+    expect(parseViewState(new URLSearchParams("class=paladin&spec=retribution&lvl=31&all=1&item=872"))).toEqual(view);
   });
 
   it("names an open piece that is not crafted by its item", () => {
     const view = { filters: DEFAULT_FILTERS, recipeId: -872, gear };
-    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31&all=1&item=872");
+    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31&item=872");
     expect(parseViewState(new URLSearchParams(serializeViewState(view)))).toEqual(view);
   });
 
-  it("drops such a piece from the link once every source is no longer being compared", () => {
-    const view = { filters: DEFAULT_FILTERS, recipeId: -872, gear: { ...gear, everySource: false } };
-    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31");
+  it("drops such a piece from the link once only crafted gear is being compared", () => {
+    const view = { filters: DEFAULT_FILTERS, recipeId: -872, gear: craftedOnly };
+    expect(serializeViewState(view)).toBe("class=paladin&spec=retribution&lvl=31&all=0");
   });
 
   it("prefers a recipe when a link names both", () => {
